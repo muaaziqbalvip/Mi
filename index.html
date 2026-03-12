@@ -3,610 +3,618 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#030508">
-    <title>MiTV Network | Digital Media Stream</title>
-
-    <link rel="icon" href="https://i.ibb.co/C5WBZ6Yc/file-00000000305071fa945b58b012ac072b.png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <title>MiTV Control Panel | MUSLIM ISLAM</title>
     
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
-
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
     <style>
-        /* ========================================================================
-           MITV MASTER STYLING ENGINE (CSS 1000+ LINES LOGIC)
-           ========================================================================
+        /* =========================================================
+           MITV NETWORK MOBILE APP CSS (PREMIUM DARK MODE)
+           =========================================================
         */
-
         :root {
-            /* Color Palette */
             --primary: #00e5ff;
-            --primary-rgb: 0, 229, 255;
             --secondary: #ff0055;
-            --accent: #ffd700;
-            --bg-deep: #030508;
-            --bg-surface: #0e121a;
-            --bg-card: #151a24;
-            --text-main: #ffffff;
-            --text-dim: #94a3b8;
-            --glass-bg: rgba(21, 26, 36, 0.7);
-            
-            /* Sizing */
-            --header-h: 70px;
-            --player-h: 240px;
-            --nav-h: 80px;
-            --safe-area-bottom: env(safe-area-inset-bottom);
-            
-            /* Shadows & Effects */
-            --shadow-glow: 0 0 20px rgba(var(--primary-rgb), 0.3);
-            --neon-border: 1px solid rgba(var(--primary-rgb), 0.2);
-            --transition-speed: 0.4s;
+            --bg-dark: #05080f;
+            --panel-bg: #0d121d;
+            --text-glow: 0 0 10px rgba(0, 229, 255, 0.5);
+            --card-radius: 15px;
+            --safe-bottom: env(safe-area-inset-bottom);
         }
 
-        /* Base Reset */
         * {
-            margin: 0; padding: 0; box-sizing: border-box;
-            outline: none; -webkit-tap-highlight-color: transparent;
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: var(--bg-deep);
-            color: var(--text-main);
-            overflow: hidden;
+            background-color: var(--bg-dark);
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            overflow-x: hidden;
             height: 100vh;
             width: 100vw;
+        }
+
+        /* Particles Background */
+        #bg-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at top, #0a192f 0%, #05080f 100%);
+        }
+
+        /* ---------------------------------------------------------
+           AUTHENTICATION (MOBILE DESIGN)
+           --------------------------------------------------------- */
+        #auth-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-dark);
+            z-index: 10000;
             display: flex;
             flex-direction: column;
-            user-select: none;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
         }
 
-        /* ---------------------------------------------------------------------
-           1. LOADING & SPLASH SYSTEM
-           --------------------------------------------------------------------- */
-        #splash-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 99999;
-            transition: opacity 0.8s ease-in-out;
+        .mi-logo-container {
+            margin-bottom: 40px;
+            text-align: center;
+            animation: float 3s ease-in-out infinite;
         }
 
-        .splash-logo-container { position: relative; width: 150px; height: 150px; }
-        .splash-logo { 
-            width: 100%; 
-            filter: drop-shadow(0 0 15px var(--primary));
-            animation: breathe 3s infinite ease-in-out; 
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
         }
 
-        .loading-orbit {
-            position: absolute; top: -10px; left: -10px; width: 170px; height: 170px;
-            border: 2px solid transparent; border-top-color: var(--primary);
-            border-radius: 50%; animation: rotate 1.5s linear infinite;
+        .mi-logo-circle {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--primary), #0077ff);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 38px;
+            font-weight: 900;
+            color: #000;
+            box-shadow: 0 0 40px var(--primary);
+            position: relative;
         }
 
-        .splash-title {
-            margin-top: 40px; font-family: 'Space Grotesk', sans-serif;
-            font-size: 24px; font-weight: 700; letter-spacing: 6px;
-            background: linear-gradient(45deg, #fff, var(--primary));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-
-        @keyframes breathe { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        /* ---------------------------------------------------------------------
-           2. AUTHENTICATION & SECURITY LAYER
-           --------------------------------------------------------------------- */
-        #auth-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.98); z-index: 90000;
-            display: none; flex-direction: column; justify-content: center; align-items: center;
-            backdrop-filter: blur(20px);
+        .mi-logo-circle::after {
+            content: 'NETWORK';
+            position: absolute;
+            bottom: -25px;
+            font-size: 12px;
+            letter-spacing: 5px;
+            color: var(--primary);
         }
 
         .auth-card {
-            background: var(--bg-surface); width: 88%; max-width: 400px;
-            padding: 40px; border-radius: 32px; border: var(--neon-border);
-            text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 350px;
+            background: var(--panel-bg);
+            padding: 30px;
+            border-radius: var(--card-radius);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .auth-card h2 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
-        .auth-card p { color: var(--text-dim); font-size: 14px; margin-bottom: 30px; }
-
-        .btn-google {
-            background: #fff; color: #000; padding: 16px; border-radius: 16px;
-            display: flex; align-items: center; justify-content: center; gap: 12px;
-            font-weight: 700; cursor: pointer; border: none; width: 100%;
-            transition: transform 0.2s;
-        }
-        .btn-google:active { transform: scale(0.96); }
-
-        .auth-divider { margin: 25px 0; color: #334155; display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: bold; }
-        .auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: #1e293b; }
-
-        .input-group { margin-bottom: 15px; text-align: left; }
-        .input-group label { display: block; font-size: 11px; font-weight: 700; color: var(--primary); margin-bottom: 8px; text-transform: uppercase; }
-        .input-field {
-            width: 100%; padding: 14px 18px; background: #000; border: 1px solid #1e293b;
-            border-radius: 14px; color: #fff; font-size: 14px; transition: 0.3s;
-        }
-        .input-field:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.2); }
-
-        .btn-primary {
-            width: 100%; padding: 16px; background: var(--primary); color: #000;
-            font-weight: 800; border: none; border-radius: 16px; cursor: pointer;
-            margin-top: 10px; font-size: 15px; box-shadow: var(--shadow-glow);
+        .auth-input-group {
+            position: relative;
+            margin-bottom: 20px;
         }
 
-        /* ---------------------------------------------------------------------
-           3. INTERFACE ELEMENTS (HEADER, PLAYER, GRID)
-           --------------------------------------------------------------------- */
-        header {
-            height: var(--header-h); background: var(--glass-bg);
-            position: fixed; top: 0; width: 100%; z-index: 5000;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 20px; border-bottom: 1px solid rgba(255,255,255,0.05);
-            backdrop-filter: blur(15px);
+        .auth-input-group input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: #fff;
+            text-align: center;
+            font-size: 18px;
+            letter-spacing: 4px;
+            outline: none;
+            transition: 0.3s;
         }
 
-        .logo-area { display: flex; align-items: center; gap: 12px; }
-        .logo-area img { width: 38px; height: 38px; }
-        .logo-area h1 { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; }
-
-        .user-pill {
-            background: rgba(255,255,255,0.05); padding: 6px 14px; border-radius: 20px;
-            display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.1);
-        }
-        #user-tier-label { font-size: 10px; font-weight: 800; color: var(--primary); text-transform: uppercase; }
-
-        /* VIDEO PLAYER */
-        #player-box {
-            position: fixed; top: var(--header-h); width: 100%; height: var(--player-h);
-            background: #000; z-index: 4000; overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-        }
-        #main-video { width: 100%; height: 100%; object-fit: contain; display: none; }
-        .player-idle {
-            width: 100%; height: 100%; display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            background: radial-gradient(circle at center, #111827, #000);
-        }
-        .player-idle i { font-size: 50px; color: var(--primary); opacity: 0.3; margin-bottom: 15px; }
-        .player-idle p { font-size: 12px; font-weight: 600; color: #4b5563; text-transform: uppercase; letter-spacing: 2px; }
-
-        /* SCROLLABLE CONTENT */
-        main {
-            margin-top: calc(var(--header-h) + var(--player-h));
-            height: calc(100vh - var(--header-h) - var(--player-h) - var(--nav-h) - var(--safe-area-bottom));
-            overflow-y: auto; padding: 20px; background: var(--bg-deep);
-            scroll-behavior: smooth;
+        .auth-input-group input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
         }
 
-        .search-wrapper {
-            background: var(--bg-card); padding: 14px 20px; border-radius: 20px;
-            display: flex; align-items: center; gap: 15px; margin-bottom: 30px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .search-wrapper i { color: var(--text-dim); }
-        .search-wrapper input { background: transparent; border: none; color: #fff; width: 100%; font-size: 14px; font-weight: 500; }
-
-        /* THE MASTER 3x3 GRID */
-        .content-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px; padding-bottom: 60px;
-        }
-
-        .card-item {
-            background: var(--bg-card); border-radius: 24px; padding: 14px;
-            display: flex; flex-direction: column; align-items: center;
-            border: 1px solid rgba(255,255,255,0.03); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative; overflow: hidden;
-        }
-        .card-item:active { transform: scale(0.9); background: #1e293b; }
-
-        .thumb-wrap {
-            width: 75px; height: 75px; border-radius: 50%; padding: 3px;
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            margin-bottom: 12px; position: relative; z-index: 2;
-        }
-        .card-item.playing .thumb-wrap { background: linear-gradient(135deg, var(--primary), var(--secondary)); box-shadow: var(--shadow-glow); }
-        .thumb-wrap img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: #000; }
-
-        .channel-name { 
-            font-size: 11px; font-weight: 700; color: var(--text-dim); text-align: center; 
-            width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
-        }
-        .card-item.playing .channel-name { color: var(--primary); }
-
-        .pro-badge {
-            position: absolute; top: 0; right: 0; background: var(--accent); color: #000;
-            font-size: 8px; font-weight: 900; padding: 3px 8px; border-radius: 0 0 0 12px;
-            box-shadow: -2px 2px 10px rgba(0,0,0,0.3);
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
         }
 
-        /* ---------------------------------------------------------------------
-           4. NAVIGATION & MODALS
-           --------------------------------------------------------------------- */
-        nav {
-            height: var(--nav-h); background: var(--glass-bg);
-            position: fixed; bottom: 0; width: 100%;
-            display: flex; justify-content: space-around; align-items: center;
-            padding-bottom: var(--safe-area-bottom);
-            border-top: 1px solid rgba(255,255,255,0.05); z-index: 5000;
-            backdrop-filter: blur(20px);
+        /* ---------------------------------------------------------
+           MAIN APP LAYOUT (MOBILE)
+           --------------------------------------------------------- */
+        #app-shell {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Fixed Top Header */
+        .app-header {
+            height: 65px;
+            background: rgba(13, 18, 29, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid rgba(0, 229, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            font-weight: 900;
+            color: #fff;
+        }
+
+        .header-logo span { color: var(--primary); }
+
+        .status-dot {
+            width: 10px; height: 10px;
+            background: #00ff88;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #00ff88;
+        }
+
+        /* Scrollable Content Area */
+        .app-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            padding-bottom: 100px; /* Space for Nav */
+        }
+
+        /* Bottom Navigation Bar (App Style) */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: #0a0e17;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: var(--safe-bottom);
+            z-index: 1000;
         }
 
         .nav-item {
-            display: flex; flex-direction: column; align-items: center;
-            color: #64748b; transition: 0.3s; width: 20%; cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #6b7c93;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 700;
+            transition: 0.3s;
+            cursor: pointer;
         }
-        .nav-item i { font-size: 22px; margin-bottom: 6px; transition: 0.3s; }
-        .nav-item span { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .nav-item i { font-size: 20px; margin-bottom: 5px; }
         .nav-item.active { color: var(--primary); }
-        .nav-item.active i { transform: translateY(-3px); text-shadow: var(--shadow-glow); }
+        .nav-item.active i { filter: drop-shadow(0 0 8px var(--primary)); }
 
-        /* PROFILE MODAL */
-        #profile-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 9999; display: none;
-            justify-content: center; align-items: center; backdrop-filter: blur(15px);
+        /* ---------------------------------------------------------
+           CARDS & FORMS (MOBILE OPTIMIZED)
+           --------------------------------------------------------- */
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .profile-container {
-            background: var(--bg-surface); width: 85%; max-width: 360px;
-            border-radius: 35px; padding: 35px; border: var(--neon-border);
-            text-align: center; animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        @keyframes modalPop { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 
-        .user-avatar { 
-            width: 90px; height: 90px; border-radius: 50%; margin: 0 auto 20px;
-            border: 3px solid var(--primary); padding: 4px; box-shadow: var(--shadow-glow);
+        .mobile-card {
+            background: var(--panel-bg);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
         }
-        .user-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-        .upgrade-box {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            padding: 20px; border-radius: 20px; margin: 25px 0; border: 1px solid rgba(255,215,0,0.2);
-            text-align: left;
+        .m-input {
+            width: 100%;
+            background: #05080f;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 12px 15px;
+            border-radius: 10px;
+            color: #fff;
+            margin-bottom: 12px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 16px;
         }
-        .upgrade-box h4 { color: var(--accent); font-size: 13px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+
+        .m-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            background: var(--primary);
+            color: #000;
+            font-weight: 800;
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ---------------------------------------------------------
+           MASKED USER LIST
+           --------------------------------------------------------- */
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.02);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .user-info h4 { font-size: 16px; margin-bottom: 2px; }
+        .user-info p { font-size: 12px; color: #6b7c93; font-family: 'Share Tech Mono'; }
+
+        .mask-badge {
+            background: rgba(0, 229, 255, 0.1);
+            color: var(--primary);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            width: 35px; height: 35px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            border: none;
+        }
+
+        .icon-btn.delete { color: var(--secondary); }
+
+        /* Toast Notifications */
+        #toast-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10001;
+            width: 90%;
+        }
+
+        .toast {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            border-bottom: 3px solid var(--primary);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
+            animation: slideDown 0.4s ease forwards;
+        }
+
+        @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
     </style>
 </head>
 <body>
 
-    <div id="splash-screen">
-        <div class="splash-logo-container">
-            <div class="loading-orbit"></div>
-            <img src="https://i.ibb.co/C5WBZ6Yc/file-00000000305071fa945b58b012ac072b.png" class="splash-logo">
-        </div>
-        <h2 class="splash-title">MITV NETWORK</h2>
-    </div>
+    <canvas id="bg-canvas"></canvas>
 
-    <div id="auth-overlay">
+    <div id="auth-screen">
+        <div class="mi-logo-container">
+            <div class="mi-logo-circle">Mi</div>
+        </div>
+        
         <div class="auth-card">
-            <img src="https://i.ibb.co/SD424ppD/IMG-20260312-052617-removebg-preview.png" style="width: 70px; margin-bottom: 20px;">
-            <h2>Secure Login</h2>
-            <p>Access the world of MiTV Premium Streaming</p>
-            
-            <button class="btn-google" onclick="handleGoogleLogin()">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18">
-                Continue with Google
-            </button>
-            
-            <div class="auth-divider">OR USE CREDENTIALS</div>
-
-            <div class="input-group">
-                <label>Email Address</label>
-                <input type="email" id="auth-email" class="input-field" placeholder="name@example.com">
+            <h2 style="text-align:center; font-family:'Orbitron'; font-size:18px; margin-bottom:20px;">ADMIN LOGIN</h2>
+            <div class="auth-input-group">
+                <input type="password" id="master-key" placeholder="••••••••" maxlength="12">
             </div>
-            <div class="input-group">
-                <label>System Password</label>
-                <input type="password" id="auth-pass" class="input-field" placeholder="••••••••">
-            </div>
-            
-            <button class="btn-primary" onclick="handleEmailAuth()">Initialize Session</button>
+            <button class="login-btn" onclick="handleLogin()">Unlock Access</button>
+            <p id="auth-msg" style="color:var(--secondary); font-size:12px; text-align:center; margin-top:15px; display:none;">Invalid Key!</p>
         </div>
     </div>
 
-    <header>
-        <div class="logo-area">
-            <img src="https://i.ibb.co/C5WBZ6Yc/file-00000000305071fa945b58b012ac072b.png">
-            <h1>MiTV</h1>
-        </div>
-        <div class="user-pill">
-            <span id="user-tier-label">FREE PLAN</span>
-            <i class="fas fa-crown" style="color: var(--accent); font-size: 12px;"></i>
-        </div>
-    </header>
-
-    <div id="player-box">
-        <div class="player-idle" id="idle-ui">
-            <i class="fas fa-play-circle"></i>
-            <p>Select Content to Play</p>
-        </div>
-        <video id="main-video" controls autoplay playsinline poster="https://i.ibb.co/C5WBZ6Yc/file-00000000305071fa945b58b012ac072b.png"></video>
-    </div>
-
-    <main id="main-feed">
-        <div class="search-wrapper">
-            <i class="fas fa-search"></i>
-            <input type="text" id="search-input" placeholder="Search 10,000+ Channels..." onkeyup="filterGrid()">
-        </div>
-
-        <div class="content-grid" id="channel-container">
+    <div id="app-shell">
+        
+        <header class="app-header">
+            <div class="header-logo">MiTV <span>PRO</span></div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:12px; font-weight:bold; color:#6b7c93;">SERVER</span>
+                <div class="status-dot"></div>
             </div>
-    </main>
+        </header>
 
-    <nav>
-        <div class="nav-item active" onclick="switchCategory('Live TV', this)">
-            <i class="fas fa-tv"></i>
-            <span>Live</span>
-        </div>
-        <div class="nav-item" onclick="switchCategory('Movies', this)">
-            <i class="fas fa-film"></i>
-            <span>Movies</span>
-        </div>
-        <div class="nav-item" onclick="switchCategory('Series', this)">
-            <i class="fas fa-video"></i>
-            <span>Series</span>
-        </div>
-        <div class="nav-item" onclick="switchCategory('Islamic', this)">
-            <i class="fas fa-kaaba"></i>
-            <span>Islamic</span>
-        </div>
-        <div class="nav-item" onclick="openProfile()">
-            <i class="fas fa-user-circle"></i>
-            <span>Profile</span>
-        </div>
-    </nav>
-
-    <div id="profile-modal" onclick="closeProfile()">
-        <div class="profile-container" onclick="event.stopPropagation()">
-            <div class="user-avatar">
-                <img id="p-avatar" src="https://i.ibb.co/SD424ppD/IMG-20260312-052617-removebg-preview.png">
-            </div>
-            <h3 id="p-name">Maaz Iqbal</h3>
-            <p id="p-email" style="font-size: 12px; color: var(--text-dim);">founder@mitv.net</p>
+        <main class="app-content">
             
-            <div class="upgrade-box">
-                <h4><i class="fas fa-gem"></i> PRO PREMIUM BENEFITS</h4>
-                <ul style="font-size: 11px; color: #94a3b8; margin-left: 18px; margin-top: 8px;">
-                    <li>Access to 4K Ultra HD Links</li>
-                    <li>Zero Advertisement Experience</li>
-                    <li>Exclusive Islamic Content Library</li>
-                </ul>
+            <div id="view-users">
+                <div class="section-title"><i class="fas fa-user-plus"></i> GENERATE MASKED M3U</div>
+                
+                <div class="mobile-card">
+                    <input type="text" id="user-name" class="m-input" placeholder="Client Name (e.g. Maaz)">
+                    <input type="text" id="user-slug" class="m-input" placeholder="Custom ID (e.g. maaz-001)">
+                    <button class="m-btn" onclick="generateMaskedUser()">
+                        <i class="fas fa-shield-alt"></i> GENERATE SECURE LINK
+                    </button>
+                </div>
+
+                <div class="section-title"><i class="fas fa-users"></i> ACTIVE CLIENTS</div>
+                <div id="user-list-target">
+                    </div>
             </div>
 
-            <button class="btn-primary" onclick="whatsappAdmin()" style="background: #22c55e; color: #fff;">
-                <i class="fab fa-whatsapp"></i> UPGRADE TO PRO
-            </button>
-            <br><br>
-            <button onclick="logOut()" style="background: transparent; color: var(--secondary); border: 1px solid var(--secondary); padding: 10px; border-radius: 12px; font-weight: bold; width: 100%;">Sign Out</button>
-        </div>
+            <div id="view-channels" style="display:none;">
+                <div class="section-title"><i class="fas fa-cloud-download-alt"></i> IMPORT POOL</div>
+                <div class="mobile-card">
+                    <textarea id="raw-m3u" class="m-input" style="height:100px;" placeholder="Paste M3U content or link here..."></textarea>
+                    <button class="m-btn" style="background:#0077ff; color:#fff;" onclick="parseM3U()">
+                        <i class="fas fa-sync"></i> SYNC WITH CLOUD
+                    </button>
+                </div>
+                <div id="channel-list-target"></div>
+            </div>
+
+            <div id="view-radar" style="display:none;">
+                <div class="section-title"><i class="fas fa-satellite-dish"></i> LIVE TRAFFIC</div>
+                <div id="radar-logs" style="font-family:'Share Tech Mono'; font-size:12px;">
+                    </div>
+            </div>
+
+        </main>
+
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="switchView('users', this)">
+                <i class="fas fa-user-shield"></i>
+                <span>USERS</span>
+            </div>
+            <div class="nav-item" onclick="switchView('channels', this)">
+                <i class="fas fa-tv"></i>
+                <span>POOL</span>
+            </div>
+            <div class="nav-item" onclick="switchView('radar', this)">
+                <i class="fas fa-broadcast-tower"></i>
+                <span>RADAR</span>
+            </div>
+            <div class="nav-item" onclick="location.reload()">
+                <i class="fas fa-power-off"></i>
+                <span>EXIT</span>
+            </div>
+        </nav>
     </div>
+
+    <div id="toast-box"></div>
 
     <script>
-        // --- 1. FIREBASE CONFIGURATION (Verified) ---
-        const fbConfig = {
+        /* =========================================================
+           MITV NETWORK - CORE LOGIC ENGINE (1000+ LINES CAPABLE)
+           =========================================================
+        */
+
+        // Firebase Setup
+        const config = {
             apiKey: "AIzaSyBbnU8DkthpYQMHOLLyj6M0cc05qXfjMcw",
-            authDomain: "ramadan-2385b.firebaseapp.com",
             databaseURL: "https://ramadan-2385b-default-rtdb.firebaseio.com",
             projectId: "ramadan-2385b",
-            storageBucket: "ramadan-2385b.firebasestorage.app",
-            messagingSenderId: "882828936310",
-            appId: "1:882828936310:web:7f97b921031fe130fe4b57"
         };
-
-        firebase.initializeApp(fbConfig);
-        const auth = firebase.auth();
+        firebase.initializeApp(config);
         const db = firebase.database();
 
-        let currentUserData = { uid: null, plan: 'Free', email: '' };
-        let activeCategory = 'Live TV';
-        let channelCache = [];
+        const MASTER_PASS = "mitv123456";
+        const VERCEL_URL = "https://mitv-tan.vercel.app"; // Apka masked backend
 
-        // --- 2. STARTUP SEQUENCE ---
-        window.addEventListener('load', () => {
-            console.log("MiTV Core Engine Initialized...");
-            setTimeout(() => {
-                document.getElementById('splash-screen').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('splash-screen').style.display = 'none';
-                    checkUserSession();
-                }, 8000); // 8 Sec Splash for better loading
-            }, 3000);
-        });
+        // UI View Switcher
+        function switchView(viewName, el) {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
 
-        function checkUserSession() {
-            auth.onAuthStateChanged(user => {
-                if(user) {
-                    console.log("User Authenticated:", user.email);
-                    currentUserData.uid = user.uid;
-                    currentUserData.email = user.email;
-                    document.getElementById('auth-overlay').style.display = 'none';
-                    syncUserData();
-                    loadFirebaseChannels(); // Fetch Data
-                } else {
-                    document.getElementById('auth-overlay').style.display = 'flex';
-                }
-            });
+            document.getElementById('view-users').style.display = 'none';
+            document.getElementById('view-channels').style.display = 'none';
+            document.getElementById('view-radar').style.display = 'none';
+
+            document.getElementById('view-' + viewName).style.display = 'block';
         }
 
-        // --- 3. AUTH LOGIC ---
-        function handleGoogleLogin() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch(err => alert("Google Auth Failed: " + err.message));
-        }
-
-        function handleEmailAuth() {
-            let e = document.getElementById('auth-email').value;
-            let p = document.getElementById('auth-pass').value;
-            if(!e || !p) return alert("All fields are required!");
-            
-            auth.signInWithEmailAndPassword(e, p).catch(err => {
-                if(err.code === 'auth/user-not-found') auth.createUserWithEmailAndPassword(e,p);
-                else alert(err.message);
-            });
-        }
-
-        function syncUserData() {
-            // High-priority sync
-            db.ref('users/' + currentUserData.uid).on('value', snap => {
-                let data = snap.val();
-                if(data) {
-                    currentUserData.plan = data.plan || 'Free';
-                    document.getElementById('user-tier-label').innerText = currentUserData.plan.toUpperCase() + " PLAN";
-                    document.getElementById('p-name').innerText = auth.currentUser.displayName || 'MiTV User';
-                    document.getElementById('p-email').innerText = currentUserData.email;
-                    if(auth.currentUser.photoURL) document.getElementById('p-avatar').src = auth.currentUser.photoURL;
-                } else {
-                    db.ref('users/' + currentUserData.uid).set({ email: currentUserData.email, plan: 'Free', joined: Date.now() });
-                }
-            });
-        }
-
-        // --- 4. DATA FETCHING (CRITICAL FIX) ---
-        function loadFirebaseChannels() {
-            const container = document.getElementById('channel-container');
-            container.innerHTML = '<div style="grid-column: span 3; text-align: center; padding: 50px;"><i class="fas fa-spinner fa-spin" style="font-size: 30px; color: var(--primary);"></i><p style="margin-top:10px; font-size:12px; color:#555;">Connecting to MiTV Database...</p></div>';
-
-            // Check if Firebase is actually returning anything
-            db.ref('channels').on('value', snap => {
-                channelCache = [];
-                console.log("Database Snap Received:", snap.val()); // Debug Log
-                
-                if(snap.exists()) {
-                    snap.forEach(child => {
-                        let ch = child.val();
-                        ch.id = child.key;
-                        channelCache.push(ch);
-                    });
-                    renderGridUI();
-                } else {
-                    console.warn("No data found in 'channels' node!");
-                    container.innerHTML = '<div style="grid-column: span 3; text-align: center; padding: 50px; color: #444;">No Channels available. Please add from Admin Panel.</div>';
-                }
-            }, error => {
-                console.error("Firebase Read Error:", error);
-                alert("Database Permission Error! Check Firebase Rules.");
-            });
-        }
-
-        function renderGridUI() {
-            const container = document.getElementById('channel-container');
-            container.innerHTML = '';
-            
-            const filtered = channelCache.filter(item => item.category === activeCategory);
-            
-            if(filtered.length === 0) {
-                container.innerHTML = `<p style="grid-column: span 3; text-align: center; padding: 50px; color: #334155;">No items found in ${activeCategory}</p>`;
-                return;
-            }
-
-            filtered.forEach(ch => {
-                const card = document.createElement('div');
-                card.className = 'card-item';
-                card.id = `ch-${ch.id}`;
-                
-                let proTag = ch.isPro ? '<div class="pro-badge">PRO</div>' : '';
-                
-                card.innerHTML = `
-                    ${proTag}
-                    <div class="thumb-wrap">
-                        <img src="${ch.logo}" onerror="this.src='https://i.ibb.co/C5WBZ6Yc/file-00000000305071fa945b58b012ac072b.png'">
-                    </div>
-                    <div class="channel-name">${ch.name}</div>
-                `;
-                
-                card.onclick = () => launchPlayer(ch);
-                container.appendChild(card);
-            });
-        }
-
-        // --- 5. PLAYER ENGINE ---
-        function launchPlayer(ch) {
-            if(ch.isPro && currentUserData.plan === 'Free') {
-                alert("Subscription Required! This is a Pro Premium channel.");
-                openProfile();
-                return;
-            }
-
-            // UI Feedback
-            document.querySelectorAll('.card-item').forEach(c => c.classList.remove('playing'));
-            document.getElementById(`ch-${ch.id}`).classList.add('playing');
-
-            const v = document.getElementById('main-video');
-            const idle = document.getElementById('idle-ui');
-            
-            idle.style.display = 'none';
-            v.style.display = 'block';
-
-            const stream = ch.streamLink;
-            console.log("Attempting to play:", stream);
-
-            if(stream.includes('.m3u8')) {
-                if(Hls.isSupported()) {
-                    let hls = new Hls();
-                    hls.loadSource(stream);
-                    hls.attachMedia(v);
-                    hls.on(Hls.Events.MANIFEST_PARSED, () => v.play());
-                } else if (v.canPlayType('application/vnd.apple.mpegurl')) {
-                    v.src = stream;
-                    v.play();
-                }
-            } else if (stream.includes('.mpd')) {
-                let p = dashjs.MediaPlayer().create();
-                p.initialize(v, stream, true);
+        // Authentication
+        function handleLogin() {
+            const val = document.getElementById('master-key').value;
+            if(val === MASTER_PASS) {
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('app-shell').style.display = 'flex';
+                showToast("Access Granted: Welcome Maaz", "success");
+                initApp();
             } else {
-                v.src = stream;
-                v.play();
+                document.getElementById('auth-msg').style.display = 'block';
+                setTimeout(() => document.getElementById('auth-msg').style.display = 'none', 2000);
             }
+        }
 
-            // Track Activity (Admin Logs)
-            db.ref('activity_logs/' + currentUserData.uid).push({
-                action: 'watch',
-                channel: ch.name,
-                time: firebase.database.ServerValue.TIMESTAMP
+        // M3U MASKING LOGIC & USER GENERATION
+        function generateMaskedUser() {
+            const name = document.getElementById('user-name').value.trim();
+            const slug = document.getElementById('user-slug').value.trim().toLowerCase().replace(/\s+/g, '-');
+
+            if(!name || !slug) return showToast("Please fill all fields", "error");
+
+            // Generate a Masking Token (Base64 + Random Salt)
+            const salt = Math.random().toString(36).substring(7);
+            const token = btoa(slug + "|" + salt);
+
+            // MASKED LINK STRUCTURE: 
+            // Instead of showing actual IPTV links, we show this:
+            const maskedLink = `${VERCEL_URL}/api/stream?key=${token}`;
+
+            const userData = {
+                name: name,
+                token: token,
+                masked_m3u: maskedLink,
+                status: "active",
+                created: Date.now()
+            };
+
+            db.ref('m3u_users/' + slug).set(userData).then(() => {
+                showToast("User Generated & Masked!", "success");
+                document.getElementById('user-name').value = '';
+                document.getElementById('user-slug').value = '';
             });
         }
 
-        // --- 6. UTILITIES ---
-        function switchCategory(cat, btn) {
-            activeCategory = cat;
-            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            renderGridUI();
-        }
+        // Init App & Realtime Listeners
+        function initApp() {
+            // Listen Users
+            db.ref('m3u_users').on('value', snap => {
+                const data = snap.val();
+                const container = document.getElementById('user-list-target');
+                container.innerHTML = '';
+                
+                if(data) {
+                    Object.keys(data).forEach(id => {
+                        const u = data[id];
+                        container.innerHTML += `
+                            <div class="user-item">
+                                <div class="user-info">
+                                    <h4>${u.name} <span class="mask-badge">MASKED</span></h4>
+                                    <p>${u.masked_m3u.substring(0, 35)}...</p>
+                                </div>
+                                <div class="action-btns">
+                                    <button class="icon-btn" onclick="copyLink('${u.masked_m3u}')"><i class="fas fa-copy"></i></button>
+                                    <button class="icon-btn delete" onclick="deleteUser('${id}')"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            });
 
-        function filterGrid() {
-            let q = document.getElementById('search-input').value.toLowerCase();
-            const cards = document.querySelectorAll('.card-item');
-            cards.forEach(c => {
-                let name = c.querySelector('.channel-name').innerText.toLowerCase();
-                c.style.display = name.includes(q) ? 'flex' : 'none';
+            // Listen Radar
+            db.ref('m3u_activity_logs').limitToLast(10).on('value', snap => {
+                const logs = snap.val();
+                const container = document.getElementById('radar-logs');
+                container.innerHTML = '';
+                if(logs) {
+                    Object.values(logs).forEach(l => {
+                        container.innerHTML = `<div>[${new Date(l.timestamp).toLocaleTimeString()}] ${l.ip} -> ${l.target}</div>` + container.innerHTML;
+                    });
+                }
             });
         }
 
-        function openProfile() { document.getElementById('profile-modal').style.display = 'flex'; }
-        function closeProfile() { document.getElementById('profile-modal').style.display = 'none'; }
-        
-        function whatsappAdmin() {
-            window.open(`https://wa.me/923062015325?text=I want to upgrade my MiTV plan. My ID: ${currentUserData.uid}`);
+        // Utilities
+        function copyLink(link) {
+            navigator.clipboard.writeText(link);
+            showToast("Masked link copied!", "success");
         }
-        
-        function logOut() { auth.signOut(); location.reload(); }
 
-        // Disable Developer Tools Shortcuts
-        document.onkeydown = e => { 
-            if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74))) return false; 
-        };
-        document.addEventListener('contextmenu', e => e.preventDefault());
+        function deleteUser(id) {
+            if(confirm("Delete this user?")) db.ref('m3u_users/' + id).remove();
+        }
+
+        function showToast(msg, type) {
+            const box = document.getElementById('toast-box');
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.innerText = msg;
+            box.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+
+        // Particle Background Logic
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if(this.x > canvas.width) this.x = 0;
+                if(this.x < 0) this.x = canvas.width;
+                if(this.y > canvas.height) this.y = 0;
+                if(this.y < 0) this.y = canvas.height;
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(0, 229, 255, 0.3)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            for(let i=0; i<50; i++) particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+        initParticles();
+        animate();
 
     </script>
 </body>
