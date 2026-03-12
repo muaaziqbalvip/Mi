@@ -1,18 +1,8 @@
 {
-  "version": 2,
   "rewrites": [
     {
-      "source": "/api/m3u",
-      "destination": "/api/m3u.js"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT" }
-      ]
+      "source": "/get/m3u/:user",
+      "destination": "/api/m3u?user=:user"
     }
   ]
 }
