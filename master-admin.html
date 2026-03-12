@@ -2,245 +2,113 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MiTV Master | User & Masking Console</title>
-
+    <title>MiTV Control Center | Muslim Islam</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;800&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
-        :root {
-            --primary: #00f2ff;
-            --secondary: #7000ff;
-            --bg: #05070a;
-            --card: #0f1218;
-            --border: #1f242d;
-            --text: #e2e8f0;
-            --font-main: 'Plus Jakarta Sans', sans-serif;
-            --font-code: 'JetBrains Mono', monospace;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: var(--font-main);
-            line-height: 1.6;
-            padding: 20px;
-        }
-
-        .container { max-width: 1200px; margin: 0 auto; }
-
-        /* Header Area */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 30px;
-        }
-
-        .logo-box h1 { font-weight: 800; font-size: 24px; color: var(--primary); letter-spacing: -1px; }
-        .logo-box p { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 2px; }
-
-        .grid-main {
-            display: grid;
-            grid-template-columns: 380px 1fr;
-            gap: 30px;
-        }
-
-        /* Card System */
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 30px;
-            margin-bottom: 30px;
-            transition: 0.3s;
-        }
-
-        .card:hover { border-color: var(--primary); box-shadow: 0 10px 40px rgba(0,242,255,0.05); }
-
-        .card h2 { font-size: 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
-        .card h2 i { color: var(--primary); }
-
-        /* Form Elements */
-        label { font-size: 13px; color: #94a3b8; display: block; margin-top: 15px; }
+        :root { --p: #00f2ff; --bg: #050608; --c: #0f1218; --b: #1e2530; --text: #e2e8f0; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
         
-        input, select, textarea {
-            width: 100%;
-            padding: 14px;
-            background: #000;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            color: #fff;
-            margin-top: 8px;
-            font-size: 14px;
-            transition: 0.3s;
-        }
+        /* Login Overlay */
+        #login-screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: var(--c); padding: 40px; border-radius: 20px; border: 1px solid var(--b); text-align: center; width: 350px; }
+        
+        .header { height: 70px; border-bottom: 1px solid var(--b); display: flex; align-items: center; padding: 0 40px; justify-content: space-between; position: sticky; top:0; background: rgba(5,6,8,0.8); backdrop-filter: blur(10px); z-index: 100; }
+        .logo { font-weight: 800; font-size: 20px; color: var(--p); letter-spacing: -1px; }
 
-        input:focus, textarea:focus { border-color: var(--primary); outline: none; }
+        .wrapper { display: grid; grid-template-columns: 280px 1fr 350px; gap: 20px; padding: 20px; }
+        .card { background: var(--c); border: 1px solid var(--b); border-radius: 15px; padding: 20px; margin-bottom: 20px; }
+        h2 { font-size: 14px; text-transform: uppercase; color: #64748b; margin-bottom: 15px; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
 
-        .btn {
-            width: 100%;
-            padding: 15px;
-            border-radius: 12px;
-            border: none;
-            font-weight: 800;
-            cursor: pointer;
-            transition: 0.3s;
-            margin-top: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
+        input, select, textarea { width: 100%; padding: 12px; background: #000; border: 1px solid var(--b); border-radius: 8px; color: #fff; margin-bottom: 10px; font-size: 13px; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; background: var(--p); color: #000; }
+        .btn:hover { opacity: 0.8; transform: translateY(-2px); }
+        .btn-del { background: #ef4444; color: #fff; padding: 5px 10px; font-size: 10px; }
 
-        .btn-primary { background: var(--primary); color: #000; }
-        .btn-secondary { background: #fff; color: #000; }
-        .btn-ghost { background: transparent; border: 1px solid var(--border); color: #fff; }
+        /* Tables & Lists */
+        .list-container { max-height: 500px; overflow-y: auto; }
+        .item { background: #000; padding: 12px; border-radius: 10px; margin-bottom: 8px; border: 1px solid transparent; }
+        .item:hover { border-color: var(--p); }
+        .status { font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+        .paid { background: rgba(0,242,255,0.1); color: var(--p); }
+        .unpaid { background: rgba(239,68,68,0.1); color: #ef4444; }
 
-        .btn:hover { transform: translateY(-3px); opacity: 0.9; }
-
-        /* User List */
-        .user-list { max-height: 400px; overflow-y: auto; margin-top: 10px; }
-        .user-item {
-            background: #000;
-            padding: 15px;
-            border-radius: 15px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid var(--border);
-        }
-
-        .user-info h4 { font-size: 15px; font-weight: 700; }
-        .user-info p { font-size: 11px; color: #64748b; font-family: var(--font-code); }
-
-        .status-pill {
-            font-size: 10px;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-weight: 800;
-        }
-        .status-paid { background: rgba(0, 242, 255, 0.1); color: var(--primary); }
-        .status-unpaid { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
-
-        /* Output Area */
-        .output-container {
-            margin-top: 25px;
-            background: #000;
-            border: 1px dashed var(--primary);
-            padding: 20px;
-            border-radius: 15px;
-            display: none;
-        }
-
-        .output-link {
-            font-family: var(--font-code);
-            font-size: 13px;
-            color: var(--primary);
-            word-break: break-all;
-            margin-bottom: 15px;
-        }
-
-        /* Responsive */
-        @media (max-width: 900px) {
-            .grid-main { grid-template-columns: 1fr; }
-        }
+        /* Activity Monitor */
+        .log-item { font-family: 'JetBrains Mono', monospace; font-size: 11px; border-bottom: 1px solid var(--b); padding: 10px 0; }
+        .log-ip { color: var(--p); }
+        .log-ch { color: #fbbf24; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <div class="logo-box">
-            <h1>MITV MASTER ENGINE</h1>
-            <p>Project Muslim Islam | Cloud Access</p>
-        </div>
-        <div class="system-status">
-            <span style="color: #10b981; font-size: 12px;"><i class="fas fa-server"></i> VERCEL ACTIVE</span>
-        </div>
-    </header>
+<div id="login-screen">
+    <div class="login-box">
+        <h1 class="logo">MiTV MASTER</h1>
+        <p style="margin-bottom: 20px; font-size: 12px;">Authentication Required</p>
+        <input type="password" id="admin-pass" placeholder="Enter Admin Password">
+        <button class="btn" onclick="checkLogin()">Unlock System</button>
+    </div>
+</div>
 
-    <div class="grid-main">
-        
-        <div class="sidebar">
-            <div class="card">
-                <h2><i class="fas fa-user-plus"></i> Register User</h2>
-                
-                <label>User Full Name</label>
-                <input type="text" id="u-name" placeholder="e.g. Ali Ahmed">
-                
-                <label>Phone Number</label>
-                <input type="text" id="u-phone" placeholder="03XXXXXXXXX">
-                
-                <label>Initial Status</label>
+<div class="header">
+    <div class="logo">MiTV | COMMAND CENTER</div>
+    <div id="stats" style="font-size: 12px; color: #64748b;">Loading System Stats...</div>
+</div>
+
+<div class="wrapper">
+    <div class="col">
+        <div class="card">
+            <h2><i class="fas fa-plus-circle"></i> Add M3U Source</h2>
+            <textarea id="m3u-input" rows="4" placeholder="Paste M3U Link or Raw Content..."></textarea>
+            <button class="btn" onclick="parseM3U()">Import & Extract</button>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-tv"></i> Global Channels (<span id="ch-count">0</span>)</h2>
+            <input type="text" id="search-ch" placeholder="Search channels..." onkeyup="filterChannels()">
+            <div id="channel-list" class="list-container"></div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="card">
+            <h2><i class="fas fa-user-plus"></i> Register User</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <input type="text" id="u-name" placeholder="Full Name">
+                <input type="text" id="u-id" placeholder="Username (Xtream)">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <input type="text" id="u-pass" placeholder="Password (Phone)">
                 <select id="u-status">
-                    <option value="Paid">PAID (Active)</option>
-                    <option value="Unpaid">UNPAID (Blocked)</option>
+                    <option value="Paid">Status: PAID</option>
+                    <option value="Unpaid">Status: UNPAID</option>
                 </select>
-
-                <button class="btn btn-primary" onclick="addUser()">Create Identity</button>
             </div>
-
-            <div class="card">
-                <h2><i class="fas fa-users-viewfinder"></i> Directory</h2>
-                <div id="user-display" class="user-list">
-                    </div>
-            </div>
+            <button class="btn" onclick="saveUser()"><i class="fas fa-save"></i> Save User Profile</button>
         </div>
 
-        <div class="main-engine">
-            <div class="card">
-                <h2><i class="fas fa-layer-group"></i> Multi-M3U Aggregator</h2>
-                <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Paste multiple M3U links below. Our Vercel engine will merge them into one masked link.</p>
-                
-                <label>Input M3U Sources (One per line)</label>
-                <textarea id="m3u-list" rows="6" placeholder="https://server1.com/list.m3u&#10;https://server2.com/playlist.m3u"></textarea>
+        <div class="card">
+            <h2><i class="fas fa-users"></i> Registered Users</h2>
+            <div id="user-list" class="list-container"></div>
+        </div>
+    </div>
 
-                <label>Select Target User</label>
-                <select id="user-select-main">
-                    <option value="">-- Choose User for this Link --</option>
-                </select>
-
-                <label>Emergency Loop Video (For Unpaid Users)</label>
-                <input type="text" id="warning-vid" value="https://i.imgur.com/example_payment_video.mp4" placeholder="Direct MP4 Link">
-
-                <button class="btn btn-secondary" onclick="generateLink()">
-                    <i class="fas fa-shield-halved"></i> Generate Masked Playlist
-                </button>
-
-                <div id="result-box" class="output-container">
-                    <p style="font-size: 11px; color: #64748b; margin-bottom: 5px;">Your Professional Masked URL:</p>
-                    <div id="final-url" class="output-link"></div>
-                    <button class="btn btn-ghost" onclick="copyUrl()"><i class="fas fa-copy"></i> Copy To Clipboard</button>
-                </div>
-            </div>
-
-            <div class="card" style="border-style: dashed;">
-                <h2><i class="fas fa-circle-info"></i> System Guide</h2>
-                <ul style="font-size: 13px; padding-left: 20px; color: #94a3b8;">
-                    <li><b>Masking:</b> Real M3U links are never exposed to the user's player.</li>
-                    <li><b>Dynamic Control:</b> If you change user status to "Unpaid" in the sidebar, their link will instantly start playing the warning video.</li>
-                    <li><b>Vercel Logic:</b> The link calls <code>mitv-tan.vercel.app</code> which processes the request.</li>
-                </ul>
+    <div class="col">
+        <div class="card" style="border-color: #ef4444;">
+            <h2><i class="fas fa-microscope"></i> Live Activity Tracker</h2>
+            <div id="live-logs" class="list-container" style="max-height: 800px;">
+                <p style="text-align:center; font-size:12px; color:#444;">No live tracking data...</p>
             </div>
         </div>
-
     </div>
 </div>
 
 <script>
-    // --- FIREBASE CONFIG ---
+    // --- FIREBASE SETUP ---
     const firebaseConfig = {
         apiKey: "AIzaSyBbnU8DkthpYQMHOLLyj6M0cc05qXfjMcw",
         databaseURL: "https://ramadan-2385b-default-rtdb.firebaseio.com",
@@ -249,104 +117,153 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // --- LOGIN PROTECTION ---
+    function checkLogin() {
+        const p = document.getElementById('admin-pass').value;
+        if(p === 'mitv123456') {
+            document.getElementById('login-screen').style.display = 'none';
+            initSystem();
+        } else { alert("Incorrect Password Maaz Bhai!"); }
+    }
+
+    // --- CHANNEL MANAGEMENT ---
+    async function parseM3U() {
+        const input = document.getElementById('m3u-input').value;
+        if(!input) return alert("Kuch to dalo!");
+        
+        let rawM3U = input;
+        if(input.startsWith('http')) {
+            const res = await fetch(input);
+            rawM3U = await res.text();
+        }
+
+        const lines = rawM3U.split('\n');
+        let channelsAdded = 0;
+
+        for(let i=0; i<lines.length; i++) {
+            if(lines[i].includes('#EXTINF')) {
+                const info = lines[i];
+                const url = lines[i+1]?.trim();
+                if(url && url.startsWith('http')) {
+                    const name = info.split(',')[1] || "Unknown Channel";
+                    const logoMatch = info.match(/tvg-logo="([^"]+)"/);
+                    const logo = logoMatch ? logoMatch[1] : "";
+                    
+                    const cid = btoa(name).substring(0,10);
+                    db.ref('global_channels/' + cid).set({
+                        name: name.trim(),
+                        url: url,
+                        logo: logo,
+                        updated: Date.now()
+                    });
+                    channelsAdded++;
+                }
+            }
+        }
+        alert(channelsAdded + " Channels Added to Pool!");
+        document.getElementById('m3u-input').value = '';
+    }
+
+    function loadChannels() {
+        db.ref('global_channels').on('value', snap => {
+            const list = document.getElementById('channel-list');
+            list.innerHTML = '';
+            let count = 0;
+            snap.forEach(child => {
+                const c = child.val();
+                list.innerHTML += `
+                    <div class="item">
+                        <div style="font-weight:700; font-size:12px;">${c.name}</div>
+                        <div style="font-size:9px; color:#444; word-break:break-all;">${c.url}</div>
+                        <button onclick="delChannel('${child.key}')" class="btn-del" style="margin-top:5px;">Delete</button>
+                    </div>
+                `;
+                count++;
+            });
+            document.getElementById('ch-count').innerText = count;
+        });
+    }
+
+    function delChannel(id) { if(confirm("Channel delete kar den?")) db.ref('global_channels/'+id).remove(); }
+
     // --- USER MANAGEMENT ---
-    function addUser() {
+    function saveUser() {
+        const id = document.getElementById('u-id').value;
         const name = document.getElementById('u-name').value;
-        const phone = document.getElementById('u-phone').value;
+        const pass = document.getElementById('u-pass').value;
         const status = document.getElementById('u-status').value;
 
-        if(!name || !phone) return alert("Please fill all fields!");
+        if(!id || !pass) return alert("Username aur Password zaroori hain!");
 
-        // Unique ID Generation
-        const uid = "MI-" + Math.floor(100000 + Math.random() * 900000);
-
-        db.ref('master_users/' + uid).set({
+        db.ref('master_users/' + id).set({
             name: name,
-            phone: phone,
+            phone: pass,
             status: status,
-            created: Date.now()
-        }).then(() => {
-            alert("User Registered Successfully!");
-            document.getElementById('u-name').value = '';
-            document.getElementById('u-phone').value = '';
-        });
+            m3u_link: `https://mitv-tan.vercel.app/get/m3u/${id}`
+        }).then(() => alert("User Saved!"));
     }
 
     function loadUsers() {
         db.ref('master_users').on('value', snap => {
-            const display = document.getElementById('user-display');
-            const select = document.getElementById('user-select-main');
-            display.innerHTML = '';
-            select.innerHTML = '<option value="">-- Choose User for this Link --</option>';
-
+            const list = document.getElementById('user-list');
+            list.innerHTML = '';
             snap.forEach(child => {
-                const user = child.val();
+                const u = child.val();
                 const id = child.key;
-                const sClass = user.status === 'Paid' ? 'status-paid' : 'status-unpaid';
-
-                // Sidebar List
-                display.innerHTML += `
-                    <div class="user-item">
-                        <div class="user-info">
-                            <h4>${user.name}</h4>
-                            <p>${id} | ${user.phone}</p>
+                const sc = u.status === 'Paid' ? 'paid' : 'unpaid';
+                list.innerHTML += `
+                    <div class="item">
+                        <div style="display:flex; justify-content:space-between">
+                            <b>${u.name}</b>
+                            <span class="status ${sc}">${u.status}</span>
                         </div>
-                        <div style="text-align:right">
-                            <span class="status-pill ${sClass}">${user.status}</span><br>
-                            <button onclick="toggleStatus('${id}', '${user.status}')" style="background:none; border:none; color:var(--primary); font-size:10px; cursor:pointer; margin-top:5px;">Change</button>
+                        <div style="font-size:11px; color:#64748b; margin:5px 0;">
+                            Login: ${id} | Pass: ${u.phone}
                         </div>
+                        <input type="text" readonly value="${u.m3u_link}" style="background:#111; font-size:10px; padding:5px;">
+                        <button onclick="delUser('${id}')" class="btn-del">Delete User</button>
                     </div>
                 `;
-
-                // Main Dropdown
-                select.innerHTML += `<option value="${id}">${user.name} (${id})</option>`;
             });
         });
     }
 
-    function toggleStatus(id, current) {
-        const next = current === 'Paid' ? 'Unpaid' : 'Paid';
-        db.ref('master_users/' + id).update({ status: next });
-    }
+    function delUser(id) { if(confirm("User delete karein?")) db.ref('master_users/'+id).remove(); }
 
-    // --- M3U MASKING LOGIC ---
-    function generateLink() {
-        const m3uText = document.getElementById('m3u-list').value;
-        const userId = document.getElementById('user-select-main').value;
-        const warning = document.getElementById('warning-vid').value;
-
-        if(!m3uText || !userId) return alert("Please add M3U links and select a user!");
-
-        const sources = m3uText.split('\n').filter(line => line.trim().startsWith('http'));
-
-        // Save this config to Firebase (Vercel API will read this)
-        db.ref('active_playlists/' + userId).set({
-            sources: sources,
-            warningVideo: warning,
-            updatedAt: Date.now()
-        }).then(() => {
-            // Generate the Vercel Masked Link
-            const vDomain = "https://mitv-tan.vercel.app";
-            const maskedUrl = `${vDomain}/get/m3u/${userId}`;
-
-            document.getElementById('result-box').style.display = 'block';
-            document.getElementById('final-url').innerText = maskedUrl;
+    // --- LIVE TRACKING SYSTEM ---
+    function loadLogs() {
+        db.ref('activity_logs').on('value', snap => {
+            const list = document.getElementById('live-logs');
+            list.innerHTML = '';
+            let totalActive = 0;
             
-            // Auto scroll to result
-            document.getElementById('result-box').scrollIntoView({ behavior: 'smooth' });
+            // Getting logs for each user
+            snap.forEach(userNode => {
+                const userId = userNode.key;
+                userNode.forEach(logNode => {
+                    const l = logNode.val();
+                    list.innerHTML = `
+                        <div class="log-item">
+                            <div><b style="color:var(--p)">[${userId}]</b> ${l.time}</div>
+                            <div>Action: <b>${l.action}</b></div>
+                            <div class="log-ch">Target: ${l.channel}</div>
+                            <div class="log-ip">IP: ${l.ip}</div>
+                            <div style="font-size:9px; color:#444;">${l.device}</div>
+                        </div>
+                    ` + list.innerHTML;
+                    totalActive++;
+                });
+            });
+            document.getElementById('stats').innerText = `Total Records: ${totalActive} | Monitoring Active`;
         });
     }
 
-    function copyUrl() {
-        const link = document.getElementById('final-url').innerText;
-        navigator.clipboard.writeText(link);
-        alert("Masked URL copied to clipboard!");
+    function initSystem() {
+        loadChannels();
+        loadUsers();
+        loadLogs();
     }
-
-    // Initial Load
-    loadUsers();
-
 </script>
+
 </body>
-      </html>
-  
+</html>
