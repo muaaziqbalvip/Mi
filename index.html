@@ -3,154 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MiTV Control Panel | MUSLIM ISLAM</title>
+    <title>MiTV Master Control | MUSLIM ISLAM</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
         /* =========================================================
-           MITV NETWORK MOBILE APP CSS (PREMIUM DARK MODE)
+           MITV NETWORK - FULL DIGITAL UI (3D & MOBILE OPTIMIZED)
            =========================================================
         */
         :root {
             --primary: #00e5ff;
-            --secondary: #ff0055;
-            --bg-dark: #05080f;
-            --panel-bg: #0d121d;
-            --text-glow: 0 0 10px rgba(0, 229, 255, 0.5);
-            --card-radius: 15px;
-            --safe-bottom: env(safe-area-inset-bottom);
+            --primary-glow: rgba(0, 229, 255, 0.6);
+            --accent: #ff0055;
+            --bg-deep: #02040a;
+            --glass: rgba(13, 20, 33, 0.85);
+            --border: rgba(0, 229, 255, 0.2);
+            --success: #00ff88;
+            --warning: #ffcc00;
         }
 
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            margin: 0; padding: 0; box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: var(--bg-dark);
-            color: #fff;
+            background-color: var(--bg-deep);
+            color: #e0f7fa;
             font-family: 'Rajdhani', sans-serif;
-            overflow-x: hidden;
+            overflow: hidden;
             height: 100vh;
             width: 100vw;
         }
 
-        /* Particles Background */
-        #bg-canvas {
+        /* 3D Background Canvas */
+        #hero-canvas {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             z-index: -1;
-            background: radial-gradient(circle at top, #0a192f 0%, #05080f 100%);
+            background: radial-gradient(circle at center, #0a1020 0%, #02040a 100%);
         }
 
         /* ---------------------------------------------------------
-           AUTHENTICATION (MOBILE DESIGN)
+           AUTHENTICATION GATE
            --------------------------------------------------------- */
-        #auth-screen {
+        #auth-gate {
             position: fixed;
             inset: 0;
-            background: var(--bg-dark);
             z-index: 10000;
+            background: var(--bg-deep);
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 30px;
+            padding: 20px;
+            transition: transform 0.8s cubic-bezier(0.87, 0, 0.13, 1);
         }
 
-        .mi-logo-container {
-            margin-bottom: 40px;
+        .auth-box {
+            width: 100%;
+            max-width: 400px;
+            background: var(--glass);
+            padding: 40px 30px;
+            border-radius: 30px;
+            border: 1px solid var(--border);
+            box-shadow: 0 0 50px rgba(0,0,0,0.8), inset 0 0 20px var(--primary-glow);
             text-align: center;
-            animation: float 3s ease-in-out infinite;
+            position: relative;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-        }
-
-        .mi-logo-circle {
-            width: 120px;
-            height: 120px;
+        .mi-brand-logo {
+            width: 90px; height: 90px;
             background: linear-gradient(135deg, var(--primary), #0077ff);
-            border-radius: 50%;
+            border-radius: 22px;
+            margin: 0 auto 30px;
             display: flex;
             justify-content: center;
             align-items: center;
             font-family: 'Orbitron', sans-serif;
-            font-size: 38px;
+            font-size: 32px;
             font-weight: 900;
             color: #000;
-            box-shadow: 0 0 40px var(--primary);
-            position: relative;
+            box-shadow: 0 0 30px var(--primary);
+            transform: rotate(-5deg);
         }
 
-        .mi-logo-circle::after {
-            content: 'NETWORK';
-            position: absolute;
-            bottom: -25px;
-            font-size: 12px;
-            letter-spacing: 5px;
-            color: var(--primary);
-        }
-
-        .auth-card {
-            width: 100%;
-            max-width: 350px;
-            background: var(--panel-bg);
-            padding: 30px;
-            border-radius: var(--card-radius);
-            border: 1px solid rgba(0, 229, 255, 0.2);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .auth-input-group {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .auth-input-group input {
-            width: 100%;
-            padding: 15px;
-            background: rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-            color: #fff;
-            text-align: center;
-            font-size: 18px;
-            letter-spacing: 4px;
-            outline: none;
-            transition: 0.3s;
-        }
-
-        .auth-input-group input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 15px;
-            border-radius: 10px;
-            border: none;
-            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
-            color: #fff;
+        .auth-title {
             font-family: 'Orbitron', sans-serif;
-            font-weight: bold;
-            text-transform: uppercase;
+            font-size: 22px;
             letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .auth-subtitle {
+            color: var(--primary);
+            font-size: 12px;
+            letter-spacing: 4px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+
+        .pass-input {
+            width: 100%;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--border);
+            padding: 18px;
+            border-radius: 15px;
+            color: #fff;
+            font-size: 20px;
+            text-align: center;
+            letter-spacing: 8px;
+            margin-bottom: 20px;
+            outline: none;
+        }
+
+        .unlock-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--primary);
+            color: #000;
+            border: none;
+            border-radius: 15px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
             cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0, 229, 255, 0.3);
         }
 
         /* ---------------------------------------------------------
-           MAIN APP LAYOUT (MOBILE)
+           MAIN APP INTERFACE
            --------------------------------------------------------- */
         #app-shell {
             display: none;
@@ -158,463 +143,654 @@
             height: 100vh;
         }
 
-        /* Fixed Top Header */
+        /* Glass Header */
         .app-header {
-            height: 65px;
-            background: rgba(13, 18, 29, 0.95);
-            backdrop-filter: blur(10px);
+            height: 70px;
+            padding: 0 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 20px;
-            border-bottom: 1px solid rgba(0, 229, 255, 0.1);
-            position: sticky;
-            top: 0;
+            background: rgba(2, 4, 10, 0.8);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border);
             z-index: 100;
         }
 
-        .header-logo {
+        .header-brand {
+            display: flex; align-items: center; gap: 12px;
             font-family: 'Orbitron', sans-serif;
-            font-size: 20px;
-            font-weight: 900;
-            color: #fff;
+            font-size: 18px;
         }
 
-        .header-logo span { color: var(--primary); }
+        .header-brand span { color: var(--primary); text-shadow: var(--text-glow); }
 
-        .status-dot {
-            width: 10px; height: 10px;
-            background: #00ff88;
+        .sys-info {
+            display: flex; align-items: center; gap: 15px;
+        }
+
+        .status-pill {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: var(--success);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        .live-dot {
+            width: 6px; height: 6px;
+            background: var(--success);
             border-radius: 50%;
-            box-shadow: 0 0 8px #00ff88;
+            animation: pulse 1s infinite;
         }
 
-        /* Scrollable Content Area */
-        .app-content {
+        @keyframes pulse { 0% { opacity: 0.2; } 100% { opacity: 1; box-shadow: 0 0 10px var(--success); } }
+
+        /* Main Workspace Area */
+        .viewport {
             flex: 1;
             overflow-y: auto;
             padding: 20px;
-            padding-bottom: 100px; /* Space for Nav */
+            scroll-behavior: smooth;
         }
 
-        /* Bottom Navigation Bar (App Style) */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
+        .view-section { display: none; animation: slideUp 0.5s ease forwards; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ---------------------------------------------------------
+           PANELS & CARDS (MOBILE FIRST)
+           --------------------------------------------------------- */
+        .card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .card-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center; gap: 10px;
+            text-transform: uppercase;
+        }
+
+        .input-group { margin-bottom: 15px; }
+        .label { display: block; font-size: 11px; color: #6b7c93; margin-bottom: 8px; font-weight: 700; letter-spacing: 1px; }
+
+        .mi-input {
             width: 100%;
-            height: 70px;
-            background: #0a0e17;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 14px;
+            border-radius: 12px;
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 15px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .mi-input:focus { border-color: var(--primary); background: rgba(0, 229, 255, 0.05); }
+
+        .mi-btn {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            border: none;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn-primary { background: var(--primary); color: #000; box-shadow: 0 5px 15px rgba(0, 229, 255, 0.2); }
+        .btn-accent { background: var(--accent); color: #fff; }
+        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
+
+        /* ---------------------------------------------------------
+           CHANNEL & USER LIST ITEMS
+           --------------------------------------------------------- */
+        .list-container { display: flex; flex-direction: column; gap: 12px; }
+
+        .item-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: 0.3s;
+        }
+
+        .item-card:active { transform: scale(0.98); background: rgba(0, 229, 255, 0.05); }
+
+        .item-img {
+            width: 50px; height: 50px;
+            background: #fff;
+            border-radius: 10px;
+            object-fit: contain;
+            padding: 2px;
+        }
+
+        .item-details { flex: 1; overflow: hidden; }
+        .item-name { font-weight: 700; font-size: 16px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .item-sub { font-size: 11px; color: #6b7c93; font-family: 'Share Tech Mono'; word-break: break-all; }
+
+        .item-actions { display: flex; gap: 8px; }
+        .action-btn {
+            width: 34px; height: 34px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* ---------------------------------------------------------
+           LIVE RADAR LOGS
+           --------------------------------------------------------- */
+        .radar-box {
+            background: #000;
+            border-radius: 15px;
+            padding: 15px;
+            font-family: 'Share Tech Mono', monospace;
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--accent);
+            box-shadow: inset 0 0 20px rgba(255, 0, 85, 0.2);
+        }
+
+        .log-entry {
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 12px 0;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .log-time { color: var(--warning); margin-right: 8px; }
+        .log-user { color: var(--primary); font-weight: bold; }
+        .log-ip { color: var(--accent); }
+        .log-meta { display: block; font-size: 10px; color: #555; margin-top: 5px; }
+
+        /* ---------------------------------------------------------
+           BOTTOM NAVIGATION
+           --------------------------------------------------------- */
+        .bottom-nav {
+            height: 75px;
+            background: rgba(2, 4, 10, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
             display: flex;
             justify-content: space-around;
             align-items: center;
-            padding-bottom: var(--safe-bottom);
-            z-index: 1000;
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
-        .nav-item {
+        .nav-tab {
             display: flex;
             flex-direction: column;
             align-items: center;
-            color: #6b7c93;
-            text-decoration: none;
+            gap: 5px;
+            color: #4b5c73;
             font-size: 11px;
             font-weight: 700;
             transition: 0.3s;
             cursor: pointer;
         }
 
-        .nav-item i { font-size: 20px; margin-bottom: 5px; }
-        .nav-item.active { color: var(--primary); }
-        .nav-item.active i { filter: drop-shadow(0 0 8px var(--primary)); }
+        .nav-tab i { font-size: 22px; }
+        .nav-tab.active { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
 
         /* ---------------------------------------------------------
-           CARDS & FORMS (MOBILE OPTIMIZED)
+           MODAL SYSTEM
            --------------------------------------------------------- */
-        .section-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 16px;
-            margin-bottom: 15px;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: none;
+            justify-content: center; align-items: flex-end;
         }
 
-        .mobile-card {
-            background: var(--panel-bg);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .m-input {
+        .modal-content {
             width: 100%;
-            background: #05080f;
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 12px 15px;
-            border-radius: 10px;
-            color: #fff;
-            margin-bottom: 12px;
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 16px;
+            background: var(--bg-deep);
+            border-radius: 30px 30px 0 0;
+            padding: 30px;
+            border-top: 2px solid var(--primary);
+            animation: slideUp 0.3s ease-out;
         }
 
-        .m-btn {
-            width: 100%;
-            padding: 14px;
-            border-radius: 10px;
-            border: none;
+        /* Notifications */
+        #toast {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 10000;
             background: var(--primary);
             color: #000;
+            padding: 12px 25px;
+            border-radius: 30px;
             font-weight: 800;
-            font-family: 'Orbitron', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* ---------------------------------------------------------
-           MASKED USER LIST
-           --------------------------------------------------------- */
-        .user-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255,255,255,0.02);
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            border-left: 4px solid var(--primary);
-        }
-
-        .user-info h4 { font-size: 16px; margin-bottom: 2px; }
-        .user-info p { font-size: 12px; color: #6b7c93; font-family: 'Share Tech Mono'; }
-
-        .mask-badge {
-            background: rgba(0, 229, 255, 0.1);
-            color: var(--primary);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 10px;
-            font-weight: bold;
-        }
-
-        .action-btns {
-            display: flex;
-            gap: 10px;
-        }
-
-        .icon-btn {
-            width: 35px; height: 35px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.05);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-            border: none;
-        }
-
-        .icon-btn.delete { color: var(--secondary); }
-
-        /* Toast Notifications */
-        #toast-box {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10001;
-            width: 90%;
-        }
-
-        .toast {
-            background: #1a1a1a;
-            color: #fff;
-            padding: 15px;
-            border-radius: 10px;
-            border-bottom: 3px solid var(--primary);
+            font-size: 13px;
+            display: none;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            margin-bottom: 10px;
-            animation: slideDown 0.4s ease forwards;
         }
-
-        @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
     </style>
 </head>
 <body>
 
-    <canvas id="bg-canvas"></canvas>
+    <canvas id="hero-canvas"></canvas>
 
-    <div id="auth-screen">
-        <div class="mi-logo-container">
-            <div class="mi-logo-circle">Mi</div>
-        </div>
-        
-        <div class="auth-card">
-            <h2 style="text-align:center; font-family:'Orbitron'; font-size:18px; margin-bottom:20px;">ADMIN LOGIN</h2>
-            <div class="auth-input-group">
-                <input type="password" id="master-key" placeholder="••••••••" maxlength="12">
-            </div>
-            <button class="login-btn" onclick="handleLogin()">Unlock Access</button>
-            <p id="auth-msg" style="color:var(--secondary); font-size:12px; text-align:center; margin-top:15px; display:none;">Invalid Key!</p>
+    <div id="auth-gate">
+        <div class="auth-box">
+            <div class="mi-brand-logo">Mi</div>
+            <h1 class="auth-title">MITV NETWORK</h1>
+            <p class="auth-subtitle">Muslim Islam Admin</p>
+            
+            <input type="password" id="master-key" class="pass-input" placeholder="••••••" maxlength="10">
+            <button class="unlock-btn" onclick="checkAuth()">DECRYPT ACCESS</button>
+            <p id="auth-err" style="color:var(--accent); margin-top:15px; font-size:12px; display:none;">ACCESS KEY REJECTED!</p>
         </div>
     </div>
 
     <div id="app-shell">
         
         <header class="app-header">
-            <div class="header-logo">MiTV <span>PRO</span></div>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <span style="font-size:12px; font-weight:bold; color:#6b7c93;">SERVER</span>
-                <div class="status-dot"></div>
+            <div class="header-brand">MITV <span>CONTROL</span></div>
+            <div class="sys-info">
+                <div class="status-pill"><div class="live-dot"></div> ENGINE</div>
             </div>
         </header>
 
-        <main class="app-content">
+        <main class="viewport">
             
-            <div id="view-users">
-                <div class="section-title"><i class="fas fa-user-plus"></i> GENERATE MASKED M3U</div>
+            <section id="view-pool" class="view-section" style="display:block;">
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-file-import"></i> Channel Importer</div>
+                    <div class="input-group">
+                        <label class="label">M3U URL or Raw Content</label>
+                        <textarea id="raw-m3u-input" class="mi-input" style="height:100px;" placeholder="Paste M3U content here..."></textarea>
+                    </div>
+                    <button class="mi-btn btn-primary" onclick="parseM3U()">
+                        <i class="fas fa-cogs"></i> PARSE & IMPORT POOL
+                    </button>
+                </div>
+
+                <div class="card-title" style="margin-left:5px;"><i class="fas fa-database"></i> Global Pool (<span id="pool-count">0</span>)</div>
+                <div id="pool-list" class="list-container">
+                    </div>
+            </section>
+
+            <section id="view-users" class="view-section">
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-user-shield"></i> Generate Client M3U</div>
+                    <div class="input-group">
+                        <label class="label">Client Name</label>
+                        <input type="text" id="usr-name" class="mi-input" placeholder="e.g. Maaz Iqbal">
+                    </div>
+                    <div class="input-group">
+                        <label class="label">System Slug (Unique ID)</label>
+                        <input type="text" id="usr-slug" class="mi-input" placeholder="e.g. maaz-786">
+                    </div>
+                    <button class="mi-btn btn-primary" onclick="generateUser()">
+                        <i class="fas fa-plus-circle"></i> CREATE MASKED LINK
+                    </button>
+                </div>
+
+                <div class="card-title" style="margin-left:5px;"><i class="fas fa-users"></i> Active Clients</div>
+                <div id="user-list" class="list-container">
+                    </div>
+            </section>
+
+            <section id="view-radar" class="view-section">
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-satellite-dish"></i> Traffic Radar</div>
+                    <div id="radar-log-container" class="radar-box">
+                        <div style="color:#333; text-align:center; margin-top:150px;">AWAITING UPLINK...</div>
+                    </div>
+                </div>
                 
-                <div class="mobile-card">
-                    <input type="text" id="user-name" class="m-input" placeholder="Client Name (e.g. Maaz)">
-                    <input type="text" id="user-slug" class="m-input" placeholder="Custom ID (e.g. maaz-001)">
-                    <button class="m-btn" onclick="generateMaskedUser()">
-                        <i class="fas fa-shield-alt"></i> GENERATE SECURE LINK
-                    </button>
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-info-circle"></i> Tracking Matrix</div>
+                    <p style="font-size:12px; color:#6b7c93; line-height:1.6;">
+                        This panel monitors hits on your Vercel <b>/api/m3u</b> endpoint. It decrypts tokens to identify users and captures hardware signatures.
+                    </p>
                 </div>
-
-                <div class="section-title"><i class="fas fa-users"></i> ACTIVE CLIENTS</div>
-                <div id="user-list-target">
-                    </div>
-            </div>
-
-            <div id="view-channels" style="display:none;">
-                <div class="section-title"><i class="fas fa-cloud-download-alt"></i> IMPORT POOL</div>
-                <div class="mobile-card">
-                    <textarea id="raw-m3u" class="m-input" style="height:100px;" placeholder="Paste M3U content or link here..."></textarea>
-                    <button class="m-btn" style="background:#0077ff; color:#fff;" onclick="parseM3U()">
-                        <i class="fas fa-sync"></i> SYNC WITH CLOUD
-                    </button>
-                </div>
-                <div id="channel-list-target"></div>
-            </div>
-
-            <div id="view-radar" style="display:none;">
-                <div class="section-title"><i class="fas fa-satellite-dish"></i> LIVE TRAFFIC</div>
-                <div id="radar-logs" style="font-family:'Share Tech Mono'; font-size:12px;">
-                    </div>
-            </div>
+            </section>
 
         </main>
 
         <nav class="bottom-nav">
-            <div class="nav-item active" onclick="switchView('users', this)">
-                <i class="fas fa-user-shield"></i>
-                <span>USERS</span>
-            </div>
-            <div class="nav-item" onclick="switchView('channels', this)">
-                <i class="fas fa-tv"></i>
+            <div class="nav-tab active" onclick="showView('pool', this)">
+                <i class="fas fa-server"></i>
                 <span>POOL</span>
             </div>
-            <div class="nav-item" onclick="switchView('radar', this)">
+            <div class="nav-tab" onclick="showView('users', this)">
+                <i class="fas fa-user-cog"></i>
+                <span>USERS</span>
+            </div>
+            <div class="nav-tab" onclick="showView('radar', this)">
                 <i class="fas fa-broadcast-tower"></i>
                 <span>RADAR</span>
             </div>
-            <div class="nav-item" onclick="location.reload()">
-                <i class="fas fa-power-off"></i>
+            <div class="nav-tab" onclick="location.reload()">
+                <i class="fas fa-sign-out-alt"></i>
                 <span>EXIT</span>
             </div>
         </nav>
     </div>
 
-    <div id="toast-box"></div>
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal-content">
+            <div class="card-title" id="modal-title">Edit Resource</div>
+            <input type="hidden" id="edit-id">
+            <input type="hidden" id="edit-type">
+            
+            <div class="input-group">
+                <label class="label">Display Name</label>
+                <input type="text" id="edit-name" class="mi-input">
+            </div>
+            <div class="input-group">
+                <label class="label">Stream URL / Logo URL</label>
+                <input type="text" id="edit-val" class="mi-input">
+            </div>
+            
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="mi-btn btn-outline" style="flex:1;" onclick="closeModal()">CANCEL</button>
+                <button class="mi-btn btn-primary" style="flex:1;" onclick="saveEdit()">SAVE CHANGES</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast">ACTION COMPLETED</div>
 
     <script>
-        /* =========================================================
-           MITV NETWORK - CORE LOGIC ENGINE (1000+ LINES CAPABLE)
-           =========================================================
-        */
+        // 1. CONFIGURATION
+        const MASTER_PASSWORD = "mitv123456";
+        const VERCEL_HOST = "https://mitv-tan.vercel.app";
 
-        // Firebase Setup
-        const config = {
+        const firebaseConfig = {
             apiKey: "AIzaSyBbnU8DkthpYQMHOLLyj6M0cc05qXfjMcw",
             databaseURL: "https://ramadan-2385b-default-rtdb.firebaseio.com",
             projectId: "ramadan-2385b",
         };
-        firebase.initializeApp(config);
-        const db = firebase.database();
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-        const MASTER_PASS = "mitv123456";
-        const VERCEL_URL = "https://mitv-tan.vercel.app"; // Apka masked backend
+        // Data Storage
+        let globalPool = {};
+        let usersList = {};
 
-        // UI View Switcher
-        function switchView(viewName, el) {
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            el.classList.add('active');
-
-            document.getElementById('view-users').style.display = 'none';
-            document.getElementById('view-channels').style.display = 'none';
-            document.getElementById('view-radar').style.display = 'none';
-
-            document.getElementById('view-' + viewName).style.display = 'block';
-        }
-
-        // Authentication
-        function handleLogin() {
-            const val = document.getElementById('master-key').value;
-            if(val === MASTER_PASS) {
-                document.getElementById('auth-screen').style.display = 'none';
+        // 2. AUTHENTICATION
+        function checkAuth() {
+            const key = document.getElementById('master-key').value;
+            if(key === MASTER_PASSWORD) {
+                document.getElementById('auth-gate').style.transform = 'translateY(-100%)';
                 document.getElementById('app-shell').style.display = 'flex';
-                showToast("Access Granted: Welcome Maaz", "success");
-                initApp();
+                initRadar();
+                syncData();
+                showNotification("ACCESS GRANTED - WELCOME MAAZ");
             } else {
-                document.getElementById('auth-msg').style.display = 'block';
-                setTimeout(() => document.getElementById('auth-msg').style.display = 'none', 2000);
+                document.getElementById('auth-err').style.display = 'block';
+                setTimeout(() => document.getElementById('auth-err').style.display = 'none', 2000);
             }
         }
 
-        // M3U MASKING LOGIC & USER GENERATION
-        function generateMaskedUser() {
-            const name = document.getElementById('user-name').value.trim();
-            const slug = document.getElementById('user-slug').value.trim().toLowerCase().replace(/\s+/g, '-');
+        // 3. M3U PARSING LOGIC (THE HEART)
+        async function parseM3U() {
+            const input = document.getElementById('raw-m3u-input').value.trim();
+            if(!input) return;
 
-            if(!name || !slug) return showToast("Please fill all fields", "error");
+            showNotification("PARSING CHANNELS...");
+            
+            let lines = input.split('\n');
+            let batch = {};
+            let currentName = "";
+            let currentLogo = "";
 
-            // Generate a Masking Token (Base64 + Random Salt)
-            const salt = Math.random().toString(36).substring(7);
-            const token = btoa(slug + "|" + salt);
+            for(let line of lines) {
+                line = line.trim();
+                if(line.startsWith('#EXTINF:')) {
+                    // Extract Name
+                    let nameMatch = line.split(',');
+                    currentName = nameMatch.length > 1 ? nameMatch[1].trim() : "Unnamed Channel";
+                    
+                    // Extract Logo
+                    let logoMatch = line.match(/tvg-logo="([^"]+)"/);
+                    currentLogo = logoMatch ? logoMatch[1] : "https://via.placeholder.com/50";
+                } else if(line.startsWith('http')) {
+                    const id = btoa(line).substring(0, 16).replace(/\//g, '_');
+                    batch[id] = {
+                        name: currentName || "Unknown",
+                        logo: currentLogo,
+                        url: line,
+                        type: "live"
+                    };
+                    currentName = ""; currentLogo = "";
+                }
+            }
 
-            // MASKED LINK STRUCTURE: 
-            // Instead of showing actual IPTV links, we show this:
-            const maskedLink = `${VERCEL_URL}/api/stream?key=${token}`;
+            // Sync to Firebase Global Pool
+            await database.ref('global_pool').update(batch);
+            showNotification("POOL UPDATED SUCCESSFULLY");
+            document.getElementById('raw-m3u-input').value = "";
+        }
+
+        // 4. USER GENERATION (MASKING LOGIC)
+        async function generateUser() {
+            const name = document.getElementById('usr-name').value.trim();
+            const slug = document.getElementById('usr-slug').value.trim().toLowerCase().replace(/\s+/g, '-');
+
+            if(!name || !slug) return;
+
+            // Masking Token Generation (Base64 + Salt)
+            const token = btoa(slug + "_mitv_" + Date.now());
+            const maskedUrl = `${VERCEL_HOST}/api/m3u?token=${token}`;
 
             const userData = {
                 name: name,
                 token: token,
-                masked_m3u: maskedLink,
+                slug: slug,
+                masked_url: maskedUrl,
                 status: "active",
-                created: Date.now()
+                created_at: Date.now()
             };
 
-            db.ref('m3u_users/' + slug).set(userData).then(() => {
-                showToast("User Generated & Masked!", "success");
-                document.getElementById('user-name').value = '';
-                document.getElementById('user-slug').value = '';
+            await database.ref('users/' + slug).set(userData);
+            showNotification("CLIENT M3U GENERATED");
+            document.getElementById('usr-name').value = "";
+            document.getElementById('usr-slug').value = "";
+        }
+
+        // 5. DATA SYNC & RENDERING
+        function syncData() {
+            // Sync Pool
+            database.ref('global_pool').on('value', snap => {
+                globalPool = snap.val() || {};
+                renderPool();
+            });
+
+            // Sync Users
+            database.ref('users').on('value', snap => {
+                usersList = snap.val() || {};
+                renderUsers();
             });
         }
 
-        // Init App & Realtime Listeners
-        function initApp() {
-            // Listen Users
-            db.ref('m3u_users').on('value', snap => {
-                const data = snap.val();
-                const container = document.getElementById('user-list-target');
-                container.innerHTML = '';
-                
-                if(data) {
-                    Object.keys(data).forEach(id => {
-                        const u = data[id];
-                        container.innerHTML += `
-                            <div class="user-item">
-                                <div class="user-info">
-                                    <h4>${u.name} <span class="mask-badge">MASKED</span></h4>
-                                    <p>${u.masked_m3u.substring(0, 35)}...</p>
-                                </div>
-                                <div class="action-btns">
-                                    <button class="icon-btn" onclick="copyLink('${u.masked_m3u}')"><i class="fas fa-copy"></i></button>
-                                    <button class="icon-btn delete" onclick="deleteUser('${id}')"><i class="fas fa-trash"></i></button>
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
-            });
+        function renderPool() {
+            const container = document.getElementById('pool-list');
+            document.getElementById('pool-count').innerText = Object.keys(globalPool).length;
+            container.innerHTML = "";
 
-            // Listen Radar
-            db.ref('m3u_activity_logs').limitToLast(10).on('value', snap => {
+            Object.keys(globalPool).forEach(id => {
+                const item = globalPool[id];
+                container.innerHTML += `
+                    <div class="item-card">
+                        <img src="${item.logo}" class="item-img" onerror="this.src='https://via.placeholder.com/50'">
+                        <div class="item-details">
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-sub">${item.url.substring(0, 40)}...</div>
+                        </div>
+                        <div class="item-actions">
+                            <button class="action-btn" onclick="openEdit('${id}', 'pool')"><i class="fas fa-edit"></i></button>
+                            <button class="action-btn" style="color:var(--accent);" onclick="deleteItem('${id}', 'global_pool')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderUsers() {
+            const container = document.getElementById('user-list');
+            container.innerHTML = "";
+
+            Object.keys(usersList).forEach(slug => {
+                const u = usersList[slug];
+                container.innerHTML += `
+                    <div class="item-card">
+                        <div style="width:50px; height:50px; background:var(--primary); border-radius:10px; display:flex; justify-content:center; align-items:center; color:#000;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="item-details">
+                            <div class="item-name">${u.name}</div>
+                            <div class="item-sub">ID: ${u.slug}</div>
+                        </div>
+                        <div class="item-actions">
+                            <button class="action-btn" onclick="copyLink('${u.masked_url}')"><i class="fas fa-copy"></i></button>
+                            <button class="action-btn" style="color:var(--accent);" onclick="deleteItem('${slug}', 'users')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // 6. RADAR TRACKING LOGIC
+        function initRadar() {
+            const radarContainer = document.getElementById('radar-log-container');
+            // Hum Vercel se logs Firebase mein likhte hain, yahan sirf listen karte hain
+            database.ref('activity_logs').limitToLast(50).on('value', snap => {
                 const logs = snap.val();
-                const container = document.getElementById('radar-logs');
-                container.innerHTML = '';
-                if(logs) {
-                    Object.values(logs).forEach(l => {
-                        container.innerHTML = `<div>[${new Date(l.timestamp).toLocaleTimeString()}] ${l.ip} -> ${l.target}</div>` + container.innerHTML;
-                    });
-                }
+                if(!logs) return;
+                
+                radarContainer.innerHTML = "";
+                Object.values(logs).reverse().forEach(log => {
+                    const time = new Date(log.timestamp).toLocaleTimeString();
+                    radarContainer.innerHTML += `
+                        <div class="log-entry">
+                            <span class="log-time">[${time}]</span>
+                            <span class="log-user">${log.user_name || 'GUEST'}</span> -> 
+                            <span style="color:#fff">${log.channel_name || 'PLAYLIST_REQ'}</span>
+                            <span class="log-meta">
+                                IP: <span class="log-ip">${log.ip}</span> | 
+                                LOC: ${log.city || 'N/A'}, ${log.country || 'N/A'} |
+                                DEV: ${log.device || 'Unknown'} | APP: ${log.software || 'Generic'}
+                            </span>
+                        </div>
+                    `;
+                });
             });
         }
 
-        // Utilities
+        // 7. UTILITIES & UI
+        function showView(viewId, el) {
+            document.querySelectorAll('.view-section').forEach(s => s.style.display = 'none');
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            
+            document.getElementById('view-' + viewId).style.display = 'block';
+            el.classList.add('active');
+        }
+
+        function openEdit(id, type) {
+            const item = type === 'pool' ? globalPool[id] : usersList[id];
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-type').value = type;
+            document.getElementById('edit-name').value = item.name;
+            document.getElementById('edit-val').value = type === 'pool' ? item.url : item.masked_url;
+            
+            document.getElementById('edit-modal').style.display = 'flex';
+        }
+
+        function closeModal() { document.getElementById('edit-modal').style.display = 'none'; }
+
+        async function saveEdit() {
+            const id = document.getElementById('edit-id').value;
+            const type = document.getElementById('edit-type').value;
+            const newName = document.getElementById('edit-name').value;
+            const newVal = document.getElementById('edit-val').value;
+
+            if(type === 'pool') {
+                await database.ref('global_pool/' + id).update({ name: newName, url: newVal });
+            }
+            showNotification("CHANGES SAVED");
+            closeModal();
+        }
+
+        function deleteItem(id, path) {
+            if(confirm("DANGER: DELETE THIS RESOURCE?")) {
+                database.ref(path + '/' + id).remove();
+                showNotification("RESOURCE REMOVED");
+            }
+        }
+
         function copyLink(link) {
             navigator.clipboard.writeText(link);
-            showToast("Masked link copied!", "success");
+            showNotification("LINK COPIED TO CLIPBOARD");
         }
 
-        function deleteUser(id) {
-            if(confirm("Delete this user?")) db.ref('m3u_users/' + id).remove();
-        }
-
-        function showToast(msg, type) {
-            const box = document.getElementById('toast-box');
-            const t = document.createElement('div');
-            t.className = 'toast';
+        function showNotification(msg) {
+            const t = document.getElementById('toast');
             t.innerText = msg;
-            box.appendChild(t);
-            setTimeout(() => t.remove(), 3000);
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
         }
 
-        // Particle Background Logic
-        const canvas = document.getElementById('bg-canvas');
+        // 8. 3D BACKGROUND ENGINE
+        const canvas = document.getElementById('hero-canvas');
         const ctx = canvas.getContext('2d');
-        let particles = [];
+        let dots = [];
 
-        function resize() {
+        function init3D() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-        }
-
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2;
-                this.speedX = Math.random() * 0.5 - 0.25;
-                this.speedY = Math.random() * 0.5 - 0.25;
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if(this.x > canvas.width) this.x = 0;
-                if(this.x < 0) this.x = canvas.width;
-                if(this.y > canvas.height) this.y = 0;
-                if(this.y < 0) this.y = canvas.height;
-            }
-            draw() {
-                ctx.fillStyle = 'rgba(0, 229, 255, 0.3)';
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
+            for(let i=0; i<80; i++) {
+                dots.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    size: Math.random() * 2
+                });
             }
         }
 
-        function initParticles() {
-            for(let i=0; i<50; i++) particles.push(new Particle());
-        }
-
-        function animate() {
+        function draw3D() {
             ctx.clearRect(0,0, canvas.width, canvas.height);
-            particles.forEach(p => { p.update(); p.draw(); });
-            requestAnimationFrame(animate);
+            ctx.fillStyle = "rgba(0, 229, 255, 0.2)";
+            dots.forEach(d => {
+                d.x += d.vx; d.y += d.vy;
+                if(d.x < 0 || d.x > canvas.width) d.vx *= -1;
+                if(d.y < 0 || d.y > canvas.height) d.vy *= -1;
+                ctx.beginPath();
+                ctx.arc(d.x, d.y, d.size, 0, Math.PI*2);
+                ctx.fill();
+            });
+            requestAnimationFrame(draw3D);
         }
 
-        window.addEventListener('resize', resize);
-        resize();
-        initParticles();
-        animate();
+        window.addEventListener('resize', init3D);
+        init3D(); draw3D();
 
     </script>
 </body>
