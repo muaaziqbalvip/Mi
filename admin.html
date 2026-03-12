@@ -2,308 +2,58 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MiTV Admin | Master Console</title>
-
-    <link rel="icon" href="https://i.ibb.co/C5WBZ6Yc/file-00000000305071fa945b58b012ac072b.png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
+    <title>MiTV Admin - Control Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
-        /* ========================================================================
-           ADMIN UI DESIGN SYSTEM (MODERN DARK ENTERPRISE)
-           ========================================================================
-        */
-        :root {
-            --bg-body: #05070a;
-            --bg-side: #0b0e14;
-            --bg-card: #12171f;
-            --primary: #58a6ff;
-            --accent: #d29922;
-            --success: #238636;
-            --danger: #f85149;
-            --text-main: #c9d1d9;
-            --text-muted: #8b949e;
-            --border: #30363d;
-            --font-main: 'Space Grotesk', sans-serif;
-            --font-code: 'JetBrains Mono', monospace;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            font-family: var(--font-main);
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* ---------------------------------------------------------------------
-           1. SECURITY GATE (LOGIN SCREEN)
-           --------------------------------------------------------------------- */
-        #security-gate {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 99999; display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-        }
-
-        .gate-card {
-            background: var(--bg-card); width: 90%; max-width: 400px;
-            padding: 40px; border-radius: 24px; border: 1px solid var(--border);
-            text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-        }
-
-        .gate-card h2 { margin-bottom: 25px; letter-spacing: 2px; color: var(--primary); }
-
-        .sys-input {
-            width: 100%; padding: 15px; background: #000; border: 1px solid var(--border);
-            border-radius: 12px; color: #fff; margin-bottom: 20px; text-align: center;
-            font-size: 16px; font-family: var(--font-code);
-        }
-
-        .captcha-area {
-            display: flex; justify-content: space-between; align-items: center;
-            background: #111; padding: 15px; border-radius: 12px; margin-bottom: 25px;
-        }
-        #captcha-display { 
-            font-family: var(--font-code); font-size: 22px; font-weight: 800;
-            color: var(--accent); letter-spacing: 5px; font-style: italic;
-            text-decoration: line-through;
-        }
-
-        /* ---------------------------------------------------------------------
-           2. SIDEBAR NAVIGATION
-           --------------------------------------------------------------------- */
-        #sidebar {
-            width: 280px; background: var(--bg-side); border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; transition: 0.3s;
-        }
-
-        .side-header { padding: 40px 20px; text-align: center; }
-        .side-header img { width: 60px; margin-bottom: 15px; filter: drop-shadow(0 0 10px var(--primary)); }
-        .side-header h3 { font-size: 14px; letter-spacing: 4px; color: #fff; }
-
-        .nav-link {
-            padding: 18px 30px; display: flex; align-items: center; gap: 15px;
-            color: var(--text-muted); text-decoration: none; cursor: pointer;
-            border-left: 4px solid transparent; transition: 0.2s;
-        }
-        .nav-link:hover { background: rgba(88, 166, 255, 0.05); color: #fff; }
-        .nav-link.active { 
-            background: rgba(88, 166, 255, 0.1); color: var(--primary); 
-            border-left-color: var(--primary); font-weight: 700;
-        }
-
-        /* ---------------------------------------------------------------------
-           3. MAIN CONTENT AREA
-           --------------------------------------------------------------------- */
-        #main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-
-        .top-nav {
-            height: 70px; background: var(--bg-side); border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: space-between; padding: 0 40px;
-        }
-
-        .view-port { flex: 1; overflow-y: auto; padding: 40px; }
-        .view-section { display: none; animation: fadeIn 0.4s ease; }
-        .view-section.active { display: block; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Dashboard Stats */
-        .grid-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px; }
-        .stat-box { 
-            background: var(--bg-card); padding: 25px; border-radius: 18px; 
-            border: 1px solid var(--border); position: relative; overflow: hidden;
-        }
-        .stat-box::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--primary); opacity: 0.3; }
-        .stat-box h4 { font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
-        .stat-box h2 { font-size: 32px; font-weight: 700; color: #fff; }
-
-        /* Tables & Forms */
-        .content-card { background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border); padding: 30px; margin-bottom: 30px; }
-        .content-card h3 { margin-bottom: 25px; font-size: 18px; display: flex; align-items: center; gap: 10px; }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { text-align: left; padding: 15px; color: var(--text-muted); font-size: 12px; border-bottom: 1px solid var(--border); }
-        td { padding: 15px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.02); }
-
-        .badge-pro { background: rgba(210, 153, 34, 0.15); color: var(--accent); padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; }
-        .badge-free { background: rgba(88, 166, 255, 0.15); color: var(--primary); padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; }
-
-        /* UI Components */
-        .btn { 
-            padding: 12px 24px; border-radius: 10px; border: none; font-weight: 700; 
-            cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px;
-        }
-        .btn-primary { background: var(--primary); color: #000; }
-        .btn-success { background: var(--success); color: #fff; }
-        .btn-danger { background: var(--danger); color: #fff; }
-        .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
-
-        .form-input {
-            width: 100%; padding: 14px; background: #000; border: 1px solid var(--border);
-            border-radius: 10px; color: #fff; margin-bottom: 15px;
-        }
-
-        #activity-log-stream {
-            background: #000; padding: 20px; border-radius: 15px; 
-            height: 350px; overflow-y: auto; font-family: var(--font-code); font-size: 13px;
-        }
-        .log-entry { padding: 8px 0; border-bottom: 1px solid #111; color: #777; }
-        .log-entry b { color: var(--primary); }
-        .log-entry i { color: var(--accent); }
-
+        .glow { box-shadow: 0 0 20px rgba(229, 9, 20, 0.4); }
+        body { background: radial-gradient(circle at top, #1a1a1a, #000); min-height: 100vh; color: white; }
     </style>
 </head>
-<body>
+<body class="p-8">
+    <div class="max-w-4xl mx-auto">
+        <header class="flex justify-between items-center mb-12 border-b border-zinc-800 pb-6">
+            <h1 class="text-4xl font-black text-red-600 tracking-tighter">MiTV ADMIN <span class="text-white text-sm font-light uppercase tracking-widest ml-2">v2.0</span></h1>
+            <button onclick="logout()" class="bg-zinc-800 px-4 py-2 rounded text-xs hover:bg-zinc-700 transition">LOGOUT</button>
+        </header>
 
-    <div id="security-gate">
-        <div class="gate-card">
-            <img src="https://i.ibb.co/C5WBZ6Yc/file-00000000305071fa945b58b012ac072b.png" width="80" style="margin-bottom: 20px;">
-            <h2>Master Login</h2>
-            <input type="password" id="sys-key" class="sys-input" placeholder="Encryption Key">
-            
-            <div class="captcha-area">
-                <span id="captcha-display">LOADING</span>
-                <button onclick="generateCaptcha()" class="btn-ghost" style="padding: 5px 10px;"><i class="fas fa-sync"></i></button>
-            </div>
-            <input type="text" id="captcha-verify" class="sys-input" placeholder="Enter Captcha">
-
-            <button class="btn btn-primary" style="width: 100%;" onclick="verifyGate()">INITIALIZE SYSTEM</button>
-        </div>
-    </div>
-
-    <div id="sidebar">
-        <div class="side-header">
-            <img src="https://i.ibb.co/C5WBZ6Yc/file-00000000305071fa945b58b012ac072b.png">
-            <h3>MITV MASTER</h3>
-        </div>
-        <div class="nav-link active" onclick="switchView('dashboard', this)"><i class="fas fa-chart-pie"></i> Dashboard</div>
-        <div class="nav-link" onclick="switchView('users', this)"><i class="fas fa-users-cog"></i> User Management</div>
-        <div class="nav-link" onclick="switchView('content', this)"><i class="fas fa-film"></i> Content Nodes</div>
-        <div class="nav-link" onclick="switchView('m3u', this)"><i class="fas fa-file-import"></i> M3U Smart Import</div>
-        <div class="nav-link" onclick="switchView('logs', this)"><i class="fas fa-satellite-dish"></i> Live Watch Logs</div>
-    </div>
-
-    <div id="main-wrapper">
-        <div class="top-nav">
-            <h4 id="view-title">Network Overview</h4>
-            <div style="display: flex; gap: 15px;">
-                <span style="font-size: 11px; color: var(--success); background: rgba(35,134,54,0.1); padding: 5px 12px; border-radius: 20px;"><i class="fas fa-check-circle"></i> CLOUD SYNC ACTIVE</span>
-                <button class="btn btn-ghost" style="padding: 5px 12px; font-size: 11px;" onclick="location.reload()">REBOOT</button>
-            </div>
+        <div id="login-box" class="hidden max-w-md mx-auto bg-zinc-900 p-8 rounded-xl border border-zinc-800 glow">
+            <h2 class="text-xl font-bold mb-6 text-center">Authentication Required</h2>
+            <input id="email" type="email" placeholder="Admin Email" class="w-full p-3 mb-4 bg-black border border-zinc-700 rounded focus:border-red-600 outline-none">
+            <input id="pass" type="password" placeholder="Admin Password" class="w-full p-3 mb-6 bg-black border border-zinc-700 rounded focus:border-red-600 outline-none">
+            <button onclick="login()" class="w-full bg-red-600 py-3 rounded font-bold hover:bg-red-700 transition">ACCESS PANEL</button>
         </div>
 
-        <div class="view-port">
-            
-            <div id="view-dashboard" class="view-section active">
-                <div class="grid-stats">
-                    <div class="stat-box"><h4>Total Users</h4><h2 id="stat-total-users">0</h2></div>
-                    <div class="stat-box"><h4>Pro Members</h4><h2 id="stat-pro-users">0</h2></div>
-                    <div class="stat-box"><h4>Content Count</h4><h2 id="stat-content">0</h2></div>
-                    <div class="stat-box"><h4>Server Latency</h4><h2>14ms</h2></div>
+        <div id="admin-panel" class="hidden space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-zinc-900 p-6 rounded-xl border border-zinc-800">
+                    <h3 class="text-lg font-bold mb-4 text-red-500">Stream Source Management</h3>
+                    <label class="block text-xs text-gray-500 mb-2 uppercase">Original M3U URL</label>
+                    <input id="m3u-input" type="text" class="w-full p-3 bg-black border border-zinc-700 rounded mb-4 text-sm outline-none focus:border-red-600" placeholder="Paste .m3u link here">
+                    <button onclick="updateLink()" class="w-full bg-white text-black py-2 rounded font-bold hover:bg-gray-200 transition">UPDATE GLOBAL SOURCE</button>
                 </div>
 
-                <div class="content-card">
-                    <h3><i class="fas fa-bullhorn" style="color: var(--accent);"></i> Global System Broadcast</h3>
-                    <textarea id="global-msg" class="form-input" rows="3" placeholder="Write a message to show all users..."></textarea>
-                    <button class="btn btn-primary">BROADCAST TO ALL DEVICES</button>
-                </div>
-            </div>
-
-            <div id="view-users" class="view-section">
-                <div class="content-card">
-                    <h3><i class="fas fa-user-shield"></i> Registered User Database</h3>
-                    <table id="user-table">
-                        <thead>
-                            <tr>
-                                <th>Email Address</th>
-                                <th>Plan Tier</th>
-                                <th>Registered On</th>
-                                <th>Management</th>
-                            </tr>
-                        </thead>
-                        <tbody id="user-list"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="view-content" class="view-section">
-                <div class="content-card">
-                    <h3><i class="fas fa-plus-circle"></i> Deploy New Node</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <input type="text" id="ch-name" class="form-input" placeholder="Channel / Movie Name">
-                        <input type="text" id="ch-logo" class="form-input" placeholder="Logo URL (Icon)">
-                        <input type="text" id="ch-stream" class="form-input" placeholder="Direct Stream Link (M3U8 / MPD)">
-                        <select id="ch-cat" class="form-input">
-                            <option value="Live TV">Live TV</option>
-                            <option value="Movies">Movies</option>
-                            <option value="Series">Series</option>
-                            <option value="Islamic">Islamic</option>
-                        </select>
-                    </div>
-                    <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-                        <input type="checkbox" id="ch-ispro" style="width: 20px; height: 20px;">
-                        <label>Restrict to PRO PREMIUM only</label>
-                    </div>
-                    <button class="btn btn-primary" onclick="addChannel()">DEPLOY TO CLOUD</button>
-                </div>
-
-                <div class="content-card">
-                    <h3><i class="fas fa-database"></i> Live Content Nodes</h3>
-                    <table id="content-table">
-                        <thead>
-                            <tr>
-                                <th>Visual</th>
-                                <th>Node Name</th>
-                                <th>Category</th>
-                                <th>Tier</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="content-list"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="view-m3u" class="view-section">
-                <div class="content-card">
-                    <h3><i class="fas fa-cloud-download-alt"></i> Bulk M3U Smart Importer</h3>
-                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Paste a direct M3U URL. System will auto-parse logos, names, and groups into the database.</p>
-                    <input type="url" id="m3u-url" class="form-input" placeholder="https://example.com/playlist.m3u">
-                    <button class="btn btn-success" onclick="startM3UImport()">EXECUTE SMART PARSE</button>
-                    
-                    <div id="import-progress" style="margin-top: 30px; display: none;">
-                        <div style="height: 6px; background: #222; border-radius: 10px; overflow: hidden; margin-bottom: 10px;">
-                            <div id="progress-bar" style="width: 0%; height: 100%; background: var(--primary); transition: 0.3s;"></div>
+                <div class="bg-zinc-900 p-6 rounded-xl border border-zinc-800">
+                    <h3 class="text-lg font-bold mb-4 text-red-500">Real-time Stats</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between border-b border-zinc-800 pb-2">
+                            <span class="text-gray-400">Database Status:</span>
+                            <span class="text-green-500 font-mono">ONLINE</span>
                         </div>
-                        <p id="import-status" style="font-size: 12px; color: var(--primary); font-family: var(--font-code);"></p>
+                        <div class="flex justify-between border-b border-zinc-800 pb-2">
+                            <span class="text-gray-400">Masking Proxy:</span>
+                            <span class="text-blue-400 font-mono italic">ACTIVE</span>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <div id="view-logs" class="view-section">
-                <div class="content-card">
-                    <h3><i class="fas fa-history"></i> Real-time User Watch Activity</h3>
-                    <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Monitoring what users are watching across the MiTV Network.</p>
-                    <div id="activity-log-stream">
-                        </div>
-                </div>
-            </div>
-
         </div>
     </div>
 
     <script>
-        // --- 1. CONFIGURATION ---
-        const fbConfig = {
+        const firebaseConfig = {
             apiKey: "AIzaSyBbnU8DkthpYQMHOLLyj6M0cc05qXfjMcw",
             authDomain: "ramadan-2385b.firebaseapp.com",
             databaseURL: "https://ramadan-2385b-default-rtdb.firebaseio.com",
@@ -312,225 +62,38 @@
             messagingSenderId: "882828936310",
             appId: "1:882828936310:web:7f97b921031fe130fe4b57"
         };
-        firebase.initializeApp(fbConfig);
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
         const db = firebase.database();
 
-        let captchaValue = "";
-
-        // --- 2. SECURITY LAYER ---
-        function generateCaptcha() {
-            const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-            let code = "";
-            for (let i = 0; i < 5; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
-            captchaValue = code;
-            document.getElementById('captcha-display').innerText = code;
+        function login() {
+            auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value)
+                .catch(e => alert(e.message));
         }
 
-        function verifyGate() {
-            const key = document.getElementById('sys-key').value;
-            const userCaptcha = document.getElementById('captcha-verify').value;
+        function logout() { auth.signOut(); }
 
-            // Simple Security: "mi123456" is the password for now
-            if(key === "mi123456" && userCaptcha.toUpperCase() === captchaValue) {
-                document.getElementById('security-gate').style.display = 'none';
-                initAdminSystem();
+        auth.onAuthStateChanged(user => {
+            if(user) {
+                document.getElementById('login-box').classList.add('hidden');
+                document.getElementById('admin-panel').classList.remove('hidden');
+                // Load current link
+                db.ref('settings/m3u_source').once('value', s => {
+                    if(s.exists()) document.getElementById('m3u-input').value = s.val();
+                });
             } else {
-                alert("ACCESS DENIED: Credentials or Captcha Invalid!");
-                generateCaptcha();
+                document.getElementById('login-box').classList.remove('hidden');
+                document.getElementById('admin-panel').classList.add('hidden');
             }
+        });
+
+        function updateLink() {
+            const newLink = document.getElementById('m3u-input').value;
+            db.ref('settings').update({ m3u_source: newLink })
+                .then(() => alert("Source Updated! All users will see the new content."))
+                .catch(e => alert(e.message));
         }
-        generateCaptcha();
-
-        // --- 3. SYSTEM INITIALIZATION ---
-        function initAdminSystem() {
-            syncStats();
-            loadUsers();
-            loadChannels();
-            listenToActivity();
-        }
-
-        function switchView(id, btn) {
-            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
-            document.getElementById('view-' + id).classList.add('active');
-            btn.classList.add('active');
-            document.getElementById('view-title').innerText = btn.innerText;
-        }
-
-        // --- 4. DATA SYNC (CRUD) ---
-        function syncStats() {
-            db.ref('users').on('value', snap => {
-                document.getElementById('stat-total-users').innerText = snap.numChildren();
-                let proCount = 0;
-                snap.forEach(u => { if(u.val().plan === 'Pro Premium') proCount++; });
-                document.getElementById('stat-pro-users').innerText = proCount;
-            });
-            db.ref('channels').on('value', snap => {
-                document.getElementById('stat-content').innerText = snap.numChildren();
-            });
-        }
-
-        function loadUsers() {
-            db.ref('users').on('value', snap => {
-                const list = document.getElementById('user-list');
-                list.innerHTML = '';
-                snap.forEach(child => {
-                    const u = child.val();
-                    const key = child.key;
-                    const date = new Date(u.joined).toLocaleDateString();
-                    const badge = u.plan === 'Pro Premium' ? 'badge-pro' : 'badge-free';
-                    
-                    list.innerHTML += `
-                        <tr>
-                            <td><b>${u.email}</b><br><small style="color:#444">${key}</small></td>
-                            <td><span class="${badge}">${u.plan || 'Free'}</span></td>
-                            <td>${date}</td>
-                            <td>
-                                <button class="btn btn-ghost" onclick="updatePlan('${key}', 'Pro Premium')" style="padding:5px 10px; font-size:10px;">PRO</button>
-                                <button class="btn btn-ghost" onclick="updatePlan('${key}', 'Free')" style="padding:5px 10px; font-size:10px;">FREE</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            });
-        }
-
-        function updatePlan(uid, plan) {
-            db.ref('users/' + uid).update({ plan: plan });
-        }
-
-        function addChannel() {
-            const name = document.getElementById('ch-name').value;
-            const logo = document.getElementById('ch-logo').value;
-            const link = document.getElementById('ch-stream').value;
-            const cat = document.getElementById('ch-cat').value;
-            const pro = document.getElementById('ch-ispro').checked;
-
-            if(!name || !link) return alert("Fill required fields!");
-
-            db.ref('channels').push({
-                name: name, logo: logo, streamLink: link, category: cat, isPro: pro
-            }).then(() => {
-                alert("Node Deployed Successfully!");
-                document.querySelectorAll('.form-input').forEach(i => i.value = '');
-            });
-        }
-
-        function loadChannels() {
-            db.ref('channels').on('value', snap => {
-                const list = document.getElementById('content-list');
-                list.innerHTML = '';
-                snap.forEach(child => {
-                    const c = child.val();
-                    const key = child.key;
-                    const tier = c.isPro ? '<span class="badge-pro">PRO</span>' : '<span class="badge-free">FREE</span>';
-                    
-                    list.innerHTML += `
-                        <tr>
-                            <td><img src="${c.logo}" width="30" height="30" style="border-radius:5px; object-fit:cover;"></td>
-                            <td>${c.name}</td>
-                            <td>${c.category}</td>
-                            <td>${tier}</td>
-                            <td>
-                                <button class="btn btn-danger" onclick="deleteNode('${key}')" style="padding:5px 10px; font-size:10px;"><i class="fas fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            });
-        }
-
-        function deleteNode(key) {
-            if(confirm("Permanently remove this channel/movie?")) db.ref('channels/' + key).remove();
-        }
-
-        // --- 5. SMART M3U PARSER ---
-        async function startM3UImport() {
-            const url = document.getElementById('m3u-url').value;
-            if(!url) return alert("Enter M3U URL!");
-
-            const progress = document.getElementById('import-progress');
-            const bar = document.getElementById('progress-bar');
-            const status = document.getElementById('import-status');
-
-            progress.style.display = 'block';
-            status.innerText = "Connecting to remote stream server...";
-
-            try {
-                const response = await fetch(url);
-                const data = await response.text();
-                const lines = data.split('\n');
-                
-                let channels = [];
-                let current = {};
-
-                status.innerText = "Parsing M3U headers...";
-
-                for(let line of lines) {
-                    line = line.trim();
-                    if(line.startsWith("#EXTINF:")) {
-                        // Extract Name
-                        const nameMatch = line.split(',')[1];
-                        current.name = nameMatch ? nameMatch.trim() : "Unknown Channel";
-                        
-                        // Extract Logo
-                        const logoMatch = line.match(/tvg-logo="(.*?)"/);
-                        current.logo = logoMatch ? logoMatch[1] : "";
-
-                        // Extract Group/Category
-                        const groupMatch = line.match(/group-title="(.*?)"/);
-                        current.category = groupMatch ? groupMatch[1] : "Live TV";
-                        current.isPro = false;
-                    } else if (line.startsWith("http")) {
-                        current.streamLink = line;
-                        channels.push({...current});
-                        current = {};
-                    }
-                }
-
-                status.innerText = `Found ${channels.length} channels. Uploading to Firebase...`;
-                
-                // Batch Upload
-                let count = 0;
-                for(let ch of channels) {
-                    await db.ref('channels').push(ch);
-                    count++;
-                    let perc = Math.floor((count / channels.length) * 100);
-                    bar.style.width = perc + "%";
-                }
-
-                status.innerText = "IMPORT COMPLETE! All nodes synced.";
-                setTimeout(() => progress.style.display = 'none', 3000);
-
-            } catch(err) {
-                status.innerText = "ERROR: " + err.message;
-                status.style.color = "red";
-            }
-        }
-
-        // --- 6. LIVE ACTIVITY MONITOR ---
-        function listenToActivity() {
-            const stream = document.getElementById('activity-log-stream');
-            
-            // Listen to 'activity_logs' which is written by index.html
-            db.ref('activity_logs').limitToLast(20).on('child_added', snap => {
-                const userLogs = snap.val();
-                const uid = snap.key;
-
-                // Inside each user ID there are multiple log entries
-                Object.values(userLogs).forEach(log => {
-                    const time = new Date(log.time).toLocaleTimeString();
-                    const div = document.createElement('div');
-                    div.className = 'log-entry';
-                    div.innerHTML = `[${time}] <b>User (${uid.substring(0,6)})</b> is watching <i>${log.channel}</i>`;
-                    stream.prepend(div);
-                });
-            });
-        }
-
-        // System Protection
-        document.onkeydown = e => { if(e.keyCode == 123) return false; };
-        document.addEventListener('contextmenu', e => e.preventDefault());
     </script>
 </body>
-</html>
+            </html>
+                        
