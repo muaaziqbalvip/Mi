@@ -1,0 +1,37 @@
+{
+  "name": "MiTV Master Pro Console",
+  "short_name": "MiTV Master",
+  "description": "Advanced Admin Control Center for MiTV Network",
+  "start_url": "/admin.html",
+  "display": "standalone",
+  "background_color": "#05070a",
+  "theme_color": "#00f2ff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://i.ibb.co/SD424ppD/mitv-v5.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.ibb.co/SD424ppD/mitv-v5.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Manage Users",
+      "url": "/admin.html#sect-users",
+      "icons": [{ "src": "https://i.ibb.co/SD424ppD/mitv-v5.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "M3U Engine",
+      "url": "/admin.html#sect-engine",
+      "icons": [{ "src": "https://i.ibb.co/SD424ppD/mitv-v5.png", "sizes": "192x192" }]
+    }
+  ]
+}
