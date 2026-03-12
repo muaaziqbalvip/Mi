@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/get/m3u/:user",
+      "destination": "/api/m3u?user=:user"
+    }
+  ]
+}
