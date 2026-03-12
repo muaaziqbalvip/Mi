@@ -2,248 +2,574 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MiTV Ultimate M3U Generator | MUSLIM ISLAM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MiTV Control Panel | MUSLIM ISLAM</title>
+    
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
         /* =========================================================
-           MITV NETWORK - ADVANCED 3D STYLESHEET
-           OWNER: MUAAZ IQBAL
-           ========================================================= */
+           MITV NETWORK MOBILE APP CSS (PREMIUM DARK MODE)
+           =========================================================
+        */
         :root {
             --primary: #00e5ff;
             --secondary: #ff0055;
-            --bg-dark: #030508;
-            --panel-bg: rgba(10, 15, 25, 0.7);
-            --border-glow: 0 0 10px rgba(0, 229, 255, 0.5);
-            --text-main: #e0f7fa;
-            --text-muted: #8492a6;
-            --success: #00ff88;
-            --danger: #ff3366;
-            --warning: #ffcc00;
+            --bg-dark: #05080f;
+            --panel-bg: #0d121d;
+            --text-glow: 0 0 10px rgba(0, 229, 255, 0.5);
+            --card-radius: 15px;
+            --safe-bottom: env(safe-area-inset-bottom);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
         body {
             background-color: var(--bg-dark);
-            color: var(--text-main);
+            color: #fff;
             font-family: 'Rajdhani', sans-serif;
-            overflow: hidden; /* Prevent body scroll, use custom scroll areas */
+            overflow-x: hidden;
             height: 100vh;
             width: 100vw;
         }
 
-        /* LIVE 3D PARTICLE BACKGROUND */
-        #canvas-bg {
+        /* Particles Background */
+        #bg-canvas {
             position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
+            top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
-            background: radial-gradient(circle at center, #0a1128 0%, #010308 100%);
+            background: radial-gradient(circle at top, #0a192f 0%, #05080f 100%);
         }
 
-        /* SCROLLBAR CUSTOMIZATION */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.5); }
-        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #fff; }
-
-        /* LOGIN GATE (3D FLIP EFFECT) */
-        #login-gate {
-            position: fixed; inset: 0;
-            display: flex; justify-content: center; align-items: center;
+        /* ---------------------------------------------------------
+           AUTHENTICATION (MOBILE DESIGN)
+           --------------------------------------------------------- */
+        #auth-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-dark);
             z-index: 10000;
-            backdrop-filter: blur(20px);
-            background: rgba(0,0,0,0.8);
-            perspective: 1000px;
-            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-        .login-card {
-            background: var(--panel-bg);
-            border: 1px solid rgba(0, 229, 255, 0.3);
-            padding: 50px;
-            border-radius: 20px;
-            box-shadow: 0 0 30px rgba(0,229,255,0.2), inset 0 0 20px rgba(0,229,255,0.1);
-            text-align: center;
-            transform-style: preserve-3d;
-            animation: float 4s ease-in-out infinite;
-            backdrop-filter: blur(10px);
-            width: 400px;
-        }
-        @keyframes float {
-            0% { transform: translateY(0px) rotateX(2deg); }
-            50% { transform: translateY(-15px) rotateX(-2deg); }
-            100% { transform: translateY(0px) rotateX(2deg); }
-        }
-        .login-card h1 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 32px;
-            color: var(--primary);
-            text-shadow: 0 0 10px var(--primary);
-            margin-bottom: 5px;
-            letter-spacing: 2px;
-        }
-        .login-card p { color: var(--text-muted); margin-bottom: 30px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* CORE UI LAYOUT */
-        #app-container {
-            display: none;
-            height: 100vh;
-            width: 100vw;
             display: flex;
             flex-direction: column;
-            opacity: 0;
-            transition: opacity 1s ease-in;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
         }
 
-        /* TOP NAVIGATION */
-        .top-nav {
-            height: 70px;
-            background: rgba(5, 10, 15, 0.85);
-            border-bottom: 1px solid rgba(0, 229, 255, 0.2);
+        .mi-logo-container {
+            margin-bottom: 40px;
+            text-align: center;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .mi-logo-circle {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--primary), #0077ff);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 38px;
+            font-weight: 900;
+            color: #000;
+            box-shadow: 0 0 40px var(--primary);
+            position: relative;
+        }
+
+        .mi-logo-circle::after {
+            content: 'NETWORK';
+            position: absolute;
+            bottom: -25px;
+            font-size: 12px;
+            letter-spacing: 5px;
+            color: var(--primary);
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 350px;
+            background: var(--panel-bg);
+            padding: 30px;
+            border-radius: var(--card-radius);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .auth-input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .auth-input-group input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: #fff;
+            text-align: center;
+            font-size: 18px;
+            letter-spacing: 4px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .auth-input-group input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+        }
+
+        /* ---------------------------------------------------------
+           MAIN APP LAYOUT (MOBILE)
+           --------------------------------------------------------- */
+        #app-shell {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Fixed Top Header */
+        .app-header {
+            height: 65px;
+            background: rgba(13, 18, 29, 0.95);
             backdrop-filter: blur(10px);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 30px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            padding: 0 20px;
+            border-bottom: 1px solid rgba(0, 229, 255, 0.1);
+            position: sticky;
+            top: 0;
             z-index: 100;
         }
-        .nav-brand {
+
+        .header-logo {
             font-family: 'Orbitron', sans-serif;
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 900;
             color: #fff;
-            display: flex; align-items: center; gap: 10px;
-        }
-        .nav-brand span { color: var(--primary); text-shadow: 0 0 8px var(--primary); }
-        .system-status {
-            display: flex; gap: 20px; align-items: center; font-size: 14px; font-weight: 600;
-        }
-        .pulse-dot {
-            height: 10px; width: 10px; background: var(--success); border-radius: 50%;
-            box-shadow: 0 0 10px var(--success);
-            animation: pulse-dot 1.5s infinite;
-        }
-        @keyframes pulse-dot {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(0, 255, 136, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
         }
 
-        /* MAIN GRID SYSTEM */
-        .main-workspace {
-            display: grid;
-            grid-template-columns: 350px 1fr 400px;
-            gap: 20px;
-            padding: 20px;
+        .header-logo span { color: var(--primary); }
+
+        .status-dot {
+            width: 10px; height: 10px;
+            background: #00ff88;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #00ff88;
+        }
+
+        /* Scrollable Content Area */
+        .app-content {
             flex: 1;
-            overflow: hidden;
+            overflow-y: auto;
+            padding: 20px;
+            padding-bottom: 100px; /* Space for Nav */
         }
 
-        /* PANELS (GLASSMORPHISM) */
-        .glass-panel {
-            background: var(--panel-bg);
-            border: 1px solid rgba(0,229,255,0.15);
-            border-radius: 15px;
-            display: flex; flex-direction: column;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            overflow: hidden;
-            transition: border-color 0.3s ease;
-        }
-        .glass-panel:hover { border-color: rgba(0,229,255,0.4); }
-        
-        .panel-header {
-            padding: 15px 20px;
-            background: rgba(0,0,0,0.4);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 14px;
-            letter-spacing: 1px;
-            color: var(--primary);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .panel-body { padding: 20px; flex: 1; overflow-y: auto; }
-
-        /* FORM CONTROLS */
-        .input-group { margin-bottom: 15px; }
-        label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; font-weight: 700; }
-        input, select, textarea {
+        /* Bottom Navigation Bar (App Style) */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
             width: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(0, 229, 255, 0.2);
-            color: #fff;
-            padding: 12px 15px;
-            border-radius: 8px;
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 15px;
-            font-weight: 600;
-            transition: all 0.3s;
-            outline: none;
-        }
-        input:focus, select:focus, textarea:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 15px rgba(0,229,255,0.2);
-            background: rgba(0,0,0,0.8);
+            height: 70px;
+            background: #0a0e17;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: var(--safe-bottom);
+            z-index: 1000;
         }
 
-        /* BUTTONS */
-        .btn {
-            background: linear-gradient(45deg, #0088ff, var(--primary));
-            border: none; color: #000;
-            padding: 12px 20px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 13px; font-weight: 900;
-            border-radius: 8px;
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #6b7c93;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 700;
+            transition: 0.3s;
             cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            width: 100%;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
         }
-        .btn::after {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: rgba(255,255,255,0.2); transform: rotate(45deg); transition: all 0.3s; opacity: 0;
-        }
-        .btn:hover::after { opacity: 1; left: 100%; }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 229, 255, 0.5); }
-        .btn:active { transform: translateY(1px); }
-        
-        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); box-shadow: none; }
-        .btn-outline:hover { background: rgba(0,229,255,0.1); }
-        .btn-danger { background: linear-gradient(45deg, #ff0055, #ff3366); box-shadow: 0 4px 15px rgba(255, 0, 85, 0.3); color: white; }
-        .btn-warning { background: linear-gradient(45deg, #ffaa00, #ffcc00); color: #000; }
-        .btn-small { padding: 6px 12px; font-size: 11px; width: auto; border-radius: 4px; }
 
-        /* LIST ITEMS (CHANNELS & USERS) */
-        .list-item {
-            background: rgba(0,0,0,0.6);
+        .nav-item i { font-size: 20px; margin-bottom: 5px; }
+        .nav-item.active { color: var(--primary); }
+        .nav-item.active i { filter: drop-shadow(0 0 8px var(--primary)); }
+
+        /* ---------------------------------------------------------
+           CARDS & FORMS (MOBILE OPTIMIZED)
+           --------------------------------------------------------- */
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mobile-card {
+            background: var(--panel-bg);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
             border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 12px;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
         }
-        .list-item:hover { border-color: var(--primary); transform: translateX(5px); background: rgba(0,0,0,0.8); }
-        .list-item::before {
-            content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 3px; background: var(--primary); opacity: 0; transition: 0.3s;
-        }
-        .list-item:hover::before { opacity: 1; }
 
-        .ch-logo { width: 40px; height: 40px; border-radius: 8px; object-fit: contain; background: #fff; margin-right: 15px; float: left; }
-        .item-title { font-weight: 700; font-size: 16px; margin-bottom: 5px; color: #fff; }
-        .item-meta { font-size: 11px; color: var(--text-muted); word-break: break-all; margin-bottom: 10px; }
+        .m-input {
+            width: 100%;
+            background: #05080f;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 12px 15px;
+            border-radius: 10px;
+            color: #fff;
+            margin-bottom: 12px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 16px;
+        }
+
+        .m-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            background: var(--primary);
+            color: #000;
+            font-weight: 800;
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ---------------------------------------------------------
+           MASKED USER LIST
+           --------------------------------------------------------- */
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.02);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .user-info h4 { font-size: 16px; margin-bottom: 2px; }
+        .user-info p { font-size: 12px; color: #6b7c93; font-family: 'Share Tech Mono'; }
+
+        .mask-badge {
+            background: rgba(0, 229, 255, 0.1);
+            color: var(--primary);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            width: 35px; height: 35px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            border: none;
+        }
+
+        .icon-btn.delete { color: var(--secondary); }
+
+        /* Toast Notifications */
+        #toast-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10001;
+            width: 90%;
+        }
+
+        .toast {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            border-bottom: 3px solid var(--primary);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
+            animation: slideDown 0.4s ease forwards;
+        }
+
+        @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <div id="auth-screen">
+        <div class="mi-logo-container">
+            <div class="mi-logo-circle">Mi</div>
+        </div>
+        
+        <div class="auth-card">
+            <h2 style="text-align:center; font-family:'Orbitron'; font-size:18px; margin-bottom:20px;">ADMIN LOGIN</h2>
+            <div class="auth-input-group">
+                <input type="password" id="master-key" placeholder="••••••••" maxlength="12">
+            </div>
+            <button class="login-btn" onclick="handleLogin()">Unlock Access</button>
+            <p id="auth-msg" style="color:var(--secondary); font-size:12px; text-align:center; margin-top:15px; display:none;">Invalid Key!</p>
+        </div>
+    </div>
+
+    <div id="app-shell">
+        
+        <header class="app-header">
+            <div class="header-logo">MiTV <span>PRO</span></div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:12px; font-weight:bold; color:#6b7c93;">SERVER</span>
+                <div class="status-dot"></div>
+            </div>
+        </header>
+
+        <main class="app-content">
+            
+            <div id="view-users">
+                <div class="section-title"><i class="fas fa-user-plus"></i> GENERATE MASKED M3U</div>
+                
+                <div class="mobile-card">
+                    <input type="text" id="user-name" class="m-input" placeholder="Client Name (e.g. Maaz)">
+                    <input type="text" id="user-slug" class="m-input" placeholder="Custom ID (e.g. maaz-001)">
+                    <button class="m-btn" onclick="generateMaskedUser()">
+                        <i class="fas fa-shield-alt"></i> GENERATE SECURE LINK
+                    </button>
+                </div>
+
+                <div class="section-title"><i class="fas fa-users"></i> ACTIVE CLIENTS</div>
+                <div id="user-list-target">
+                    </div>
+            </div>
+
+            <div id="view-channels" style="display:none;">
+                <div class="section-title"><i class="fas fa-cloud-download-alt"></i> IMPORT POOL</div>
+                <div class="mobile-card">
+                    <textarea id="raw-m3u" class="m-input" style="height:100px;" placeholder="Paste M3U content or link here..."></textarea>
+                    <button class="m-btn" style="background:#0077ff; color:#fff;" onclick="parseM3U()">
+                        <i class="fas fa-sync"></i> SYNC WITH CLOUD
+                    </button>
+                </div>
+                <div id="channel-list-target"></div>
+            </div>
+
+            <div id="view-radar" style="display:none;">
+                <div class="section-title"><i class="fas fa-satellite-dish"></i> LIVE TRAFFIC</div>
+                <div id="radar-logs" style="font-family:'Share Tech Mono'; font-size:12px;">
+                    </div>
+            </div>
+
+        </main>
+
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="switchView('users', this)">
+                <i class="fas fa-user-shield"></i>
+                <span>USERS</span>
+            </div>
+            <div class="nav-item" onclick="switchView('channels', this)">
+                <i class="fas fa-tv"></i>
+                <span>POOL</span>
+            </div>
+            <div class="nav-item" onclick="switchView('radar', this)">
+                <i class="fas fa-broadcast-tower"></i>
+                <span>RADAR</span>
+            </div>
+            <div class="nav-item" onclick="location.reload()">
+                <i class="fas fa-power-off"></i>
+                <span>EXIT</span>
+            </div>
+        </nav>
+    </div>
+
+    <div id="toast-box"></div>
+
+    <script>
+        /* =========================================================
+           MITV NETWORK - CORE LOGIC ENGINE (1000+ LINES CAPABLE)
+           =========================================================
+        */
+
+        // Firebase Setup
+        const config = {
+            apiKey: "AIzaSyBbnU8DkthpYQMHOLLyj6M0cc05qXfjMcw",
+            databaseURL: "https://ramadan-2385b-default-rtdb.firebaseio.com",
+            projectId: "ramadan-2385b",
+        };
+        firebase.initializeApp(config);
+        const db = firebase.database();
+
+        const MASTER_PASS = "mitv123456";
+        const VERCEL_URL = "https://mitv-tan.vercel.app"; // Apka masked backend
+
+        // UI View Switcher
+        function switchView(viewName, el) {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+
+            document.getElementById('view-users').style.display = 'none';
+            document.getElementById('view-channels').style.display = 'none';
+            document.getElementById('view-radar').style.display = 'none';
+
+            document.getElementById('view-' + viewName).style.display = 'block';
+        }
+
+        // Authentication
+        function handleLogin() {
+            const val = document.getElementById('master-key').value;
+            if(val === MASTER_PASS) {
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('app-shell').style.display = 'flex';
+                showToast("Access Granted: Welcome Maaz", "success");
+                initApp();
+            } else {
+                document.getElementById('auth-msg').style.display = 'block';
+                setTimeout(() => document.getElementById('auth-msg').style.display = 'none', 2000);
+            }
+        }
+
+        // M3U MASKING LOGIC & USER GENERATION
+        function generateMaskedUser() {
+            const name = document.getElementById('user-name').value.trim();
+            const slug = document.getElementById('user-slug').value.trim().toLowerCase().replace(/\s+/g, '-');
+
+            if(!name || !slug) return showToast("Please fill all fields", "error");
+
+            // Generate a Masking Token (Base64 + Random Salt)
+            const salt = Math.random().toString(36).substring(7);
+            const token = btoa(slug + "|" + salt);
+
+            // MASKED LINK STRUCTURE: 
+            // Instead of showing actual IPTV links, we show this:
+            const maskedLink = `${VERCEL_URL}/api/stream?key=${token}`;
+
+            const userData = {
+                name: name,
+                token: token,
+                masked_m3u: maskedLink,
+                status: "active",
+                created: Date.now()
+            };
+
+            db.ref('m3u_users/' + slug).set(userData).then(() => {
+                showToast("User Generated & Masked!", "success");
+                document.getElementById('user-name').value = '';
+                document.getElementById('user-slug').value = '';
+            });
+        }
+
+        // Init App & Realtime Listeners
+        function initApp() {
+            // Listen Users
+            db.ref('m3u_users').on('value', snap => {
+                const data = snap.val();
+                const container = document.getElementById('user-list-target');
+                container.innerHTML = '';
+                
+                if(data) {
+                    Object.keys(data).forEach(id => {
+                        const u = data[id];
+                        container.innerHTML += `
+                            <div class="user-item">
+                                <div class="user-info">
+                                    <h4>${u.name} <span class="mask-badge">MASKED</span></h4>
+                                    <p>${u.masked_m3u.substring(0, 35)}...</p>
+                                </div>
+                                <div class="action-btns">
+                                    <button class="icon-btn" onclick="copyLink('${u.masked_m3u}')"><i class="fas fa-copy"></i></button>
+                                    <button class="icon-btn delete" onclick="deleteUser('${id}')"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            });
+
+            // Listen Radar
+            db.ref('m3u_activity_logs').limitToLast(10).on('value', snap => {
+                const logs = snap.val();
+                const container = document.getElementById('radar-logs');
+                container.innerHTML = '';
+                if(logs) {
+                    Object.values(logs).forEach(l => {
+                        container.innerHTML = `<div>[${new Date(l.timestamp).toLocaleTimeString()}] ${l.ip} -> ${l.target}</div>` + container.innerHTML;
+                    });
+                }
+            });
+        }
+
+        // Utilities
+        function copyLink(link) {
+            navigator.clipboard.writeText(link);
+            showToast("Masked link copied!", "success");
+        }
+
+        function deleteUser(id) {
+            if(confirm("Delete this user?")) db.ref('m3u_users/' + id).remove();
+        }
+
+        function showToast(msg, type) {
+            const box = document.getElementById('toast-box');
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.innerText = msg;
+            box.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+
+        // Particle Background Logic
+        const canvas = document.getElementById('bg-canvas');
+        const c color: var(--text-muted); word-break: break-all; margin-bottom: 10px; }
         .badge { padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         .badge-active { background: rgba(0,255,136,0.1); color: var(--success); border: 1px solid rgba(0,255,136,0.3); }
         .badge-inactive { background: rgba(255,51,102,0.1); color: var(--danger); border: 1px solid rgba(255,51,102,0.3); }
