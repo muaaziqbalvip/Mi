@@ -1,113 +1,136 @@
 /**
- * MITV NETWORK - HYBRID XTREAM API & M3U MASKER
- * OWNER: MUAAZ IQBAL (Founder MUSLIM ISLAM)
+ * MITV CLOUD ENGINE - VER 3.0 (ULTRA MASKER)
+ * PROJECT: MUSLIM ISLAM | OWNER: MUAAZ IQBAL
+ * * FEATURES:
+ * - Real-time Device Tracking
+ * - IP & User-Agent Logging
+ * - Dynamic Channel Extraction from Global Pool
+ * - Xtream Codes API Compatibility
  */
 
 const axios = require('axios');
 
 module.exports = async (req, res) => {
-    const { user, password, stream, sid, username, action } = req.query;
+    const { user, password, stream, sid, username, action, type } = req.query;
     const dbUrl = `https://ramadan-2385b-default-rtdb.firebaseio.com`;
     const host = req.headers.host;
 
-    // --- 1. XTREAM CODES API LOGIC (player_api.php) ---
-    // Xtream players 'username' aur 'password' query use karte hain
+    // Helper: Security & Logging
+    const recordActivity = async (uid, actionName, chName, ip, ua) => {
+        try {
+            const timestamp = new Date().toLocaleString("en-PK", { timeZone: "Asia/Karachi" });
+            const logRef = `${dbUrl}/activity_logs/${uid}.json`;
+            await axios.post(logRef, {
+                time: timestamp,
+                action: actionName,
+                channel: chName || "N/A",
+                ip: ip,
+                device: ua || "Unknown Device",
+                status: "Active"
+            });
+            // Update User's Last Seen
+            await axios.patch(`${dbUrl}/master_users/${uid}.json`, { 
+                last_seen: timestamp, 
+                last_ip: ip,
+                last_device: ua 
+            });
+        } catch (e) { console.error("Logger Error"); }
+    };
+
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const userAgent = req.headers['user-agent'];
     const finalUser = user || username;
     const finalPass = password;
 
-    if (finalUser && finalPass) {
+    // -------------------------------------------------------------------
+    // CASE 1: INDIVIDUAL STREAM REDIRECT (MASKING)
+    // -------------------------------------------------------------------
+    if (stream && sid && finalUser) {
         try {
-            const userRes = await axios.get(`${dbUrl}/master_users/${finalUser}.json`);
-            const userData = userRes.data;
-
-            // Security Check: User aur Password (Phone) match hona chahiye
-            if (!userData || userData.phone !== finalPass) {
-                return res.status(403).json({ auth: 0, message: "Invalid Login" });
+            const realUrl = Buffer.from(sid, 'base64').toString('ascii');
+            const userCheck = await axios.get(`${dbUrl}/master_users/${finalUser}.json`);
+            
+            if (!userCheck.data || userCheck.data.status !== 'Paid') {
+                return res.status(403).send("Access Denied / Unpaid");
             }
 
-            // Agar Player sirf Login check kar raha hai
+            // Log which channel is being watched
+            const channelId = req.query.cid || "Unknown";
+            await recordActivity(finalUser, "Watching Channel", channelId, clientIp, userAgent);
+
+            return res.redirect(302, realUrl);
+        } catch (e) { return res.status(500).send("Stream Error"); }
+    }
+
+    // -------------------------------------------------------------------
+    // CASE 2: XTREAM CODES API SUPPORT
+    // -------------------------------------------------------------------
+    if (finalUser && finalPass) {
+        try {
+            const uRes = await axios.get(`${dbUrl}/master_users/${finalUser}.json`);
+            const uData = uRes.data;
+
+            if (!uData || uData.phone !== finalPass) {
+                return res.status(403).json({ auth: 0, message: "Invalid Credentials" });
+            }
+
+            await recordActivity(finalUser, "Xtream Login", "System", clientIp, userAgent);
+
             if (!action) {
                 return res.json({
-                    user_info: {
-                        username: finalUser,
-                        status: userData.status,
-                        expiry_date: "1923456789", // Future date
-                        is_trial: "0",
-                        active_cons: "1",
-                        max_connections: "1"
-                    },
+                    user_info: { username: finalUser, status: uData.status, expiry_date: "1923456789", active_cons: "1" },
                     server_info: { url: host, port: "80", https_port: "443", server_protocol: "https" }
                 });
             }
 
-            // Agar Player "Live Streams" maang raha hai
-            if (action === 'get_live_categories') {
-                return res.json([{ category_id: "1", category_name: "MiTV All Channels", parent_id: 0 }]);
-            }
-
+            // Categories & Streams
+            if (action === 'get_live_categories') return res.json([{ category_id: "1", category_name: "MiTV Global" }]);
+            
             if (action === 'get_live_streams') {
-                const configRes = await axios.get(`${dbUrl}/active_playlists/${finalUser}.json`);
-                const config = configRes.data;
-                let streams = [];
-
-                if (userData.status === 'Paid' && config.sources) {
-                    // Yahan hum M3U ko extract kar ke Xtream Format (JSON) mein convert karenge
-                    // Abhi simple placeholder de raha hoon, asli links expand honge
-                    streams.push({
-                        num: 1, name: "Check M3U Link for Full List", stream_id: "1", 
-                        stream_icon: "", category_id: "1", epg_channel_id: ""
-                    });
-                }
-                return res.json(streams);
+                const chRes = await axios.get(`${dbUrl}/global_channels.json`);
+                const channels = chRes.data || {};
+                let output = [];
+                Object.keys(channels).forEach(key => {
+                    const c = channels[key];
+                    const masked = `https://${host}/api/m3u?user=${finalUser}&stream=true&cid=${encodeURIComponent(c.name)}&sid=${Buffer.from(c.url).toString('base64')}`;
+                    output.push({ num: key, name: c.name, stream_id: key, stream_icon: c.logo || "", category_id: "1", url: masked });
+                });
+                return res.json(output);
             }
-        } catch (e) { return res.status(500).send("API Error"); }
+        } catch (e) { return res.status(500).send("API Fail"); }
     }
 
-    // --- 2. DEEP STREAM MASKING (Vahi purana logic) ---
-    if (stream && sid) {
-        const realLink = Buffer.from(sid, 'base64').toString('ascii');
-        return res.redirect(realLink);
-    }
-
-    // --- 3. M3U PLAYLIST GENERATOR ---
+    // -------------------------------------------------------------------
+    // CASE 3: FULL M3U PLAYLIST GENERATION
+    // -------------------------------------------------------------------
     if (finalUser) {
         try {
-            const [userRes, configRes] = await Promise.all([
-                axios.get(`${dbUrl}/master_users/${finalUser}.json`),
-                axios.get(`${dbUrl}/active_playlists/${finalUser}.json`)
-            ]);
+            const uRes = await axios.get(`${dbUrl}/master_users/${finalUser}.json`);
+            const uData = uRes.data;
 
-            const userData = userRes.data;
-            const config = configRes.data;
+            if (!uData) return res.status(404).send("User Not Found");
 
-            if (!userData) return res.status(404).send("User not found");
+            await recordActivity(finalUser, "Playlist Downloaded", "Full M3U", clientIp, userAgent);
 
-            let finalM3U = "#EXTM3U\n";
-
-            if (userData.status !== 'Paid') {
-                finalM3U += `#EXTINF:-1, PAYMENT REQUIRED\n${config.warningVideo}\n`;
+            let m3u = "#EXTM3U\n";
+            if (uData.status !== 'Paid') {
+                m3u += `#EXTINF:-1 tvg-logo="https://i.imgur.com/8Nn7Y9o.png", >>> ACCOUNT SUSPENDED - CONTACT MITV <<<\nhttps://example.com/pay.mp4\n`;
             } else {
-                for (let sourceUrl of config.sources) {
-                    try {
-                        const m3uResponse = await axios.get(sourceUrl);
-                        const lines = m3uResponse.data.split('\n');
-                        for (let i = 0; i < lines.length; i++) {
-                            let line = lines[i].trim();
-                            if (line.startsWith('#EXTINF')) {
-                                let streamLine = lines[i+1]?.trim();
-                                if (streamLine?.startsWith('http')) {
-                                    const encoded = Buffer.from(streamLine).toString('base64');
-                                    const masked = `https://${host}/api/m3u?user=${finalUser}&stream=true&sid=${encoded}`;
-                                    finalM3U += `${line}\n${masked}\n`;
-                                    i++;
-                                }
-                            }
-                        }
-                    } catch (e) {}
-                }
+                const chRes = await axios.get(`${dbUrl}/global_channels.json`);
+                const channels = chRes.data || {};
+                
+                Object.keys(channels).forEach(key => {
+                    const c = channels[key];
+                    const masked = `https://${host}/api/m3u?user=${finalUser}&stream=true&cid=${encodeURIComponent(c.name)}&sid=${Buffer.from(c.url).toString('base64')}`;
+                    m3u += `#EXTINF:-1 tvg-logo="${c.logo || ''}" group-title="${c.group || 'General'}",${c.name}\n${masked}\n`;
+                });
             }
+
             res.setHeader('Content-Type', 'application/x-mpegurl');
-            return res.status(200).send(finalM3U);
-        } catch (error) { return res.status(500).send("M3U Error"); }
+            return res.send(m3u);
+        } catch (e) { return res.status(500).send("M3U Engine Crash"); }
     }
+
+    res.status(400).send("MiTV Engine: Invalid Request");
 };
+                    
