@@ -1,549 +1,352 @@
 <!DOCTYPE html>
-<html lang="ur">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MiTV Master Admin | MUSLIM ISLAM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiTV Master | User & Masking Console</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    
+
     <style>
-        /* =========================================================
-           MITV NETWORK - FULL DIGITAL 3D UI ENGINE
-           =========================================================
-        */
         :root {
-            --primary: #00e5ff;
-            --primary-glow: rgba(0, 229, 255, 0.4);
-            --accent: #ff0055;
-            --bg-dark: #020408;
-            --panel-bg: rgba(10, 15, 25, 0.9);
-            --border: rgba(0, 229, 255, 0.2);
-            --text: #e0f7fa;
-            --success: #00ff88;
+            --primary: #00f2ff;
+            --secondary: #7000ff;
+            --bg: #05070a;
+            --card: #0f1218;
+            --border: #1f242d;
+            --text: #e2e8f0;
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background-color: var(--bg-dark);
+            background-color: var(--bg);
             color: var(--text);
-            font-family: 'Rajdhani', sans-serif;
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
+            font-family: var(--font-main);
+            line-height: 1.6;
+            padding: 20px;
         }
 
-        /* Animated 3D Cyber Background */
-        #canvas-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            background: radial-gradient(circle at center, #0a1525 0%, #020408 100%);
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        /* Header Area */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 30px;
         }
 
-        /* --- AUTHENTICATION SCREEN --- */
-        #auth-overlay {
-            position: fixed; inset: 0; z-index: 10000;
-            background: var(--bg-dark);
-            display: flex; justify-content: center; align-items: center;
-            transition: 0.8s cubic-bezier(0.85, 0, 0.15, 1);
+        .logo-box h1 { font-weight: 800; font-size: 24px; color: var(--primary); letter-spacing: -1px; }
+        .logo-box p { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 2px; }
+
+        .grid-main {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 30px;
         }
 
-        .auth-card {
-            width: 90%; max-width: 400px;
-            background: var(--panel-bg);
-            padding: 40px 25px;
-            border-radius: 30px;
+        /* Card System */
+        .card {
+            background: var(--card);
             border: 1px solid var(--border);
-            text-align: center;
-            box-shadow: 0 0 50px rgba(0, 229, 255, 0.15);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: 0.3s;
         }
 
-        .mi-logo-3d {
-            width: 100px; height: 100px;
-            background: linear-gradient(135deg, var(--primary), #0055ff);
-            margin: 0 auto 30px;
-            border-radius: 25px;
-            display: flex; justify-content: center; align-items: center;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 35px; font-weight: 900; color: #000;
-            box-shadow: 0 10px 30px var(--primary-glow);
-            transform: perspective(500px) rotateX(10deg);
-        }
+        .card:hover { border-color: var(--primary); box-shadow: 0 10px 40px rgba(0,242,255,0.05); }
 
-        .mi-input {
-            width: 100%; background: rgba(0,0,0,0.5);
+        .card h2 { font-size: 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
+        .card h2 i { color: var(--primary); }
+
+        /* Form Elements */
+        label { font-size: 13px; color: #94a3b8; display: block; margin-top: 15px; }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 14px;
+            background: #000;
             border: 1px solid var(--border);
-            padding: 16px; border-radius: 15px;
-            color: #fff; font-size: 18px; text-align: center;
-            margin-bottom: 20px; outline: none;
+            border-radius: 12px;
+            color: #fff;
+            margin-top: 8px;
+            font-size: 14px;
+            transition: 0.3s;
         }
 
-        .mi-btn {
-            width: 100%; padding: 16px; border: none;
-            border-radius: 15px; font-family: 'Orbitron', sans-serif;
-            font-weight: 900; cursor: pointer;
-            transition: 0.3s; text-transform: uppercase;
+        input:focus, textarea:focus { border-color: var(--primary); outline: none; }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
         }
 
-        .btn-glow { background: var(--primary); color: #000; box-shadow: 0 0 20px var(--primary-glow); }
+        .btn-primary { background: var(--primary); color: #000; }
+        .btn-secondary { background: #fff; color: #000; }
+        .btn-ghost { background: transparent; border: 1px solid var(--border); color: #fff; }
 
-        /* --- MAIN APP LAYOUT --- */
-        #app-container { display: none; flex-direction: column; height: 100vh; }
+        .btn:hover { transform: translateY(-3px); opacity: 0.9; }
 
-        .app-header {
-            height: 70px; background: rgba(5, 10, 20, 0.8);
-            backdrop-filter: blur(20px);
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 20px; border-bottom: 1px solid var(--border);
-            z-index: 100;
-        }
-
-        .brand-text { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 900; }
-        .brand-text span { color: var(--primary); }
-
-        .viewport { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
-
-        /* --- DASHBOARD WIDGETS --- */
-        .section-header {
-            font-family: 'Orbitron', sans-serif; font-size: 14px;
-            color: var(--primary); margin: 25px 0 15px 5px;
-            display: flex; align-items: center; gap: 10px;
-        }
-
-        .glass-card {
-            background: var(--panel-bg);
+        /* User List */
+        .user-list { max-height: 400px; overflow-y: auto; margin-top: 10px; }
+        .user-item {
+            background: #000;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             border: 1px solid var(--border);
-            border-radius: 25px; padding: 20px; margin-bottom: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
         }
 
-        /* --- M3U EDITOR STYLES --- */
-        .channel-item {
-            display: flex; align-items: center; gap: 15px;
-            background: rgba(255,255,255,0.03);
-            margin-bottom: 12px; padding: 12px;
-            border-radius: 18px; border: 1px solid rgba(255,255,255,0.05);
+        .user-info h4 { font-size: 15px; font-weight: 700; }
+        .user-info p { font-size: 11px; color: #64748b; font-family: var(--font-code); }
+
+        .status-pill {
+            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 800;
+        }
+        .status-paid { background: rgba(0, 242, 255, 0.1); color: var(--primary); }
+        .status-unpaid { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+        /* Output Area */
+        .output-container {
+            margin-top: 25px;
+            background: #000;
+            border: 1px dashed var(--primary);
+            padding: 20px;
+            border-radius: 15px;
+            display: none;
         }
 
-        .chan-img { width: 55px; height: 55px; border-radius: 12px; background: #fff; object-fit: contain; }
-        .chan-info { flex: 1; overflow: hidden; }
-        .chan-info h4 { font-size: 16px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .chan-info p { font-size: 11px; color: #6b7c93; font-family: 'Share Tech Mono'; }
-
-        .chan-actions { display: flex; gap: 10px; }
-        .icon-btn {
-            width: 38px; height: 38px; border-radius: 12px;
-            background: rgba(255,255,255,0.05); border: none;
-            color: #fff; display: flex; justify-content: center; align-items: center;
-            font-size: 16px;
-        }
-        .icon-btn.edit { color: var(--primary); }
-        .icon-btn.del { color: var(--accent); }
-
-        /* --- RADAR / TRACKING --- */
-        .radar-container {
-            height: 350px; overflow-y: auto;
-            background: #000; border-radius: 20px;
-            padding: 15px; border: 1px solid var(--accent);
-            font-family: 'Share Tech Mono', monospace;
+        .output-link {
+            font-family: var(--font-code);
+            font-size: 13px;
+            color: var(--primary);
+            word-break: break-all;
+            margin-bottom: 15px;
         }
 
-        .log-entry {
-            padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 12px;
+        /* Responsive */
+        @media (max-width: 900px) {
+            .grid-main { grid-template-columns: 1fr; }
         }
-        .log-time { color: var(--primary); margin-right: 8px; }
-        .log-user { color: var(--success); font-weight: bold; }
-        .log-meta { display: block; font-size: 10px; color: #555; margin-top: 4px; }
-
-        /* --- BOTTOM NAV --- */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            height: 75px; background: rgba(5, 10, 20, 0.95);
-            backdrop-filter: blur(20px); border-top: 1px solid var(--border);
-            display: flex; justify-content: space-around; align-items: center;
-            padding-bottom: env(safe-area-inset-bottom);
-            z-index: 1000;
-        }
-
-        .nav-item {
-            display: flex; flex-direction: column; align-items: center;
-            gap: 5px; color: #5c6b80; font-size: 11px; font-weight: 700;
-            cursor: pointer; transition: 0.3s;
-        }
-        .nav-item.active { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
-        .nav-item i { font-size: 22px; }
-
-        /* --- MODAL SYSTEM --- */
-        #modal-overlay {
-            position: fixed; inset: 0; z-index: 5000;
-            background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
-            display: none; justify-content: center; align-items: flex-end;
-        }
-        .modal-body {
-            width: 100%; max-width: 500px; background: var(--bg-dark);
-            border-radius: 30px 30px 0 0; padding: 30px;
-            border-top: 2px solid var(--primary);
-            animation: slideUp 0.4s ease-out;
-        }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
-        /* Toast Notifications */
-        #mi-toast {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            z-index: 11000; background: var(--primary); color: #000;
-            padding: 12px 30px; border-radius: 50px; font-weight: 800;
-            display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
     </style>
 </head>
 <body>
 
-    <canvas id="canvas-bg"></canvas>
-
-    <div id="auth-overlay">
-        <div class="auth-card">
-            <div class="mi-logo-3d">Mi</div>
-            <h2 style="font-family:'Orbitron'; font-size:18px; margin-bottom:10px;">MITV COMMAND CENTER</h2>
-            <p style="font-size:12px; color:var(--primary); letter-spacing:3px; margin-bottom:30px;">ADMIN ACCESS ONLY</p>
-            
-            <input type="password" id="admin-pass" class="mi-input" placeholder="••••••••">
-            <button class="mi-btn btn-glow" onclick="attemptLogin()">INITIATE SYSTEM</button>
+<div class="container">
+    <header>
+        <div class="logo-box">
+            <h1>MITV MASTER ENGINE</h1>
+            <p>Project Muslim Islam | Cloud Access</p>
         </div>
-    </div>
+        <div class="system-status">
+            <span style="color: #10b981; font-size: 12px;"><i class="fas fa-server"></i> VERCEL ACTIVE</span>
+        </div>
+    </header>
 
-    <div id="app-container">
+    <div class="grid-main">
         
-        <header class="app-header">
-            <div class="brand-text">MITV <span>NETWORK</span></div>
-            <div style="display:flex; align-items:center; gap:8px;">
-                <span style="font-size:10px; font-weight:bold; color:var(--success);">LIVE ENGINE</span>
-                <div style="width:8px; height:8px; background:var(--success); border-radius:50%; box-shadow: 0 0 10px var(--success);"></div>
-            </div>
-        </header>
-
-        <main class="viewport">
-            
-            <div id="view-pool" class="tab-content">
-                <div class="glass-card">
-                    <div class="section-header" style="margin:0 0 15px 0;"><i class="fas fa-file-import"></i> PARSE NEW M3U</div>
-                    <textarea id="m3u-raw-input" class="mi-input" style="height:80px; font-size:12px; text-align:left;" placeholder="#EXTM3U..."></textarea>
-                    <button class="mi-btn btn-glow" onclick="processM3U()">PARSE & SYNC CHANNELS</button>
-                </div>
-
-                <div class="section-header"><i class="fas fa-list"></i> GLOBAL CHANNEL POOL (<span id="count-pool">0</span>)</div>
-                <div id="pool-list-render">
-                    </div>
-            </div>
-
-            <div id="view-users" class="tab-content" style="display:none;">
-                <div class="glass-card">
-                    <div class="section-header" style="margin:0 0 15px 0;"><i class="fas fa-user-plus"></i> NEW CLIENT LINK</div>
-                    <input type="text" id="user-name-in" class="mi-input" style="text-align:left;" placeholder="Client Name (e.g. Maaz)">
-                    <input type="text" id="user-slug-in" class="mi-input" style="text-align:left;" placeholder="Unique ID (e.g. maaz-mitv)">
-                    <button class="mi-btn btn-glow" onclick="createUser()">GENERATE SECURE M3U</button>
-                </div>
-
-                <div class="section-header"><i class="fas fa-users-cog"></i> ACTIVE MASKED USERS</div>
-                <div id="user-list-render">
-                    </div>
-            </div>
-
-            <div id="view-radar" class="tab-content" style="display:none;">
-                <div class="section-header"><i class="fas fa-satellite-dish"></i> TRAFFIC RADAR (LIVE)</div>
-                <div class="radar-container" id="radar-logs">
-                    <div style="color:#222; text-align:center; padding-top:150px;">AWAITING UPLINK...</div>
-                </div>
+        <div class="sidebar">
+            <div class="card">
+                <h2><i class="fas fa-user-plus"></i> Register User</h2>
                 
-                <div class="glass-card" style="margin-top:20px;">
-                    <div class="section-header" style="margin:0 0 10px 0;"><i class="fas fa-shield-virus"></i> PROTECTION STATS</div>
-                    <div style="display:flex; justify-content:space-between; font-size:13px;">
-                        <span>Encrypted Links:</span>
-                        <span style="color:var(--primary);">ENABLED</span>
+                <label>User Full Name</label>
+                <input type="text" id="u-name" placeholder="e.g. Ali Ahmed">
+                
+                <label>Phone Number</label>
+                <input type="text" id="u-phone" placeholder="03XXXXXXXXX">
+                
+                <label>Initial Status</label>
+                <select id="u-status">
+                    <option value="Paid">PAID (Active)</option>
+                    <option value="Unpaid">UNPAID (Blocked)</option>
+                </select>
+
+                <button class="btn btn-primary" onclick="addUser()">Create Identity</button>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-users-viewfinder"></i> Directory</h2>
+                <div id="user-display" class="user-list">
                     </div>
-                    <div style="display:flex; justify-content:space-between; font-size:13px; margin-top:8px;">
-                        <span>Masking Protocol:</span>
-                        <span style="color:var(--primary);">BASE64_v5</span>
-                    </div>
-                </div>
-            </div>
-
-        </main>
-
-        <nav class="bottom-nav">
-            <div class="nav-item active" onclick="switchTab('pool', this)">
-                <i class="fas fa-tv"></i>
-                <span>POOL</span>
-            </div>
-            <div class="nav-item" onclick="switchTab('users', this)">
-                <i class="fas fa-user-shield"></i>
-                <span>USERS</span>
-            </div>
-            <div class="nav-item" onclick="switchTab('radar', this)">
-                <i class="fas fa-broadcast-tower"></i>
-                <span>RADAR</span>
-            </div>
-            <div class="nav-item" onclick="location.reload()">
-                <i class="fas fa-power-off"></i>
-                <span>EXIT</span>
-            </div>
-        </nav>
-    </div>
-
-    <div id="modal-overlay">
-        <div class="modal-body">
-            <h3 id="modal-title" style="font-family:'Orbitron'; margin-bottom:20px; color:var(--primary);">Edit Resource</h3>
-            <input type="hidden" id="edit-id">
-            <div class="input-group">
-                <label style="font-size:11px; color:#6b7c93; display:block; margin-bottom:5px;">NAME</label>
-                <input type="text" id="edit-name" class="mi-input" style="text-align:left;">
-            </div>
-            <div class="input-group">
-                <label style="font-size:11px; color:#6b7c93; display:block; margin-bottom:5px;">SOURCE URL / LOGO</label>
-                <input type="text" id="edit-val" class="mi-input" style="text-align:left;">
-            </div>
-            <div style="display:flex; gap:10px;">
-                <button class="mi-btn" style="background:rgba(255,255,255,0.05); color:#fff;" onclick="closeModal()">CANCEL</button>
-                <button class="mi-btn btn-glow" onclick="saveEdits()">SAVE CHANGES</button>
             </div>
         </div>
+
+        <div class="main-engine">
+            <div class="card">
+                <h2><i class="fas fa-layer-group"></i> Multi-M3U Aggregator</h2>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Paste multiple M3U links below. Our Vercel engine will merge them into one masked link.</p>
+                
+                <label>Input M3U Sources (One per line)</label>
+                <textarea id="m3u-list" rows="6" placeholder="https://server1.com/list.m3u&#10;https://server2.com/playlist.m3u"></textarea>
+
+                <label>Select Target User</label>
+                <select id="user-select-main">
+                    <option value="">-- Choose User for this Link --</option>
+                </select>
+
+                <label>Emergency Loop Video (For Unpaid Users)</label>
+                <input type="text" id="warning-vid" value="https://i.imgur.com/example_payment_video.mp4" placeholder="Direct MP4 Link">
+
+                <button class="btn btn-secondary" onclick="generateLink()">
+                    <i class="fas fa-shield-halved"></i> Generate Masked Playlist
+                </button>
+
+                <div id="result-box" class="output-container">
+                    <p style="font-size: 11px; color: #64748b; margin-bottom: 5px;">Your Professional Masked URL:</p>
+                    <div id="final-url" class="output-link"></div>
+                    <button class="btn btn-ghost" onclick="copyUrl()"><i class="fas fa-copy"></i> Copy To Clipboard</button>
+                </div>
+            </div>
+
+            <div class="card" style="border-style: dashed;">
+                <h2><i class="fas fa-circle-info"></i> System Guide</h2>
+                <ul style="font-size: 13px; padding-left: 20px; color: #94a3b8;">
+                    <li><b>Masking:</b> Real M3U links are never exposed to the user's player.</li>
+                    <li><b>Dynamic Control:</b> If you change user status to "Unpaid" in the sidebar, their link will instantly start playing the warning video.</li>
+                    <li><b>Vercel Logic:</b> The link calls <code>mitv-tan.vercel.app</code> which processes the request.</li>
+                </ul>
+            </div>
+        </div>
+
     </div>
+</div>
 
-    <div id="mi-toast">SYSTEM MESSAGE</div>
+<script>
+    // --- FIREBASE CONFIG ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyBbnU8DkthpYQMHOLLyj6M0cc05qXfjMcw",
+        databaseURL: "https://ramadan-2385b-default-rtdb.firebaseio.com",
+        projectId: "ramadan-2385b",
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    <script>
-        // 1. Initialize System
-        const ADMIN_KEY = "mitv123456";
-        const VERCEL_APP = "https://mitv-tan.vercel.app";
+    // --- USER MANAGEMENT ---
+    function addUser() {
+        const name = document.getElementById('u-name').value;
+        const phone = document.getElementById('u-phone').value;
+        const status = document.getElementById('u-status').value;
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBbnU8DkthpYQMHOLLyj6M0cc05qXfjMcw",
-            databaseURL: "https://ramadan-2385b-default-rtdb.firebaseio.com",
-            projectId: "ramadan-2385b",
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        if(!name || !phone) return alert("Please fill all fields!");
 
-        let globalPool = {};
-        let activeUsers = {};
+        // Unique ID Generation
+        const uid = "MI-" + Math.floor(100000 + Math.random() * 900000);
 
-        // 2. Auth Logic
-        function attemptLogin() {
-            const pass = document.getElementById('admin-pass').value;
-            if(pass === ADMIN_KEY) {
-                document.getElementById('auth-overlay').style.transform = 'translateY(-100%)';
-                document.getElementById('app-container').style.display = 'flex';
-                toast("SYSTEM ONLINE - WELCOME MAAZ");
-                initListeners();
-            } else {
-                toast("ACCESS DENIED!");
-            }
-        }
+        db.ref('master_users/' + uid).set({
+            name: name,
+            phone: phone,
+            status: status,
+            created: Date.now()
+        }).then(() => {
+            alert("User Registered Successfully!");
+            document.getElementById('u-name').value = '';
+            document.getElementById('u-phone').value = '';
+        });
+    }
 
-        // 3. Navigation
-        function switchTab(tabId, el) {
-            document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('view-' + tabId).style.display = 'block';
-            el.classList.add('active');
-        }
+    function loadUsers() {
+        db.ref('master_users').on('value', snap => {
+            const display = document.getElementById('user-display');
+            const select = document.getElementById('user-select-main');
+            display.innerHTML = '';
+            select.innerHTML = '<option value="">-- Choose User for this Link --</option>';
 
-        // 4. M3U Processing & Editing
-        function processM3U() {
-            const raw = document.getElementById('m3u-raw-input').value.trim();
-            if(!raw) return;
+            snap.forEach(child => {
+                const user = child.val();
+                const id = child.key;
+                const sClass = user.status === 'Paid' ? 'status-paid' : 'status-unpaid';
 
-            toast("PARSING RESOURCES...");
-            const lines = raw.split('\n');
-            let batch = {};
-            let tempName = "", tempLogo = "";
-
-            lines.forEach(line => {
-                line = line.trim();
-                if(line.startsWith('#EXTINF:')) {
-                    const nameParts = line.split(',');
-                    tempName = nameParts.length > 1 ? nameParts[1].trim() : "Unknown";
-                    const logoMatch = line.match(/tvg-logo="([^"]+)"/);
-                    tempLogo = logoMatch ? logoMatch[1] : "";
-                } else if(line.startsWith('http')) {
-                    const id = btoa(line).substring(0, 12).replace(/\//g, '_');
-                    batch[id] = { name: tempName, logo: tempLogo, url: line };
-                }
-            });
-
-            db.ref('global_pool').update(batch).then(() => {
-                toast("POOL SYNCED TO CLOUD");
-                document.getElementById('m3u-raw-input').value = "";
-            });
-        }
-
-        function renderPool() {
-            const container = document.getElementById('pool-list-render');
-            document.getElementById('count-pool').innerText = Object.keys(globalPool).length;
-            container.innerHTML = "";
-
-            Object.keys(globalPool).forEach(id => {
-                const item = globalPool[id];
-                container.innerHTML += `
-                    <div class="channel-item">
-                        <img src="${item.logo || 'https://via.placeholder.com/50'}" class="chan-img">
-                        <div class="chan-info">
-                            <h4>${item.name}</h4>
-                            <p>${item.url.substring(0, 45)}...</p>
+                // Sidebar List
+                display.innerHTML += `
+                    <div class="user-item">
+                        <div class="user-info">
+                            <h4>${user.name}</h4>
+                            <p>${id} | ${user.phone}</p>
                         </div>
-                        <div class="chan-actions">
-                            <button class="icon-btn edit" onclick="openEdit('pool', '${id}')"><i class="fas fa-edit"></i></button>
-                            <button class="icon-btn del" onclick="deleteRes('global_pool/${id}')"><i class="fas fa-trash"></i></button>
+                        <div style="text-align:right">
+                            <span class="status-pill ${sClass}">${user.status}</span><br>
+                            <button onclick="toggleStatus('${id}', '${user.status}')" style="background:none; border:none; color:var(--primary); font-size:10px; cursor:pointer; margin-top:5px;">Change</button>
                         </div>
                     </div>
                 `;
+
+                // Main Dropdown
+                select.innerHTML += `<option value="${id}">${user.name} (${id})</option>`;
             });
-        }
+        });
+    }
 
-        // 5. User Masking & Management
-        function createUser() {
-            const name = document.getElementById('user-name-in').value.trim();
-            const slug = document.getElementById('user-slug-in').value.trim().toLowerCase();
+    function toggleStatus(id, current) {
+        const next = current === 'Paid' ? 'Unpaid' : 'Paid';
+        db.ref('master_users/' + id).update({ status: next });
+    }
 
-            if(!name || !slug) return toast("FILL ALL FIELDS");
+    // --- M3U MASKING LOGIC ---
+    function generateLink() {
+        const m3uText = document.getElementById('m3u-list').value;
+        const userId = document.getElementById('user-select-main').value;
+        const warning = document.getElementById('warning-vid').value;
 
-            // MASKING LOGIC: We create a unique token for the user
-            const token = btoa(slug + "_mitv_" + Date.now());
-            const maskedUrl = `${VERCEL_APP}/api/m3u?token=${token}`;
+        if(!m3uText || !userId) return alert("Please add M3U links and select a user!");
 
-            const userData = {
-                name: name,
-                token: token,
-                slug: slug,
-                masked_m3u: maskedUrl,
-                status: "active",
-                created_at: Date.now()
-            };
+        const sources = m3uText.split('\n').filter(line => line.trim().startsWith('http'));
 
-            db.ref('users/' + slug).set(userData).then(() => {
-                toast("USER M3U GENERATED");
-                document.getElementById('user-name-in').value = "";
-                document.getElementById('user-slug-in').value = "";
-            });
-        }
+        // Save this config to Firebase (Vercel API will read this)
+        db.ref('active_playlists/' + userId).set({
+            sources: sources,
+            warningVideo: warning,
+            updatedAt: Date.now()
+        }).then(() => {
+            // Generate the Vercel Masked Link
+            const vDomain = "https://mitv-tan.vercel.app";
+            const maskedUrl = `${vDomain}/get/m3u/${userId}`;
 
-        function renderUsers() {
-            const container = document.getElementById('user-list-render');
-            container.innerHTML = "";
-
-            Object.keys(activeUsers).forEach(slug => {
-                const u = activeUsers[slug];
-                container.innerHTML += `
-                    <div class="channel-item" style="border-left: 4px solid var(--primary);">
-                        <div class="icon-btn" style="background:var(--primary); color:#000;"><i class="fas fa-user"></i></div>
-                        <div class="chan-info">
-                            <h4>${u.name}</h4>
-                            <p>ID: ${u.slug}</p>
-                        </div>
-                        <div class="chan-actions">
-                            <button class="icon-btn edit" onclick="copyText('${u.masked_m3u}')"><i class="fas fa-copy"></i></button>
-                            <button class="icon-btn del" onclick="deleteRes('users/${slug}')"><i class="fas fa-user-minus"></i></button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        // 6. Live Radar Tracking
-        function initListeners() {
-            db.ref('global_pool').on('value', snap => { globalPool = snap.val() || {}; renderPool(); });
-            db.ref('users').on('value', snap => { activeUsers = snap.val() || {}; renderUsers(); });
+            document.getElementById('result-box').style.display = 'block';
+            document.getElementById('final-url').innerText = maskedUrl;
             
-            // ACTIVITY MONITOR
-            db.ref('activity_logs').limitToLast(30).on('value', snap => {
-                const logs = snap.val();
-                const container = document.getElementById('radar-logs');
-                container.innerHTML = "";
-                if(!logs) return;
+            // Auto scroll to result
+            document.getElementById('result-box').scrollIntoView({ behavior: 'smooth' });
+        });
+    }
 
-                Object.values(logs).reverse().forEach(log => {
-                    const time = new Date(log.timestamp).toLocaleTimeString();
-                    container.innerHTML += `
-                        <div class="log-entry">
-                            <span class="log-time">[${time}]</span>
-                            <span class="log-user">${log.user_name}</span> » 
-                            <span style="color:#fff">${log.target}</span>
-                            <span class="log-meta">
-                                IP: ${log.ip} | LOC: ${log.location} | DEV: ${log.software}
-                            </span>
-                        </div>
-                    `;
-                });
-            });
-        }
+    function copyUrl() {
+        const link = document.getElementById('final-url').innerText;
+        navigator.clipboard.writeText(link);
+        alert("Masked URL copied to clipboard!");
+    }
 
-        // 7. Modals & Helpers
-        function openEdit(type, id) {
-            const item = globalPool[id];
-            document.getElementById('edit-id').value = id;
-            document.getElementById('edit-name').value = item.name;
-            document.getElementById('edit-val').value = item.url;
-            document.getElementById('modal-overlay').style.display = 'flex';
-        }
+    // Initial Load
+    loadUsers();
 
-        function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
-
-        function saveEdits() {
-            const id = document.getElementById('edit-id').value;
-            const name = document.getElementById('edit-name').value;
-            const url = document.getElementById('edit-val').value;
-            
-            db.ref('global_pool/' + id).update({ name, url }).then(() => {
-                toast("RESOURCE UPDATED");
-                closeModal();
-            });
-        }
-
-        function deleteRes(path) {
-            if(confirm("PERMANENTLY DELETE THIS?")) {
-                db.ref(path).remove().then(() => toast("REMOVED FROM SYSTEM"));
-            }
-        }
-
-        function copyText(txt) {
-            navigator.clipboard.writeText(txt);
-            toast("LINK COPIED");
-        }
-
-        function toast(msg) {
-            const t = document.getElementById('mi-toast');
-            t.innerText = msg;
-            t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 3000);
-        }
-
-        // Background Particles
-        const canvas = document.getElementById('canvas-bg');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        function initP() {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            particles = [];
-            for(let i=0; i<60; i++) particles.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*2, vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5 });
-        }
-        function drawP() {
-            ctx.clearRect(0,0, canvas.width, canvas.height);
-            ctx.fillStyle = "rgba(0, 229, 255, 0.2)";
-            particles.forEach(p => {
-                p.x += p.vx; p.y += p.vy;
-                if(p.x<0 || p.x>canvas.width) p.vx*=-1;
-                if(p.y<0 || p.y>canvas.height) p.vy*=-1;
-                ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fill();
-            });
-            requestAnimationFrame(drawP);
-        }
-        window.onresize = initP; initP(); drawP();
-
-    </script>
+</script>
 </body>
-</html>
+    </html>
+                                                                
