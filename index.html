@@ -3,48 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MiTV Network - Project of MUSLIM ISLAM</title>
-    
-    <meta name="description" content="MiTV Network - Premium Live Streaming by Muaaz Iqbal">
-    <link rel="icon" href="https://i.ibb.co/C5WBZ6Yc/file-00000000305071fa945b58b012ac072b.png">
+    <meta name="description" content="MiTV Network - Premium Digital Streaming Experience">
+    <title>MiTV Network | Stream Live TV & Movies</title>
 
+    <link rel="icon" href="https://i.ibb.co/C5WBZ6Yc/file-00000000305071fa945b58b012ac072b.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
-    
+
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
-        /* =========================================
-           1. CSS MASTER STYLING (LOGIC & DESIGN)
-           =========================================
+        /* ========================================================
+           ADVANCED CSS DESIGN SYSTEM (MITV UI FRAMEWORK)
+           ========================================================
         */
         :root {
             --primary: #00e5ff;
-            --primary-glow: rgba(0, 229, 255, 0.4);
-            --bg-deep: #05070a;
-            --bg-card: #11141b;
-            --text-main: #ffffff;
-            --text-dim: #a0a6b3;
-            --accent: #ff0055;
+            --secondary: #ff0055;
+            --dark-bg: #030508;
+            --card-bg: #10141d;
             --header-h: 65px;
-            --player-h: 230px;
-            --nav-h: 70px;
+            --player-h: 235px;
+            --nav-h: 75px;
             --footer-h: 30px;
+            --text-gold: #ffd700;
+            --glass: rgba(255, 255, 255, 0.05);
+            --neon-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
         }
 
+        /* Standard Reset */
         * {
             margin: 0; padding: 0; box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-            -webkit-tap-highlight-color: transparent;
+            outline: none; -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: var(--bg-deep);
-            color: var(--text-main);
+            background-color: var(--dark-bg);
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
             overflow: hidden;
             height: 100vh;
             width: 100vw;
@@ -52,263 +53,272 @@
             flex-direction: column;
         }
 
-        /* -----------------------------------------
-           SPLASH SCREEN LOGIC
-           ----------------------------------------- */
-        #splash-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 10000;
-        }
-        .splash-logo { width: 150px; filter: drop-shadow(0 0 20px var(--primary)); animation: zoomIn 2s infinite alternate; }
-        .loader-bar { width: 200px; height: 3px; background: #222; margin-top: 30px; position: relative; overflow: hidden; border-radius: 5px; }
-        .loader-fill { width: 0%; height: 100%; background: var(--primary); box-shadow: 0 0 10px var(--primary); animation: loadProgress 5s forwards; }
+        /* SCROLLBAR CUSTOMIZATION */
+        ::-webkit-scrollbar { width: 0; height: 0; }
 
-        @keyframes loadProgress { 0% { width: 0%; } 100% { width: 100%; } }
-        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0.8; } to { transform: scale(1.1); opacity: 1; } }
-
-        /* -----------------------------------------
-           AUTHENTICATION (GOOGLE & EMAIL)
-           ----------------------------------------- */
-        #auth-container {
+        /* --------------------------------------------------------
+           1. SPLASH SCREEN LOGIC (PROFESSIONAL ENTRY)
+           --------------------------------------------------------
+        */
+        #splash {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 7, 10, 0.95); display: none; 
-            flex-direction: column; justify-content: center; align-items: center; z-index: 9000;
-            backdrop-filter: blur(15px);
+            background: radial-gradient(circle at center, #1a202c, #000);
+            display: flex; flex-direction: column; justify-content: center;
+            align-items: center; z-index: 99999; transition: 1s ease-out;
         }
-        .auth-card {
-            background: var(--bg-card); padding: 40px; border-radius: 25px;
-            width: 90%; max-width: 400px; text-align: center;
-            border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        .splash-img { width: 140px; animation: pulse-logo 2s infinite ease-in-out; }
+        .splash-text { margin-top: 20px; font-family: 'Orbitron', sans-serif; letter-spacing: 5px; color: var(--primary); }
+        .loading-line { width: 180px; height: 2px; background: #222; margin-top: 20px; border-radius: 5px; overflow: hidden; }
+        .loading-fill { width: 0%; height: 100%; background: var(--primary); box-shadow: var(--neon-shadow); animation: line-grow 5s forwards; }
+
+        @keyframes pulse-logo { 0% { transform: scale(0.9); opacity: 0.7; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(0.9); opacity: 0.7; } }
+        @keyframes line-grow { 0% { width: 0%; } 100% { width: 100%; } }
+
+        /* --------------------------------------------------------
+           2. AUTHENTICATION SCREENS (GOOGLE & EMAIL)
+           --------------------------------------------------------
+        */
+        #auth-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95); z-index: 80000;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            backdrop-filter: blur(10px);
         }
-        .auth-card h2 { color: var(--primary); margin-bottom: 10px; font-weight: 800; letter-spacing: 1px; }
-        .google-btn {
-            background: #fff; color: #000; padding: 12px 25px; border-radius: 30px;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            font-weight: 600; cursor: pointer; border: none; width: 100%; margin-top: 20px;
+        .auth-box {
+            background: var(--card-bg); width: 85%; max-width: 400px;
+            padding: 40px 30px; border-radius: 30px; border: 1px solid var(--primary);
+            text-align: center; box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+        .auth-box h2 { font-weight: 800; color: #fff; margin-bottom: 5px; }
+        .auth-box p { color: #888; font-size: 13px; margin-bottom: 25px; }
+
+        .google-login-btn {
+            background: #fff; color: #000; padding: 14px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            font-weight: 700; cursor: pointer; border: none; width: 100%;
             transition: 0.3s;
         }
-        .google-btn:hover { background: #e0e0e0; transform: translateY(-2px); }
+        .google-login-btn:hover { background: #f0f0f0; transform: translateY(-2px); }
 
-        /* -----------------------------------------
-           LAYOUT SECTIONS
-           ----------------------------------------- */
+        .auth-input {
+            width: 100%; padding: 14px; margin-bottom: 12px; background: #000;
+            border: 1px solid #333; color: #fff; border-radius: 12px;
+        }
+        .primary-btn {
+            width: 100%; padding: 14px; background: var(--primary); color: #000;
+            font-weight: 800; border: none; border-radius: 12px; cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* --------------------------------------------------------
+           3. MAIN APP INTERFACE
+           --------------------------------------------------------
+        */
         header {
-            height: var(--header-h); background: var(--bg-card);
+            height: var(--header-h); background: var(--card-bg);
+            position: fixed; top: 0; width: 100%; z-index: 1000;
             display: flex; align-items: center; justify-content: space-between;
             padding: 0 20px; border-bottom: 2px solid var(--primary);
-            position: fixed; top: 0; width: 100%; z-index: 1000;
         }
-        .header-logo { display: flex; align-items: center; gap: 12px; }
-        .header-logo img { width: 40px; }
-        .header-logo h1 { font-size: 18px; font-weight: 700; background: linear-gradient(to right, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .brand-logo { display: flex; align-items: center; gap: 10px; }
+        .brand-logo img { width: 35px; }
+        .brand-logo h1 { font-size: 18px; font-weight: 800; color: #fff; letter-spacing: -1px; }
 
-        #video-section {
+        /* PLAYER REGION */
+        #player-wrapper {
             position: fixed; top: var(--header-h); width: 100%; height: var(--player-h);
-            background: #000; z-index: 900; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: #000; z-index: 900; overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
         }
-        #universal-player { width: 100%; height: 100%; object-fit: contain; display: none; }
-        #player-ui-placeholder {
+        video { width: 100%; height: 100%; object-fit: contain; display: none; }
+        #player-overlay {
             width: 100%; height: 100%; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; color: var(--text-dim);
-            background: radial-gradient(circle, #1a1e26 0%, #000 100%);
+            justify-content: center; align-items: center; text-align: center;
+            background: radial-gradient(circle, #222 0%, #000 100%);
         }
-        #player-ui-placeholder i { font-size: 50px; color: var(--primary); margin-bottom: 15px; opacity: 0.6; }
+        #player-overlay i { font-size: 50px; color: var(--primary); margin-bottom: 15px; opacity: 0.6; }
 
-        /* -----------------------------------------
-           3x3 DYNAMIC GRID LOGIC
-           ----------------------------------------- */
-        #main-content {
+        /* CONTENT GRID AREA */
+        #main-scroll-view {
             margin-top: calc(var(--header-h) + var(--player-h));
             height: calc(100vh - var(--header-h) - var(--player-h) - var(--nav-h) - var(--footer-h));
-            overflow-y: scroll; padding: 20px; background: var(--bg-deep);
-            scrollbar-width: none;
+            overflow-y: auto; padding: 20px; background: var(--dark-bg);
         }
-        #main-content::-webkit-scrollbar { display: none; }
 
-        .search-bar {
-            background: var(--bg-card); padding: 12px 20px; border-radius: 12px;
-            display: flex; align-items: center; gap: 15px; margin-bottom: 20px;
+        .search-container {
+            background: var(--card-bg); padding: 14px 20px; border-radius: 15px;
+            display: flex; align-items: center; gap: 15px; margin-bottom: 25px;
             border: 1px solid #222;
         }
-        .search-bar input { background: transparent; border: none; color: #fff; width: 100%; outline: none; font-size: 14px; }
+        .search-container input { background: transparent; border: none; color: #fff; width: 100%; font-size: 14px; }
 
-        .grid-container {
+        /* THE 3x3 GRID LOGIC */
+        .grid-layout {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px; padding-bottom: 40px;
+            gap: 15px; padding-bottom: 50px;
         }
 
-        .channel-card {
-            background: var(--bg-card); border-radius: 18px; padding: 10px;
+        .item-card {
+            background: var(--card-bg); border-radius: 20px; padding: 12px;
             display: flex; flex-direction: column; align-items: center;
-            border: 1px solid #1a1e26; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative; overflow: hidden;
+            border: 1px solid #1a1f2b; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
         }
-        .channel-card:active { transform: scale(0.92); }
-        
-        .card-img-wrapper {
-            width: 75px; height: 75px; border-radius: 50%; padding: 3px;
-            background: linear-gradient(45deg, transparent, #222);
-            display: flex; justify-content: center; align-items: center;
-            margin-bottom: 10px; position: relative;
-        }
-        .channel-card.playing .card-img-wrapper {
-            background: linear-gradient(45deg, var(--primary), var(--accent));
-            box-shadow: 0 0 15px var(--primary-glow);
-        }
-        .card-img-wrapper img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: #000; }
-        
-        .card-title { font-size: 11px; font-weight: 600; text-align: center; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
-        .channel-card.playing .card-title { color: var(--primary); }
+        .item-card:active { transform: scale(0.9); }
 
-        .badge-pro {
-            position: absolute; top: 5px; right: 5px; background: gold; color: #000;
-            font-size: 8px; font-weight: 900; padding: 2px 6px; border-radius: 5px;
+        .img-box {
+            width: 70px; height: 70px; border-radius: 50%;
+            padding: 2px; border: 2px solid transparent; transition: 0.4s;
+            margin-bottom: 10px; overflow: hidden; background: #000;
+        }
+        .item-card.active-play .img-box { border-color: var(--primary); box-shadow: var(--neon-shadow); }
+        .img-box img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+
+        .item-name { font-size: 10px; font-weight: 700; color: #ccc; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+        .item-card.active-play .item-name { color: var(--primary); }
+
+        .pro-label {
+            position: absolute; top: 0; right: 0; background: var(--text-gold); color: #000;
+            font-size: 8px; font-weight: 900; padding: 2px 6px; border-radius: 0 15px 0 15px;
         }
 
-        /* -----------------------------------------
-           NAVIGATION BAR
-           ----------------------------------------- */
+        /* NAVIGATION BAR */
         nav {
-            height: var(--nav-h); background: var(--bg-card);
+            height: var(--nav-h); background: var(--card-bg);
             position: fixed; bottom: var(--footer-h); width: 100%;
             display: flex; justify-content: space-around; align-items: center;
-            border-top: 1px solid #222; z-index: 1000;
+            border-top: 1px solid #1a1a1a; z-index: 1000;
         }
-        .nav-link {
+        .nav-btn {
             display: flex; flex-direction: column; align-items: center;
-            color: var(--text-dim); transition: 0.3s; width: 20%;
+            color: #666; transition: 0.3s; width: 20%;
         }
-        .nav-link i { font-size: 22px; margin-bottom: 5px; }
-        .nav-link span { font-size: 10px; font-weight: 600; text-transform: uppercase; }
-        .nav-link.active { color: var(--primary); }
+        .nav-btn i { font-size: 24px; margin-bottom: 4px; }
+        .nav-btn span { font-size: 9px; font-weight: 800; text-transform: uppercase; }
+        .nav-btn.active { color: var(--primary); text-shadow: var(--neon-shadow); }
 
         footer {
             height: var(--footer-h); background: #000; width: 100%;
             position: fixed; bottom: 0; display: flex; justify-content: center; align-items: center;
-            font-size: 9px; font-weight: 700; color: #444; letter-spacing: 1px; z-index: 1000;
+            font-size: 9px; font-weight: 700; color: #333; letter-spacing: 2px;
         }
 
-        /* -----------------------------------------
-           MODALS & PROFILE
-           ----------------------------------------- */
-        .modal-overlay {
+        /* MODALS */
+        .modal-wrap {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 2000; display: none;
-            justify-content: center; align-items: center; backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.9); z-index: 50000; display: none;
+            justify-content: center; align-items: center; padding: 20px;
         }
-        .modal-body {
-            background: var(--bg-card); width: 85%; padding: 30px;
-            border-radius: 25px; border: 1px solid var(--primary); text-align: center;
+        .modal-content {
+            background: var(--card-bg); width: 100%; max-width: 350px;
+            border-radius: 25px; padding: 30px; border: 1px solid var(--primary);
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
-    <div id="splash-screen">
-        <img src="https://i.ibb.co/C5WBZ6Yc/file-00000000305071fa945b58b012ac072b.png" class="splash-logo">
-        <h2 style="margin-top: 20px; letter-spacing: 5px; font-weight: 800;">MiTV</h2>
-        <div class="loader-bar"><div class="loader-fill"></div></div>
+    <div id="splash">
+        <img src="https://i.ibb.co/C5WBZ6Yc/file-00000000305071fa945b58b012ac072b.png" class="splash-img">
+        <h2 class="splash-text">MITV NETWORK</h2>
+        <div class="loading-line"><div class="loading-fill"></div></div>
     </div>
 
-    <div id="auth-container">
-        <div class="auth-card">
-            <img src="https://i.ibb.co/SD424ppD/IMG-20260312-052617-removebg-preview.png" style="width: 80px; margin-bottom: 20px;">
-            <h2>WELCOME</h2>
-            <p style="color: var(--text-dim); font-size: 13px;">Login to access MiTV Network Channels</p>
+    <div id="auth-layer">
+        <div class="auth-box">
+            <img src="https://i.ibb.co/SD424ppD/IMG-20260312-052617-removebg-preview.png" style="width: 70px; margin-bottom: 20px;">
+            <h2>MiTV Access</h2>
+            <p>Sign in to continue to your network</p>
             
-            <button class="google-btn" onclick="loginWithGoogle()">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="20">
-                Sign in with Google
+            <button class="google-login-btn" onclick="googleAuth()">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18">
+                Continue with Google
             </button>
             
-            <div style="margin: 20px 0; color: #333;">OR</div>
+            <div style="margin: 20px 0; color: #444; font-size: 12px; font-weight: bold;">OR USE EMAIL</div>
 
-            <input type="email" id="user-email" placeholder="Email" style="width: 100%; padding: 12px; margin-bottom: 10px; background: #000; border: 1px solid #333; color: #fff; border-radius: 10px;">
-            <input type="password" id="user-pass" placeholder="Password" style="width: 100%; padding: 12px; margin-bottom: 20px; background: #000; border: 1px solid #333; color: #fff; border-radius: 10px;">
-            <button onclick="loginWithEmail()" style="width: 100%; padding: 12px; background: var(--primary); border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">Continue</button>
+            <input type="email" id="login-email" class="auth-input" placeholder="Email Address">
+            <input type="password" id="login-pass" class="auth-input" placeholder="Security Password">
+            <button class="primary-btn" onclick="emailAuth()">Sign In / Sign Up</button>
         </div>
     </div>
 
     <header>
-        <div class="header-logo">
+        <div class="brand-logo">
             <img src="https://i.ibb.co/C5WBZ6Yc/file-00000000305071fa945b58b012ac072b.png">
             <h1>MiTV Network</h1>
         </div>
-        <div id="user-plan-status" style="font-size: 10px; font-weight: bold; background: #222; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--primary);">FREE USER</div>
+        <div id="status-chip" style="font-size: 9px; font-weight: 900; background: #222; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--primary);">FREE ACCESS</div>
     </header>
 
-    <div id="video-section">
-        <div id="player-ui-placeholder">
+    <div id="player-wrapper">
+        <div id="player-overlay">
             <i class="fas fa-play-circle"></i>
-            <p style="font-size: 12px; font-weight: 600; letter-spacing: 1px;">IDLE - SELECT CONTENT</p>
+            <p style="font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #555;">READY TO STREAM</p>
         </div>
-        <video id="universal-player" controls autoplay playsinline poster="https://i.ibb.co/C5WBZ6Yc/file-00000000305071fa945b58b012ac072b.png"></video>
+        <video id="video-engine" controls autoplay playsinline poster="https://i.ibb.co/C5WBZ6Yc/file-00000000305071fa945b58b012ac072b.png"></video>
     </div>
 
-    <div id="main-content">
-        <div class="search-bar">
-            <i class="fas fa-search" style="color: var(--text-dim);"></i>
-            <input type="text" id="channel-search" placeholder="Search for channels, movies..." onkeyup="filterChannels()">
+    <div id="main-scroll-view">
+        <div class="search-container">
+            <i class="fas fa-search" style="color: #444;"></i>
+            <input type="text" id="live-search" placeholder="Search Channels, Movies, Series..." onkeyup="doSearch()">
         </div>
 
-        <div class="grid-container" id="channel-grid">
+        <div class="grid-layout" id="main-grid">
             </div>
     </div>
 
     <nav>
-        <div class="nav-link active" onclick="changeCategory('Live TV', this)">
-            <i class="fas fa-tv"></i>
+        <div class="nav-btn active" onclick="setTab('Live TV', this)">
+            <i class="fas fa-broadcast-tower"></i>
             <span>Live TV</span>
         </div>
-        <div class="nav-link" onclick="changeCategory('Movies', this)">
-            <i class="fas fa-film"></i>
+        <div class="nav-btn" onclick="setTab('Movies', this)">
+            <i class="fas fa-clapperboard"></i>
             <span>Movies</span>
         </div>
-        <div class="nav-link" onclick="changeCategory('Series', this)">
-            <i class="fas fa-video"></i>
+        <div class="nav-btn" onclick="setTab('Series', this)">
+            <i class="fas fa-folder-open"></i>
             <span>Series</span>
         </div>
-        <div class="nav-link" onclick="changeCategory('Islamic', this)">
-            <i class="fas fa-kaaba"></i>
+        <div class="nav-btn" onclick="setTab('Islamic', this)">
+            <i class="fas fa-moon"></i>
             <span>Islamic</span>
         </div>
-        <div class="nav-link" onclick="toggleProfile()">
-            <i class="fas fa-user-circle"></i>
+        <div class="nav-btn" onclick="openProfile()">
+            <i class="fas fa-user-shield"></i>
             <span>Profile</span>
         </div>
     </nav>
 
     <footer>
-        <i class="fas fa-shield-halved" style="margin-right: 5px; color: var(--primary);"></i> SECURED BY MUSLIM ISLAM SYSTEM
+        <i class="fas fa-mosque" style="margin-right: 8px; color: var(--primary);"></i> MUSLIM ISLAM SYSTEM - 2026
     </footer>
 
-    <div id="profile-modal" class="modal-overlay" onclick="toggleProfile()">
-        <div class="modal-body" onclick="event.stopPropagation()">
-            <img id="user-photo" src="https://i.ibb.co/SD424ppD/IMG-20260312-052617-removebg-preview.png" style="width: 70px; border-radius: 50%; border: 2px solid var(--primary); margin-bottom: 15px;">
-            <h3 id="user-display-name">Maaz Iqbal</h3>
-            <p id="user-display-email" style="font-size: 12px; color: var(--text-dim); margin-bottom: 20px;">contact@mitv.net</p>
+    <div id="p-modal" class="modal-wrap" onclick="closeProfile()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <img id="u-img" src="https://i.ibb.co/SD424ppD/IMG-20260312-052617-removebg-preview.png" style="width: 80px; border-radius: 50%; border: 3px solid var(--primary); margin-bottom: 15px;">
+            <h3 id="u-name">MiTV User</h3>
+            <p id="u-email" style="font-size: 12px; color: #666; margin-bottom: 25px;">guest@mitv.net</p>
             
-            <div style="background: #000; padding: 15px; border-radius: 15px; text-align: left; margin-bottom: 20px;">
-                <p style="font-size: 11px; color: gold;"><i class="fas fa-crown"></i> PRO PREMIUM ADVANTAGES:</p>
-                <ul style="font-size: 10px; margin-top: 5px; color: #888; margin-left: 15px;">
-                    <li>Unlock 10,000+ Premium Channels</li>
-                    <li>No Buffering High-Speed Links</li>
-                    <li>24/7 Priority Support</li>
-                </ul>
+            <div style="background: #000; padding: 20px; border-radius: 15px; text-align: left; margin-bottom: 20px; border-left: 4px solid var(--text-gold);">
+                <p style="font-size: 10px; color: var(--text-gold); font-weight: 800; margin-bottom: 5px;">PRO PREMIUM STATUS</p>
+                <p style="font-size: 11px; color: #888;">Unlock thousands of 4K channels and global movies without ads.</p>
             </div>
 
-            <button onclick="contactAdmin()" style="width: 100%; padding: 12px; background: #25D366; color: #fff; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-bottom: 10px;">
-                <i class="fab fa-whatsapp"></i> Upgrade to Pro
+            <button class="primary-btn" onclick="contactMaaz()" style="background: #25D366; color: #fff;">
+                <i class="fab fa-whatsapp"></i> UPGRADE TO PRO
             </button>
-            <button onclick="logout()" style="width: 100%; padding: 10px; background: transparent; color: var(--accent); border: 1px solid var(--accent); border-radius: 10px; font-weight: bold; cursor: pointer;">Logout</button>
+            <br><br>
+            <button onclick="logoff()" style="background: transparent; border: 1px solid #ff0055; color: #ff0055; padding: 10px 20px; border-radius: 10px; font-weight: bold; width: 100%;">LOGOUT</button>
         </div>
     </div>
 
     <script>
-        // --- 1. CONFIGURATION ---
-        const config = {
+        // --- System Configuration ---
+        const fbConfig = {
             apiKey: "AIzaSyBbnU8DkthpYQMHOLLyj6M0cc05qXfjMcw",
             authDomain: "ramadan-2385b.firebaseapp.com",
             databaseURL: "https://ramadan-2385b-default-rtdb.firebaseio.com",
@@ -317,37 +327,49 @@
             messagingSenderId: "882828936310",
             appId: "1:882828936310:web:7f97b921031fe130fe4b57"
         };
-        firebase.initializeApp(config);
+        firebase.initializeApp(fbConfig);
         const auth = firebase.auth();
         const db = firebase.database();
 
-        let userData = { uid: null, plan: 'Free', email: '' };
-        let activeCategory = 'Live TV';
-        let channelsMasterList = [];
+        let globalUserData = { uid: null, plan: 'Free', email: '' };
+        let activeCat = 'Live TV';
+        let channelCache = [];
 
-        // --- 2. AUTHENTICATION LOGIC ---
-        function checkAuth() {
+        // --- 1. Security & Splash Logic ---
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('splash').style.opacity = '0';
+                setTimeout(() => document.getElementById('splash').style.display = 'none', 1000);
+                startAuthCheck();
+            }, 4000);
+        });
+
+        // Anti-Inspect Code
+        document.onkeydown = e => { if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73)) return false; };
+        document.addEventListener('contextmenu', e => e.preventDefault());
+
+        // --- 2. Auth Core ---
+        function startAuthCheck() {
             auth.onAuthStateChanged(user => {
                 if(user) {
-                    userData.uid = user.uid;
-                    userData.email = user.email;
-                    document.getElementById('auth-container').style.display = 'none';
-                    syncUserDatabase();
-                    loadChannels();
+                    globalUserData.uid = user.uid;
+                    globalUserData.email = user.email;
+                    document.getElementById('auth-layer').style.display = 'none';
+                    syncUser();
+                    fetchContent();
                 } else {
-                    document.getElementById('auth-container').style.display = 'flex';
+                    document.getElementById('auth-layer').style.display = 'flex';
                 }
             });
         }
 
-        function loginWithGoogle() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch(e => alert(e.message));
+        function googleAuth() {
+            auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(err => alert(err.message));
         }
 
-        function loginWithEmail() {
-            let e = document.getElementById('user-email').value;
-            let p = document.getElementById('user-pass').value;
+        function emailAuth() {
+            let e = document.getElementById('login-email').value;
+            let p = document.getElementById('login-pass').value;
             if(!e || !p) return;
             auth.signInWithEmailAndPassword(e,p).catch(err => {
                 if(err.code === 'auth/user-not-found') auth.createUserWithEmailAndPassword(e,p);
@@ -355,153 +377,134 @@
             });
         }
 
-        function logout() { auth.signOut(); location.reload(); }
+        function logoff() { auth.signOut(); location.reload(); }
 
-        function syncUserDatabase() {
-            db.ref('users/' + userData.uid).on('value', snap => {
-                if(snap.exists()) {
-                    let d = snap.val();
-                    userData.plan = d.plan || 'Free';
-                    document.getElementById('user-plan-status').innerText = userData.plan.toUpperCase() + " USER";
-                    document.getElementById('user-display-name').innerText = auth.currentUser.displayName || 'MiTV User';
-                    document.getElementById('user-display-email').innerText = userData.email;
-                    if(auth.currentUser.photoURL) document.getElementById('user-photo').src = auth.currentUser.photoURL;
+        function syncUser() {
+            db.ref('users/' + globalUserData.uid).on('value', snap => {
+                let data = snap.val();
+                if(data) {
+                    globalUserData.plan = data.plan || 'Free';
+                    document.getElementById('status-chip').innerText = globalUserData.plan.toUpperCase() + " USER";
+                    document.getElementById('u-name').innerText = auth.currentUser.displayName || 'MiTV User';
+                    document.getElementById('u-email').innerText = globalUserData.email;
+                    if(auth.currentUser.photoURL) document.getElementById('u-img').src = auth.currentUser.photoURL;
                 } else {
-                    db.ref('users/' + userData.uid).set({ email: userData.email, plan: 'Free', joinDate: new Date().toISOString() });
+                    db.ref('users/' + globalUserData.uid).set({ email: globalUserData.email, plan: 'Free', created: Date.now() });
                 }
             });
         }
 
-        // --- 3. DYNAMIC CONTENT LOGIC ---
-        function loadChannels() {
-            const grid = document.getElementById('channel-grid');
-            grid.innerHTML = `<div style="grid-column: span 3; padding: 50px; text-align: center;"><i class="fas fa-spinner fa-spin" style="font-size: 30px; color: var(--primary);"></i></div>`;
+        // --- 3. Content Logic (3x3 Grid) ---
+        function fetchContent() {
+            const grid = document.getElementById('main-grid');
+            grid.innerHTML = '<div style="grid-column: span 3; text-align: center; padding: 100px 0;"><i class="fas fa-circle-notch fa-spin" style="font-size: 30px; color: var(--primary);"></i></div>';
 
             db.ref('channels').on('value', snap => {
-                channelsMasterList = [];
+                channelCache = [];
                 snap.forEach(child => {
                     let c = child.val();
                     c.key = child.key;
-                    channelsMasterList.push(c);
+                    channelCache.push(c);
                 });
-                renderFilteredGrid();
+                renderUI();
             });
         }
 
-        function renderFilteredGrid() {
-            const grid = document.getElementById('channel-grid');
+        function renderUI() {
+            const grid = document.getElementById('main-grid');
             grid.innerHTML = '';
             
-            const filtered = channelsMasterList.filter(c => c.category === activeCategory);
+            const filtered = channelCache.filter(c => c.category === activeCat);
             
             if(filtered.length === 0) {
-                grid.innerHTML = `<div style="grid-column: span 3; padding: 50px; text-align: center; color: #444;">No content found in ${activeCategory}</div>`;
+                grid.innerHTML = `<p style="grid-column: span 3; text-align: center; padding: 50px; color: #444;">No items found in ${activeCat}</p>`;
                 return;
             }
 
             filtered.forEach(ch => {
                 const card = document.createElement('div');
-                card.className = 'channel-card';
-                card.setAttribute('data-url', ch.streamLink);
-                card.setAttribute('data-name', ch.name);
+                card.className = 'item-card';
+                card.id = `card-${ch.key}`;
                 
-                let proBadge = ch.isPro ? `<div class="badge-pro">PRO</div>` : '';
+                let proTag = ch.isPro ? '<div class="pro-label">PRO</div>' : '';
                 
                 card.innerHTML = `
-                    ${proBadge}
-                    <div class="card-img-wrapper">
-                        <img src="${ch.logo}" onerror="this.src='https://i.ibb.co/C5WBZ6Yc/file-00000000305071fa945b58b012ac072b.png'">
-                    </div>
-                    <div class="card-title">${ch.name}</div>
+                    ${proTag}
+                    <div class="img-box"><img src="${ch.logo}" onerror="this.src='https://i.ibb.co/C5WBZ6Yc/file-00000000305071fa945b58b012ac072b.png'"></div>
+                    <div class="item-name">${ch.name}</div>
                 `;
                 
-                card.onclick = () => playStream(ch);
+                card.onclick = () => initPlayback(ch);
                 grid.appendChild(card);
             });
         }
 
-        function changeCategory(cat, el) {
-            activeCategory = cat;
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            el.classList.add('active');
-            renderFilteredGrid();
+        function setTab(cat, btn) {
+            activeCat = cat;
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderUI();
         }
 
-        function filterChannels() {
-            let q = document.getElementById('channel-search').value.toLowerCase();
-            const cards = document.querySelectorAll('.channel-card');
-            cards.forEach(card => {
-                let name = card.getAttribute('data-name').toLowerCase();
-                card.style.display = name.includes(q) ? 'flex' : 'none';
+        function doSearch() {
+            let q = document.getElementById('live-search').value.toLowerCase();
+            const cards = document.querySelectorAll('.item-card');
+            cards.forEach(c => {
+                let name = c.querySelector('.item-name').innerText.toLowerCase();
+                c.style.display = name.includes(q) ? 'flex' : 'none';
             });
         }
 
-        // --- 4. UNIVERSAL PLAYER ENGINE ---
-        function playStream(ch) {
-            if(ch.isPro && userData.plan === 'Free') {
-                alert("This channel is for PRO members only. Please upgrade.");
-                toggleProfile();
+        // --- 4. Video Playback (Universal Support) ---
+        function initPlayback(ch) {
+            if(ch.isPro && globalUserData.plan === 'Free') {
+                alert("Subscription Required: Accessing Pro Premium content requires an upgraded plan.");
+                openProfile();
                 return;
             }
 
-            // Highlighting active card
-            document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('playing'));
-            // Find card and add class (simplified)
+            document.querySelectorAll('.item-card').forEach(c => c.classList.remove('active-play'));
+            document.getElementById(`card-${ch.key}`).classList.add('active-play');
 
-            const video = document.getElementById('universal-player');
-            const placeholder = document.getElementById('player-ui-placeholder');
+            const v = document.getElementById('video-engine');
+            const overlay = document.getElementById('player-overlay');
             
-            placeholder.style.display = 'none';
-            video.style.display = 'block';
+            overlay.style.display = 'none';
+            v.style.display = 'block';
 
-            const url = ch.streamLink;
+            const stream = ch.streamLink;
             
-            // Format detection logic
-            if(url.includes('.m3u8')) {
+            if(stream.includes('.m3u8')) {
                 if(Hls.isSupported()) {
                     let hls = new Hls();
-                    hls.loadSource(url);
-                    hls.attachMedia(video);
-                    hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                    video.src = url;
-                    video.play();
+                    hls.loadSource(stream);
+                    hls.attachMedia(v);
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => v.play());
+                } else if (v.canPlayType('application/vnd.apple.mpegurl')) {
+                    v.src = stream;
+                    v.play();
                 }
-            } else if (url.includes('.mpd')) {
+            } else if (stream.includes('.mpd')) {
                 let player = dashjs.MediaPlayer().create();
-                player.initialize(video, url, true);
+                player.initialize(v, stream, true);
             } else {
-                video.src = url;
-                video.play();
+                v.src = stream;
+                v.play();
             }
 
-            // Tracking user activity
-            db.ref('user_logs/' + userData.uid).push({
-                action: 'played',
-                channel: ch.name,
-                timestamp: firebase.database.ServerValue.TIMESTAMP
+            // Log activity to Admin
+            db.ref('live_activity/' + globalUserData.uid).push({
+                item: ch.name,
+                time: firebase.database.ServerValue.TIMESTAMP
             });
         }
 
-        // --- 5. UI UTILS ---
-        function toggleProfile() {
-            const m = document.getElementById('profile-modal');
-            m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+        // --- 5. UI Utilities ---
+        function openProfile() { document.getElementById('p-modal').style.display = 'flex'; }
+        function closeProfile() { document.getElementById('p-modal').style.display = 'none'; }
+        function contactMaaz() {
+            window.open(`https://wa.me/923062015325?text=Hello Muaaz, I want to upgrade my MiTV Plan to PRO PREMIUM. User Email: ${globalUserData.email}`);
         }
-
-        function contactAdmin() {
-            const msg = `Assalam o Alaikum,\nI am ${userData.email}.\nI want to upgrade my MiTV Plan to PRO PREMIUM.\nUID: ${userData.uid}`;
-            window.open(`https://wa.me/923062015325?text=${encodeURIComponent(msg)}`);
-        }
-
-        // --- INITIALIZE ---
-        setTimeout(() => {
-            document.getElementById('splash-screen').style.display = 'none';
-            checkAuth();
-        }, 5000);
-
-        // Anti-Right Click
-        document.addEventListener('contextmenu', e => e.preventDefault());
     </script>
 </body>
 </html>
