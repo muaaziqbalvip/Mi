@@ -1,8 +1,37 @@
 {
+  "version": 2,
+  "name": "mitv-masking-engine",
   "rewrites": [
     {
       "source": "/get/m3u/:user",
       "destination": "/api/m3u?user=:user"
+    },
+    {
+      "source": "/player_api.php",
+      "destination": "/api/m3u"
+    },
+    {
+      "source": "/get.php",
+      "destination": "/api/m3u"
+    },
+    {
+      "source": "/xmltv.php",
+      "destination": "/api/m3u"
+    },
+    {
+      "source": "/enigma2.php",
+      "destination": "/api/m3u"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Credentials", "value": "true" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
+        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" }
+      ]
     }
   ]
 }
