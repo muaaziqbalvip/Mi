@@ -1,57 +1,86 @@
-// api/m3u.js
-const axios = require('axios'); // M3U fetch karne ke liye
+/**
+ * MITV NETWORK - CLOUD M3U MASKING ENGINE
+ * PROJECT: MUSLIM ISLAM
+ * OWNER: MUAAZ IQBAL
+ */
 
-export default async function handler(req, res) {
-    const { user } = req.query; // Link se user ID lega: ?user=MITV123
+const axios = require('axios');
+
+module.exports = async (req, res) => {
+    // URL se user ID lena (get/m3u/:user)
+    const { user } = req.query;
 
     if (!user) {
-        return res.status(400).send("Error: No User ID provided.");
+        return res.status(400).send("#EXTM3U\n#EXTINF:-1, ERROR: NO USER ID PROVIDED");
     }
 
     try {
-        // 1. Firebase se User aur M3U Data uthana
         const dbUrl = `https://ramadan-2385b-default-rtdb.firebaseio.com`;
         
-        // User status check
-        const userRes = await axios.get(`${dbUrl}/master_users/${user}.json`);
-        const userData = userRes.data;
+        // 1. Firebase se User Status aur Playlist Config aik saath uthana
+        // Hum axios.all use kar rahe hain taake fast loading ho
+        const [userRes, configRes] = await Promise.all([
+            axios.get(`${dbUrl}/master_users/${user}.json`),
+            axios.get(`${dbUrl}/active_playlists/${user}.json`)
+        ]);
 
-        // M3U Configuration check
-        const configRes = await axios.get(`${dbUrl}/active_playlists/${user}.json`);
+        const userData = userRes.data;
         const config = configRes.data;
 
-        if (!userData || !config) {
-            return res.status(404).send("#EXTM3U\n#EXTINF:-1,USER NOT FOUND");
+        // Agar user database mein nahi milta
+        if (!userData) {
+            return res.status(404).send("#EXTM3U\n#EXTINF:-1, ERROR: USER NOT REGISTERED IN MITV");
+        }
+
+        // Agar user ki koi playlist config nahi bani hui
+        if (!config) {
+            return res.status(404).send("#EXTM3U\n#EXTINF:-1, ERROR: NO PLAYLIST FOUND FOR THIS USER");
         }
 
         let finalM3U = "#EXTM3U\n";
 
-        // 2. PAYMENT CHECK LOGIC
+        // 2. PAYMENT & STATUS CHECK
+        // 'Paid' ke spelling check kar lein Admin panel se
         if (userData.status !== 'Paid') {
-            // Unpaid user ke liye loop video
-            finalM3U += `#EXTINF:-1 tvg-logo="https://cdn-icons-png.flaticon.com/512/5972/5972778.png", PLEASE PAY BILL - MiTV\n`;
-            finalM3U += `${config.warningVideo || 'https://example.com/pay_now.mp4'}\n`;
-        } else {
-            // Paid user ke liye saare links ko combine aur mask karna
-            for (let url of config.sources) {
-                try {
-                    const m3uData = await axios.get(url);
-                    // Header nikaal kar baqi channels add karna
-                    const cleaned = m3uData.data.replace("#EXTM3U", "").trim();
-                    finalM3U += cleaned + "\n";
-                } catch (e) {
-                    console.log("Source link fail: " + url);
+            const warnImg = "https://cdn-icons-png.flaticon.com/512/5972/5972778.png";
+            const warnVid = config.warningVideo || "https://example.com/payment_warning.mp4";
+            
+            finalM3U += `#EXTINF:-1 tvg-logo="${warnImg}" group-title="MITV ALERT", >>> PLEASE PAY YOUR BILL <<<\n`;
+            finalM3U += `${warnVid}\n`;
+            finalM3U += `#EXTINF:-1 tvg-logo="${warnImg}" group-title="MITV ALERT", CONTACT ADMIN TO ACTIVATE\n`;
+            finalM3U += `${warnVid}\n`;
+        } 
+        else {
+            // 3. PAID USER: Combine Multiple M3U Sources
+            if (config.sources && Array.isArray(config.sources)) {
+                for (let sourceUrl of config.sources) {
+                    try {
+                        // Har M3U source se data fetch karna
+                        const m3uResponse = await axios.get(sourceUrl, { timeout: 5000 });
+                        let rawData = m3uResponse.data;
+
+                        // Header (#EXTM3U) ko remove karna taake duplicate na ho
+                        let cleanedData = rawData.replace("#EXTM3U", "").trim();
+                        finalM3U += cleanedData + "\n";
+                    } catch (fetchErr) {
+                        console.error(`Failed to fetch: ${sourceUrl}`);
+                        finalM3U += `#EXTINF:-1, --- SOURCE ERROR: ${sourceUrl} ---\n#\n`;
+                    }
                 }
+            } else {
+                finalM3U += `#EXTINF:-1, NO SOURCES ADDED IN ADMIN PANEL\n#\n`;
             }
         }
 
-        // 3. Response ko M3U file format mein bhejna
-        res.setHeader('Content-Type', 'audio/x-mpegurl');
+        // 4. BROWSER/PLAYER RESPONSE HEADERS
+        res.setHeader('Content-Type', 'application/x-mpegurl');
         res.setHeader('Content-Disposition', `attachment; filename="mitv_${user}.m3u"`);
-        return res.send(finalM3U);
+        res.setHeader('Cache-Control', 'no-cache');
+        
+        return res.status(200).send(finalM3U);
 
     } catch (error) {
-        return res.status(500).send("Server Error: " + error.message);
+        console.error("System Crash:", error.message);
+        return res.status(500).send("#EXTM3U\n#EXTINF:-1, MITV SERVER ERROR: " + error.message);
     }
-          }
-                      
+};
