@@ -2,39 +2,435 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>MiTV Control Center | Muslim Islam</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiTV Ultimate M3U Generator | MUSLIM ISLAM</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        :root { --p: #00f2ff; --bg: #050608; --c: #0f1218; --b: #1e2530; --text: #e2e8f0; }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+        /* =========================================================
+           MITV NETWORK - ADVANCED 3D STYLESHEET
+           OWNER: MUAAZ IQBAL
+           ========================================================= */
+        :root {
+            --primary: #00e5ff;
+            --secondary: #ff0055;
+            --bg-dark: #030508;
+            --panel-bg: rgba(10, 15, 25, 0.7);
+            --border-glow: 0 0 10px rgba(0, 229, 255, 0.5);
+            --text-main: #e0f7fa;
+            --text-muted: #8492a6;
+            --success: #00ff88;
+            --danger: #ff3366;
+            --warning: #ffcc00;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Rajdhani', sans-serif;
+            overflow: hidden; /* Prevent body scroll, use custom scroll areas */
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* LIVE 3D PARTICLE BACKGROUND */
+        #canvas-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: -1;
+            background: radial-gradient(circle at center, #0a1128 0%, #010308 100%);
+        }
+
+        /* SCROLLBAR CUSTOMIZATION */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.5); }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #fff; }
+
+        /* LOGIN GATE (3D FLIP EFFECT) */
+        #login-gate {
+            position: fixed; inset: 0;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 10000;
+            backdrop-filter: blur(20px);
+            background: rgba(0,0,0,0.8);
+            perspective: 1000px;
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .login-card {
+            background: var(--panel-bg);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(0,229,255,0.2), inset 0 0 20px rgba(0,229,255,0.1);
+            text-align: center;
+            transform-style: preserve-3d;
+            animation: float 4s ease-in-out infinite;
+            backdrop-filter: blur(10px);
+            width: 400px;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px) rotateX(2deg); }
+            50% { transform: translateY(-15px) rotateX(-2deg); }
+            100% { transform: translateY(0px) rotateX(2deg); }
+        }
+        .login-card h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 32px;
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary);
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+        }
+        .login-card p { color: var(--text-muted); margin-bottom: 30px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* CORE UI LAYOUT */
+        #app-container {
+            display: none;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 1s ease-in;
+        }
+
+        /* TOP NAVIGATION */
+        .top-nav {
+            height: 70px;
+            background: rgba(5, 10, 15, 0.85);
+            border-bottom: 1px solid rgba(0, 229, 255, 0.2);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+        .nav-brand {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            font-weight: 900;
+            color: #fff;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .nav-brand span { color: var(--primary); text-shadow: 0 0 8px var(--primary); }
+        .system-status {
+            display: flex; gap: 20px; align-items: center; font-size: 14px; font-weight: 600;
+        }
+        .pulse-dot {
+            height: 10px; width: 10px; background: var(--success); border-radius: 50%;
+            box-shadow: 0 0 10px var(--success);
+            animation: pulse-dot 1.5s infinite;
+        }
+        @keyframes pulse-dot {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(0, 255, 136, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+        }
+
+        /* MAIN GRID SYSTEM */
+        .main-workspace {
+            display: grid;
+            grid-template-columns: 350px 1fr 400px;
+            gap: 20px;
+            padding: 20px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* PANELS (GLASSMORPHISM) */
+        .glass-panel {
+            background: var(--panel-bg);
+            border: 1px solid rgba(0,229,255,0.15);
+            border-radius: 15px;
+            display: flex; flex-direction: column;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            overflow: hidden;
+            transition: border-color 0.3s ease;
+        }
+        .glass-panel:hover { border-color: rgba(0,229,255,0.4); }
         
-        /* Login Overlay */
-        #login-screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-box { background: var(--c); padding: 40px; border-radius: 20px; border: 1px solid var(--b); text-align: center; width: 350px; }
+        .panel-header {
+            padding: 15px 20px;
+            background: rgba(0,0,0,0.4);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            letter-spacing: 1px;
+            color: var(--primary);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .panel-body { padding: 20px; flex: 1; overflow-y: auto; }
+
+        /* FORM CONTROLS */
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; font-weight: 700; }
+        input, select, textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            color: #fff;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s;
+            outline: none;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0,229,255,0.2);
+            background: rgba(0,0,0,0.8);
+        }
+
+        /* BUTTONS */
+        .btn {
+            background: linear-gradient(45deg, #0088ff, var(--primary));
+            border: none; color: #000;
+            padding: 12px 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px; font-weight: 900;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 100%;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
+        }
+        .btn::after {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: rgba(255,255,255,0.2); transform: rotate(45deg); transition: all 0.3s; opacity: 0;
+        }
+        .btn:hover::after { opacity: 1; left: 100%; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 229, 255, 0.5); }
+        .btn:active { transform: translateY(1px); }
         
-        .header { height: 70px; border-bottom: 1px solid var(--b); display: flex; align-items: center; padding: 0 40px; justify-content: space-between; position: sticky; top:0; background: rgba(5,6,8,0.8); backdrop-filter: blur(10px); z-index: 100; }
-        .logo { font-weight: 800; font-size: 20px; color: var(--p); letter-spacing: -1px; }
+        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); box-shadow: none; }
+        .btn-outline:hover { background: rgba(0,229,255,0.1); }
+        .btn-danger { background: linear-gradient(45deg, #ff0055, #ff3366); box-shadow: 0 4px 15px rgba(255, 0, 85, 0.3); color: white; }
+        .btn-warning { background: linear-gradient(45deg, #ffaa00, #ffcc00); color: #000; }
+        .btn-small { padding: 6px 12px; font-size: 11px; width: auto; border-radius: 4px; }
 
-        .wrapper { display: grid; grid-template-columns: 280px 1fr 350px; gap: 20px; padding: 20px; }
-        .card { background: var(--c); border: 1px solid var(--b); border-radius: 15px; padding: 20px; margin-bottom: 20px; }
-        h2 { font-size: 14px; text-transform: uppercase; color: #64748b; margin-bottom: 15px; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+        /* LIST ITEMS (CHANNELS & USERS) */
+        .list-item {
+            background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .list-item:hover { border-color: var(--primary); transform: translateX(5px); background: rgba(0,0,0,0.8); }
+        .list-item::before {
+            content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 3px; background: var(--primary); opacity: 0; transition: 0.3s;
+        }
+        .list-item:hover::before { opacity: 1; }
 
-        input, select, textarea { width: 100%; padding: 12px; background: #000; border: 1px solid var(--b); border-radius: 8px; color: #fff; margin-bottom: 10px; font-size: 13px; }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; background: var(--p); color: #000; }
-        .btn:hover { opacity: 0.8; transform: translateY(-2px); }
-        .btn-del { background: #ef4444; color: #fff; padding: 5px 10px; font-size: 10px; }
+        .ch-logo { width: 40px; height: 40px; border-radius: 8px; object-fit: contain; background: #fff; margin-right: 15px; float: left; }
+        .item-title { font-weight: 700; font-size: 16px; margin-bottom: 5px; color: #fff; }
+        .item-meta { font-size: 11px; color: var(--text-muted); word-break: break-all; margin-bottom: 10px; }
+        .badge { padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-active { background: rgba(0,255,136,0.1); color: var(--success); border: 1px solid rgba(0,255,136,0.3); }
+        .badge-inactive { background: rgba(255,51,102,0.1); color: var(--danger); border: 1px solid rgba(255,51,102,0.3); }
+        .action-row { display: flex; gap: 8px; justify-content: flex-end; clear: both; }
 
-        /* Tables & Lists */
-        .list-container { max-height: 500px; overflow-y: auto; }
-        .item { background: #000; padding: 12px; border-radius: 10px; margin-bottom: 8px; border: 1px solid transparent; }
-        .item:hover { border-color: var(--p); }
-        .status { font-size: 10px; padding: 2px 6px; border-radius: 4px; }
-        .paid { background: rgba(0,242,255,0.1); color: var(--p); }
+        /* M3U LINK BOX */
+        .m3u-box {
+            background: #000;
+            border: 1px dashed var(--primary);
+            padding: 8px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 10px;
+            color: var(--primary);
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 10px;
+        }
+        .m3u-box i { cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .m3u-box i:hover { color: #fff; transform: scale(1.2); }
+
+        /* LIVE TRACKER (HACKER TERMINAL STYLE) */
+        #terminal-logs { font-family: 'Courier New', Courier, monospace; }
+        .log-entry {
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 12px 0;
+            font-size: 12px;
+            line-height: 1.6;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        .log-time { color: var(--warning); font-size: 10px; }
+        .log-user { color: var(--primary); font-weight: bold; font-size: 14px; }
+        .log-action { color: #fff; }
+        .log-target { color: var(--success); font-weight: bold; }
+        .log-hardware { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+        .hw-badge { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #ccc; }
+        .hw-ip { color: #00e5ff; border: 1px solid rgba(0,229,255,0.3); }
+        .hw-loc { color: #ff0055; border: 1px solid rgba(255,0,85,0.3); }
+
+        /* MODALS (EDITING) */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center; z-index: 2000;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .modal-content {
+            background: var(--bg-dark); border: 1px solid var(--primary);
+            width: 500px; border-radius: 15px; padding: 30px;
+            transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        .modal-header { font-family: 'Orbitron', sans-serif; color: var(--primary); font-size: 20px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;}
+
+        /* TOAST NOTIFICATIONS */
+        #toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast {
+            background: rgba(0,0,0,0.9); border-left: 4px solid var(--primary);
+            color: #fff; padding: 15px 25px; border-radius: 4px; font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            animation: toastIn 0.3s forwards, toastOut 0.3s 3s forwards;
+            display: flex; align-items: center; gap: 10px;
+        }
+        @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes toastOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas-bg"></canvas>
+
+    <div id="login-gate">
+        <div class="login-card">
+            <i class="fas fa-shield-alt" style="font-size: 40px; color: var(--primary); margin-bottom: 15px; filter: drop-shadow(0 0 10px var(--primary));"></i>
+            <h1>MiTV SYSTEM</h1>
+            <p>Authorized Personnel Only</p>
+            <div class="input-group">
+                <input type="password" id="admin-pass" placeholder="Enter Master Key" style="text-align: center; font-size: 18px; letter-spacing: 3px;">
+            </div>
+            <button class="btn" onclick="authenticateUser()"><i class="fas fa-fingerprint"></i> DECRYPT SYSTEM</button>
+            <div id="login-error" style="color: var(--danger); font-size: 12px; margin-top: 15px; display: none;">ACCESS DENIED. Incorrect Key.</div>
+        </div>
+    </div>
+
+    <div id="app-container">
+        
+        <header class="top-nav">
+            <div class="nav-brand">
+                <i class="fas fa-satellite-dish"></i> MiTV <span>NETWORK</span>
+            </div>
+            <div class="system-status">
+                <div class="pulse-dot"></div>
+                <span id="conn-status">SYSTEM ONLINE</span>
+                <button class="btn btn-outline btn-small" onclick="location.reload()" style="margin-left: 20px;"><i class="fas fa-sync-alt"></i> REBOOT</button>
+            </div>
+        </header>
+
+        <main class="main-workspace">
+            
+            <div class="glass-panel">
+                <div class="panel-header">
+                    <span><i class="fas fa-tv"></i> GLOBAL POOL</span>
+                    <span class="badge badge-active" id="count-channels">0</span>
+                </div>
+                <div class="panel-body">
+                    <div style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05);">
+                        <label><i class="fas fa-link"></i> Import New M3U Source</label>
+                        <textarea id="raw-m3u" rows="4" placeholder="Paste URL or Raw #EXTM3U text here..."></textarea>
+                        <button class="btn" onclick="parseAndExtractM3U()"><i class="fas fa-cogs"></i> EXTRACT CHANNELS</button>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" id="search-ch" placeholder="Search Channels..." oninput="filterChannels()">
+                    </div>
+
+                    <div id="channel-list-container">
+                        <div style="text-align:center; padding: 20px; color: var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Loading Data...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel">
+                <div class="panel-header">
+                    <span><i class="fas fa-users"></i> USER M3U GENERATOR</span>
+                    <span class="badge badge-active" id="count-users">0</span>
+                </div>
+                <div class="panel-body">
+                    <div style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05);">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div class="input-group">
+                                <label>Client Name</label>
+                                <input type="text" id="new-u-name" placeholder="E.g., Muaaz">
+                            </div>
+                            <div class="input-group">
+                                <label>System ID (Username)</label>
+                                <input type="text" id="new-u-id" placeholder="E.g., mitv-123">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Account Status</label>
+                            <select id="new-u-status">
+                                <option value="Active">🟢 ACTIVE (Full Access)</option>
+                                <option value="Suspended">🔴 SUSPENDED (Block Streams)</option>
+                            </select>
+                        </div>
+                        <button class="btn" onclick="createNewUser()"><i class="fas fa-user-plus"></i> GENERATE M3U LINK</button>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" id="search-usr" placeholder="Search Users..." oninput="filterUsers()">
+                    </div>
+
+                    <div id="user-list-container">
+                        </div>
+                </div>
+            </div>
+
+            <div class="glass-panel" style="border-color: rgba(255,0,85,0.3);">
+                <div class="panel-header" style="color: var(--secondary);">
+                    <span><i class="fas fa-satellite"></i> DEEP TRACKING RADAR</span>
+                    <i class="fas fa-signal" style="animation: pulse-dot 1s infinite;"></i>
+                </div>
+                <div class="panel-body" id="terminal-logs" style="background: rgba(0,0,0,0.8); border-radius: 8px;">
+                    <div style="text-align:center; padding: 20px; color: var(--secondary);"><i class="fas fa-radar fa-spin"></i> Scanning for activity...</div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="modal-channel">
+        <div class="modal-content">
+            <div class="modal-header">EDIT CHANNEL DETAILS</div>
+            <input type="hidden" id="edit-ch-id">
+            <div class="input-group">
+                <label>Channel Name</label>
+                <input type="text" id="edit-ch-name">
+            </div>
+            <div class="input-group">
+                <label>Logo URL</label>
+                <input type="text" id="edit-ch-logo">
+            </div>
+            <div class="input-group">
+                <label>Stream / Server URL</label>
+                <inp        .paid { background: rgba(0,242,255,0.1); color: var(--p); }
         .unpaid { background: rgba(239,68,68,0.1); color: #ef4444; }
 
         /* Activity Monitor */
