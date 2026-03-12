@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiTV Admin - Muslim Islam Core</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <style>
+        /* =========================================
+           1. ADMIN UI DESIGN SYSTEM
+           =========================================
+        */
+        :root {
+            --bg: #0d1117;
+            --sidebar: #161b22;
+            --card: #21262d;
+            --primary: #58a6ff;
+            --success: #2ea043;
+            --danger: #f85149;
+            --warning: #d29922;
+            --text: #c9d1d9;
+            --border: #30363d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Ubuntu', sans-serif; }
+        body { background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+
+        /* SIDEBAR */
+        #sidebar {
+            width: 260px; background: var(--sidebar); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; padding: 20px 0;
+        }
+        .side-header { padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 20px; text-align: center; }
+        .side-header img { width: 50px; margin-bottom: 10px; }
+        .nav-item {
+            padding: 15px 25px; cursor: pointer; display: flex; align-items: center; gap: 15px;
+            transition: 0.2s; color: #8b949e; font-weight: 600;
+        }
+        .nav-item:hover, .nav-item.active { background: #21262d; color: var(--primary); border-left: 4px solid var(--primary); }
+
+        /* MAIN AREA */
+        #main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .topbar { height: 70px; background: var(--sidebar); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 30px; justify-content: space-between; }
+        
+        .content-view { padding: 30px; display: none; animation: fadeIn 0.5s ease; }
+        .content-view.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CARDS & STATS */
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: var(--card); padding: 25px; border-radius: 12px; border: 1px solid var(--border); }
+        .stat-card h4 { color: #8b949e; font-size: 12px; text-transform: uppercase; margin-bottom: 10px; }
+        .stat-card h2 { font-size: 30px; color: #fff; }
+
+        /* TABLES & FORMS */
+        .data-card { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 25px; margin-bottom: 25px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; padding: 15px; border-bottom: 2px solid var(--border); color: #8b949e; font-size: 12px; }
+        td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
+        
+        input, select, textarea {
+            width: 100%; padding: 12px; background: #0d1117; border: 1px solid var(--border);
+            border-radius: 6px; color: #fff; outline: none; margin-bottom: 15px;
+        }
+        button {
+            padding: 12px 25px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s;
+        }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-success { background: var(--success); color: #fff; }
+        .btn-danger { background: var(--danger); color: #fff; }
+
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; }
+        .badge-pro { background: rgba(210, 153, 34, 0.2); color: var(--warning); border: 1px solid var(--warning); }
+        .badge-free { background: rgba(46, 160, 67, 0.2); color: var(--success); border: 1px solid var(--success); }
+
+        /* SECURITY OVERLAY */
+        #admin-lock {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000;
+            z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="admin-lock">
+        <img src="https://i.ibb.co/C5WBZ6Yc/file-00000000305071fa945b58b012ac072b.png" width="80" style="margin-bottom: 30px;">
+        <h2 style="margin-bottom: 20px;">MiTV Master Access</h2>
+        <input type="password" id="master-key" placeholder="Enter System Key" style="width: 300px; text-align: center; letter-spacing: 5px;">
+        <button class="btn-primary" onclick="unlockAdmin()">Unlock Console</button>
+    </div>
+
+    <div id="sidebar">
+        <div class="side-header">
+            <img src="https://i.ibb.co/SD424ppD/IMG-20260312-052617-removebg-preview.png">
+            <p style="font-size: 12px; font-weight: bold; color: var(--primary);">MiTV CONTROL PANEL</p>
+        </div>
+        <div class="nav-item active" onclick="showView('dashboard', this)"><i class="fas fa-tachometer-alt"></i> Dashboard</div>
+        <div class="nav-item" onclick="showView('users', this)"><i class="fas fa-users"></i> Users Management</div>
+        <div class="nav-item" onclick="showView('content', this)"><i class="fas fa-play-circle"></i> Channels & Movies</div>
+        <div class="nav-item" onclick="showView('m3u', this)"><i class="fas fa-file-import"></i> M3U Link Parser</div>
+        <div class="nav-item" onclick="showView('logs', this)"><i class="fas fa-history"></i> Live Activity</div>
+    </div>
+
+    <div id="main">
+        <div class="topbar">
+            <h3 id="view-title">Dashboard Summary</h3>
+            <div style="font-size: 12px; color: var(--success);"><i class="fas fa-circle"></i> Firebase Live Sync</div>
+        </div>
+
+        <div id="view-dashboard" class="content-view active">
+            <div class="stats-row">
+                <div class="stat-card"><h4>Total Users</h4><h2 id="stat-total-users">0</h2></div>
+                <div class="stat-card"><h4>Pro Users</h4><h2 id="stat-pro-users">0</h2></div>
+                <div class="stat-card"><h4>Total Channels</h4><h2 id="stat-total-ch">0</h2></div>
+                <div class="stat-card"><h4>Active Watches</h4><h2 id="stat-active">0</h2></div>
+            </div>
+
+            <div class="data-card">
+                <h3>System Announcement (Admin)</h3>
+                <textarea id="sys-msg" placeholder="Write a message for users..." rows="3" style="margin-top: 15px;"></textarea>
+                <button class="btn-success">Push Update</button>
+            </div>
+        </div>
+
+        <div id="view-users" class="content-view">
+            <div class="data-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3>User Database</h3>
+                    <input type="text" placeholder="Search Email..." style="width: 250px; margin: 0;" onkeyup="searchUser(this.value)">
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User UID</th>
+                            <th>Email Address</th>
+                            <th>Current Plan</th>
+                            <th>Manage Access</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-content" class="content-view">
+            <div class="data-card">
+                <h3>Manual Content Entry</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                    <input type="text" id="ch-name" placeholder="Channel Name">
+                    <input type="text" id="ch-logo" placeholder="Logo URL">
+                    <input type="text" id="ch-link" placeholder="Stream Link (M3U8/MPD/MP4)">
+                    <select id="ch-cat">
+                        <option value="Live TV">Live TV</option>
+                        <option value="Movies">Movies</option>
+                        <option value="Series">Series</option>
+                        <option value="Islamic">Islamic</option>
+                    </select>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                    <input type="checkbox" id="ch-pro" style="width: 20px; height: 20px; margin: 0;">
+                    <label>Make this a PRO Premium Channel</label>
+                </div>
+                <button class="btn-primary" onclick="addChannelManual()">Save to Database</button>
+            </div>
+
+            <div class="data-card">
+                <h3>Channels Database</h3>
+                <table id="content-table">
+                    <thead>
+                        <tr>
+                            <th>Preview</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Type</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="content-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-m3u" class="content-view">
+            <div class="data-card">
+                <h3>Auto M3U Link Downloader</h3>
+                <p style="font-size: 13px; color: #8b949e; margin-bottom: 15px;">Provide an M3U file URL. The system will download, extract name/logo/link, and sync with Firebase.</p>
+                <input type="url" id="m3u-url" placeholder="https://example.com/playlist.m3u">
+                <button class="btn-primary" onclick="parseM3UFromLink()">Execute Import</button>
+                <div id="import-log" style="margin-top: 20px; font-family: 'Roboto Mono'; font-size: 12px; color: var(--success); height: 200px; overflow-y: auto; background: #000; padding: 10px;">
+                    Ready for import tasks...
+                </div>
+            </div>
+        </div>
+
+        <div id="view-logs" class="content-view">
+            <div class="data-card">
+                <h3>Live User Activity Tracker</h3>
+                <table style="font-family: 'Roboto Mono'; font-size: 12px;">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>User ID</th>
+                            <th>Action</th>
+                            <th>Content</th>
+                        </tr>
+                    </thead>
+                    <tbody id="log-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. CONFIG & INIT ---
+        const config = {
+            apiKey: "AIzaSyBbnU8DkthpYQMHOLLyj6M0cc05qXfjMcw",
+            authDomain: "ramadan-2385b.firebaseapp.com",
+            databaseURL: "https://ramadan-2385b-default-rtdb.firebaseio.com",
+            projectId: "ramadan-2385b",
+            storageBucket: "ramadan-2385b.firebasestorage.app",
+            messagingSenderId: "882828936310",
+            appId: "1:882828936310:web:7f97b921031fe130fe4b57"
+        };
+        firebase.initializeApp(config);
+        const db = firebase.database();
+
+        function unlockAdmin() {
+            let key = document.getElementById('master-key').value;
+            if(key === 'mi123456') {
+                document.getElementById('admin-lock').style.display = 'none';
+                startAdminEngine();
+            } else { alert("ACCESS DENIED: WRONG KEY"); }
+        }
+
+        // --- 2. THE ENGINE ---
+        function startAdminEngine() {
+            syncStats();
+            loadUsers();
+            loadChannels();
+            loadActivityLogs();
+        }
+
+        function showView(viewId, el) {
+            document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+            el.classList.add('active');
+            document.getElementById('view-title').innerText = el.innerText;
+        }
+
+        // --- 3. LOGIC: STATS ---
+        function syncStats() {
+            db.ref('users').on('value', snap => {
+                let total = snap.numChildren();
+                let pro = 0;
+                snap.forEach(u => { if(u.val().plan === 'Pro Premium') pro++; });
+                document.getElementById('stat-total-users').innerText = total;
+                document.getElementById('stat-pro-users').innerText = pro;
+            });
+            db.ref('channels').on('value', snap => {
+                document.getElementById('stat-total-ch').innerText = snap.numChildren();
+            });
+        }
+
+        // --- 4. LOGIC: USERS ---
+        function loadUsers() {
+            db.ref('users').on('value', snap => {
+                const tbody = document.getElementById('user-table-body');
+                tbody.innerHTML = '';
+                snap.forEach(child => {
+                    let u = child.val();
+                    let key = child.key;
+                    let tr = document.createElement('tr');
+                    let badgeClass = u.plan === 'Pro Premium' ? 'badge-pro' : 'badge-free';
+                    tr.innerHTML = `
+                        <td style="color:var(--primary); font-size:11px;">${key}</td>
+                        <td>${u.email}</td>
+                        <td><span class="badge ${badgeClass}">${u.plan || 'Free'}</span></td>
+                        <td>
+                            <button class="btn-success" style="padding:5px 10px; font-size:10px;" onclick="updatePlan('${key}', 'Pro Premium')">SET PRO</button>
+                            <button class="btn-danger" style="padding:5px 10px; font-size:10px;" onclick="updatePlan('${key}', 'Free')">SET FREE</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+
+        function updatePlan(uid, plan) {
+            db.ref('users/' + uid).update({ plan: plan });
+        }
+
+        // --- 5. LOGIC: CONTENT & CRUD ---
+        function loadChannels() {
+            db.ref('channels').on('value', snap => {
+                const tbody = document.getElementById('content-table-body');
+                tbody.innerHTML = '';
+                snap.forEach(child => {
+                    let ch = child.val();
+                    let key = child.key;
+                    let tr = document.createElement('tr');
+                    let typeBadge = ch.isPro ? '<span class="badge badge-pro">PRO</span>' : '<span class="badge badge-free">FREE</span>';
+                    tr.innerHTML = `
+                        <td><img src="${ch.logo}" width="30" onerror="this.src='https://i.ibb.co/C5WBZ6Yc/file-00000000305071fa945b58b012ac072b.png'"></td>
+                        <td>${ch.name}</td>
+                        <td>${ch.category}</td>
+                        <td>${typeBadge}</td>
+                        <td>
+                            <button class="btn-danger" style="padding:5px 10px; font-size:10px;" onclick="deleteChannel('${key}')">DELETE</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+
+        function addChannelManual() {
+            const name = document.getElementById('ch-name').value;
+            const logo = document.getElementById('ch-logo').value;
+            const link = document.getElementById('ch-link').value;
+            const cat = document.getElementById('ch-cat').value;
+            const isPro = document.getElementById('ch-pro').checked;
+
+            if(!name || !link) return alert("Fields Required!");
+
+            db.ref('channels').push({
+                name, logo, streamLink: link, category: cat, isPro, timestamp: Date.now()
+            }).then(() => {
+                alert("Success!");
+                document.getElementById('ch-name').value = '';
+                document.getElementById('ch-link').value = '';
+            });
+        }
+
+        function deleteChannel(key) {
+            if(confirm("Confirm Delete?")) db.ref('channels/' + key).remove();
+        }
+
+        // --- 6. LOGIC: M3U PARSER FROM URL ---
+        async function parseM3UFromLink() {
+            const url = document.getElementById('m3u-url').value;
+            const logBox = document.getElementById('import-log');
+            if(!url) return;
+
+            logBox.innerHTML += `[${new Date().toLocaleTimeString()}] Fetching M3U Link...<br>`;
+            
+            try {
+                const res = await fetch(url);
+                const text = await res.text();
+                const lines = text.split('\n');
+                
+                let current = {};
+                let count = 0;
+                let batch = {};
+
+                for(let line of lines) {
+                    line = line.trim();
+                    if(line.startsWith('#EXTINF:')) {
+                        let nameMatch = line.split(',');
+                        let logoMatch = line.match(/tvg-logo="(.*?)"/);
+                        let groupMatch = line.match(/group-title="(.*?)"/);
+                        
+                        current.name = nameMatch[nameMatch.length-1].trim();
+                        current.logo = logoMatch ? logoMatch[1] : '';
+                        current.category = groupMatch ? groupMatch[1] : 'Live TV';
+                        current.isPro = false;
+                    } else if(line.startsWith('http')) {
+                        if(current.name) {
+                            current.streamLink = line;
+                            let key = db.ref().child('channels').push().key;
+                            batch[key] = current;
+                            count++;
+                            current = {};
+                        }
+                    }
+                }
+
+                db.ref('channels').update(batch).then(() => {
+                    logBox.innerHTML += `[SYSTEM] Success! Parsed and added ${count} channels to Firebase.<br>`;
+                });
+            } catch(e) {
+                logBox.innerHTML += `<span style="color:red;">[ERROR] ${e.message}</span><br>`;
+            }
+        }
+
+        // --- 7. LOGIC: LOGS ---
+        function loadActivityLogs() {
+            db.ref('user_logs').limitToLast(30).on('value', snap => {
+                const tbody = document.getElementById('log-table-body');
+                tbody.innerHTML = '';
+                snap.forEach(userNode => {
+                    userNode.forEach(logNode => {
+                        let log = logNode.val();
+                        let tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td style="color:#555;">${new Date(log.timestamp).toLocaleTimeString()}</td>
+                            <td style="color:var(--primary);">${userNode.key.substring(0,8)}</td>
+                            <td>${log.action}</td>
+                            <td>${log.channel || 'N/A'}</td>
+                        `;
+                        tbody.prepend(tr);
+                    });
+                });
+            });
+        }
+        
+        // Anti-Inspect
+        document.addEventListener('contextmenu', e => e.preventDefault());
+    </script>
+</body>
+</html>
