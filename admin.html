@@ -2,343 +2,268 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MiTV Pro Admin | Enterprise Management</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <title>MiTV Control Center | Muslim Islam</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap');
-        :root { --primary: #e50914; --accent: #00f2ff; --bg: #050505; }
-        body { background: var(--bg); color: #e5e5e5; font-family: 'Rajdhani', sans-serif; overflow-x: hidden; }
-        .digital-border { border: 1px solid rgba(229, 9, 20, 0.3); box-shadow: 0 0 15px rgba(229, 9, 20, 0.1); }
-        .sidebar-btn { transition: 0.3s; border-left: 4px solid transparent; }
-        .sidebar-btn:hover, .sidebar-btn.active { background: #1a1a1a; border-left-color: var(--primary); color: white; }
-        .channel-card { background: #111; border: 1px solid #222; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .channel-card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        .tracking-log { border-left: 3px solid var(--accent); background: rgba(0, 242, 255, 0.05); }
-        input::placeholder { color: #444; }
-        .loading-shimmer { background: linear-gradient(90deg, #111 25%, #222 50%, #111 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        :root { --p: #00f2ff; --bg: #050608; --c: #0f1218; --b: #1e2530; --text: #e2e8f0; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+        
+        /* Login Overlay */
+        #login-screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: var(--c); padding: 40px; border-radius: 20px; border: 1px solid var(--b); text-align: center; width: 350px; }
+        
+        .header { height: 70px; border-bottom: 1px solid var(--b); display: flex; align-items: center; padding: 0 40px; justify-content: space-between; position: sticky; top:0; background: rgba(5,6,8,0.8); backdrop-filter: blur(10px); z-index: 100; }
+        .logo { font-weight: 800; font-size: 20px; color: var(--p); letter-spacing: -1px; }
+
+        .wrapper { display: grid; grid-template-columns: 280px 1fr 350px; gap: 20px; padding: 20px; }
+        .card { background: var(--c); border: 1px solid var(--b); border-radius: 15px; padding: 20px; margin-bottom: 20px; }
+        h2 { font-size: 14px; text-transform: uppercase; color: #64748b; margin-bottom: 15px; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+
+        input, select, textarea { width: 100%; padding: 12px; background: #000; border: 1px solid var(--b); border-radius: 8px; color: #fff; margin-bottom: 10px; font-size: 13px; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; background: var(--p); color: #000; }
+        .btn:hover { opacity: 0.8; transform: translateY(-2px); }
+        .btn-del { background: #ef4444; color: #fff; padding: 5px 10px; font-size: 10px; }
+
+        /* Tables & Lists */
+        .list-container { max-height: 500px; overflow-y: auto; }
+        .item { background: #000; padding: 12px; border-radius: 10px; margin-bottom: 8px; border: 1px solid transparent; }
+        .item:hover { border-color: var(--p); }
+        .status { font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+        .paid { background: rgba(0,242,255,0.1); color: var(--p); }
+        .unpaid { background: rgba(239,68,68,0.1); color: #ef4444; }
+
+        /* Activity Monitor */
+        .log-item { font-family: 'JetBrains Mono', monospace; font-size: 11px; border-bottom: 1px solid var(--b); padding: 10px 0; }
+        .log-ip { color: var(--p); }
+        .log-ch { color: #fbbf24; }
     </style>
 </head>
-<body class="flex">
+<body>
 
-    <aside class="w-72 h-screen bg-black sticky top-0 flex flex-col border-r border-zinc-800">
-        <div class="p-8">
-            <h1 class="text-3xl font-black text-red-600 tracking-tighter italic">MiTV <span class="text-white not-italic">PRO</span></h1>
-            <p class="text-[10px] text-zinc-500 uppercase tracking-[0.3em] mt-1">Network Management v3.0</p>
+<div id="login-screen">
+    <div class="login-box">
+        <h1 class="logo">MiTV MASTER</h1>
+        <p style="margin-bottom: 20px; font-size: 12px;">Authentication Required</p>
+        <input type="password" id="admin-pass" placeholder="Enter Admin Password">
+        <button class="btn" onclick="checkLogin()">Unlock System</button>
+    </div>
+</div>
+
+<div class="header">
+    <div class="logo">MiTV | COMMAND CENTER</div>
+    <div id="stats" style="font-size: 12px; color: #64748b;">Loading System Stats...</div>
+</div>
+
+<div class="wrapper">
+    <div class="col">
+        <div class="card">
+            <h2><i class="fas fa-plus-circle"></i> Add M3U Source</h2>
+            <textarea id="m3u-input" rows="4" placeholder="Paste M3U Link or Raw Content..."></textarea>
+            <button class="btn" onclick="parseM3U()">Import & Extract</button>
         </div>
-        
-        <nav class="flex-1 mt-4">
-            <button onclick="switchTab('dashboard')" class="sidebar-btn active w-full p-5 flex items-center gap-4 text-zinc-400">
-                <i class="fas fa-th-large w-6"></i> Dashboard
-            </button>
-            <button onclick="switchTab('channels')" class="sidebar-btn w-full p-5 flex items-center gap-4 text-zinc-400">
-                <i class="fas fa-tv w-6"></i> Channel Editor
-            </button>
-            <button onclick="switchTab('users')" class="sidebar-btn w-full p-5 flex items-center gap-4 text-zinc-400">
-                <i class="fas fa-user-shield w-6"></i> User Manager
-            </button>
-            <button onclick="switchTab('logs')" class="sidebar-btn w-full p-5 flex items-center gap-4 text-zinc-400">
-                <i class="fas fa-radar w-6"></i> Activity Logs
-            </button>
-        </nav>
 
-        <div class="p-6 bg-zinc-950 border-t border-zinc-800">
-            <div class="flex items-center gap-3">
-                <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                <span class="text-xs font-bold text-zinc-400">SERVER ONLINE: VERCEL</span>
-            </div>
-        </div>
-    </aside>
-
-    <main class="flex-1 min-h-screen p-10 bg-[radial-gradient(circle_at_top_right,_#111,_#050505)]">
-        
-        <section id="tab-dashboard" class="tab-content">
-            <header class="mb-10">
-                <h2 class="text-4xl font-bold text-white">System Overview</h2>
-                <p class="text-zinc-500">Welcome back, Founder of MiTV Network.</p>
-            </header>
-            
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-                <div class="digital-border p-6 bg-zinc-900/50 rounded-xl">
-                    <p class="text-zinc-500 text-sm uppercase">Total Users</p>
-                    <h3 id="stat-users" class="text-4xl font-black text-white mt-2">0</h3>
-                </div>
-                <div class="digital-border p-6 bg-zinc-900/50 rounded-xl">
-                    <p class="text-zinc-500 text-sm uppercase">Active Streams</p>
-                    <h3 id="stat-active" class="text-4xl font-black text-cyan-400 mt-2">0</h3>
-                </div>
-                <div class="digital-border p-6 bg-zinc-900/50 rounded-xl">
-                    <p class="text-zinc-500 text-sm uppercase">Channels Managed</p>
-                    <h3 id="stat-channels" class="text-4xl font-black text-red-500 mt-2">0</h3>
-                </div>
-                <div class="digital-border p-6 bg-zinc-900/50 rounded-xl">
-                    <p class="text-zinc-500 text-sm uppercase">Revenue (MTD)</p>
-                    <h3 class="text-4xl font-black text-green-500 mt-2">PKR 0</h3>
-                </div>
-            </div>
-        </section>
-
-        <section id="tab-channels" class="tab-content hidden">
-            <div class="flex justify-between items-end mb-10">
-                <div>
-                    <h2 class="text-4xl font-bold">Channel Manager</h2>
-                    <p class="text-zinc-500">Parse M3U files and customize individual streams.</p>
-                </div>
-                <div class="flex gap-4">
-                    <input id="m3u-input" type="text" placeholder="https://source.com/list.m3u" class="bg-zinc-900 border border-zinc-700 p-3 rounded-lg w-80 outline-none focus:border-red-600">
-                    <button onclick="processM3U()" class="bg-red-600 px-8 py-3 rounded-lg font-bold hover:bg-red-700 shadow-lg shadow-red-900/20">FETCH M3U</button>
-                </div>
-            </div>
-
-            <div id="channels-grid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                </div>
-            
-            <button onclick="syncToFirebase()" class="fixed bottom-10 right-10 bg-white text-black px-12 py-4 rounded-full font-black uppercase tracking-widest hover:scale-105 transition shadow-2xl">Save Changes to Cloud</button>
-        </section>
-
-        <section id="tab-users" class="tab-content hidden">
-            <div class="flex justify-between items-center mb-10">
-                <h2 class="text-4xl font-bold">User Subscriptions</h2>
-                <button onclick="toggleModal('user-modal')" class="bg-cyan-500 text-black px-6 py-2 rounded font-bold uppercase text-sm italic">+ Add New Subscriber</button>
-            </div>
-            
-            <div class="bg-zinc-900/30 rounded-2xl border border-zinc-800 overflow-hidden">
-                <table class="w-full text-left">
-                    <thead>
-                        <tr class="bg-zinc-900 text-zinc-400 text-xs uppercase tracking-widest">
-                            <th class="p-5">Subscriber</th>
-                            <th class="p-5">Contact</th>
-                            <th class="p-5">Status</th>
-                            <th class="p-5">Expiry</th>
-                            <th class="p-5">Custom M3U</th>
-                            <th class="p-5 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="user-table-body">
-                        </tbody>
-                </table>
-            </div>
-        </section>
-
-        <section id="tab-logs" class="tab-content hidden">
-            <h2 class="text-4xl font-bold mb-10 tracking-tighter italic">LIVE ACTIVITY <span class="text-red-600">SCANNER</span></h2>
-            <div id="log-container" class="space-y-4 max-h-[70vh] overflow-y-auto pr-4 custom-scrollbar">
-                </div>
-        </section>
-
-    </main>
-
-    <div id="user-modal" class="fixed inset-0 bg-black/90 hidden z-50 flex items-center justify-center p-6">
-        <div class="bg-zinc-900 border border-zinc-700 w-full max-w-lg p-10 rounded-3xl relative">
-            <button onclick="toggleModal('user-modal')" class="absolute top-6 right-6 text-zinc-500 hover:text-white"><i class="fas fa-times text-2xl"></i></button>
-            <h3 class="text-2xl font-bold mb-8 text-red-600 italic underline">Register Subscriber</h3>
-            
-            <div class="space-y-5">
-                <div>
-                    <label class="block text-xs text-zinc-500 uppercase mb-2">Full Name</label>
-                    <input id="u-name" type="text" class="w-full bg-black border border-zinc-800 p-4 rounded-xl outline-none focus:border-red-600">
-                </div>
-                <div>
-                    <label class="block text-xs text-zinc-500 uppercase mb-2">WhatsApp / Phone</label>
-                    <input id="u-phone" type="text" class="w-full bg-black border border-zinc-800 p-4 rounded-xl outline-none focus:border-red-600">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs text-zinc-500 uppercase mb-2">Expiry Date</label>
-                        <input id="u-expiry" type="date" class="w-full bg-black border border-zinc-800 p-4 rounded-xl outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-zinc-500 uppercase mb-2">Subscription</label>
-                        <select id="u-status" class="w-full bg-black border border-zinc-800 p-4 rounded-xl outline-none">
-                            <option value="active">Active</option>
-                            <option value="paused">Paused / Unpaid</option>
-                        </select>
-                    </div>
-                </div>
-                <button onclick="saveUser()" class="w-full bg-red-600 py-5 rounded-2xl font-black text-xl hover:bg-red-700 transition mt-6">SAVE SUBSCRIBER</button>
-            </div>
+        <div class="card">
+            <h2><i class="fas fa-tv"></i> Global Channels (<span id="ch-count">0</span>)</h2>
+            <input type="text" id="search-ch" placeholder="Search channels..." onkeyup="filterChannels()">
+            <div id="channel-list" class="list-container"></div>
         </div>
     </div>
 
-    <script>
-        // FIREBASE LOGIC (Using your credentials)
-        const firebaseConfig = {
-            apiKey: "AIzaSyBbnU8DkthpYQMHOLLyj6M0cc05qXfjMcw",
-            authDomain: "ramadan-2385b.firebaseapp.com",
-            databaseURL: "https://ramadan-2385b-default-rtdb.firebaseio.com",
-            projectId: "ramadan-2385b",
-            storageBucket: "ramadan-2385b.firebasestorage.app",
-            messagingSenderId: "882828936310",
-            appId: "1:882828936310:web:7f97b921031fe130fe4b57"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+    <div class="col">
+        <div class="card">
+            <h2><i class="fas fa-user-plus"></i> Register User</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <input type="text" id="u-name" placeholder="Full Name">
+                <input type="text" id="u-id" placeholder="Username (Xtream)">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <input type="text" id="u-pass" placeholder="Password (Phone)">
+                <select id="u-status">
+                    <option value="Paid">Status: PAID</option>
+                    <option value="Unpaid">Status: UNPAID</option>
+                </select>
+            </div>
+            <button class="btn" onclick="saveUser()"><i class="fas fa-save"></i> Save User Profile</button>
+        </div>
 
-        let masterChannels = [];
+        <div class="card">
+            <h2><i class="fas fa-users"></i> Registered Users</h2>
+            <div id="user-list" class="list-container"></div>
+        </div>
+    </div>
 
-        // UI NAVIGATION
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-            document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-' + tabId).classList.remove('hidden');
-            event.currentTarget.classList.add('active');
+    <div class="col">
+        <div class="card" style="border-color: #ef4444;">
+            <h2><i class="fas fa-microscope"></i> Live Activity Tracker</h2>
+            <div id="live-logs" class="list-container" style="max-height: 800px;">
+                <p style="text-align:center; font-size:12px; color:#444;">No live tracking data...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- FIREBASE SETUP ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyBbnU8DkthpYQMHOLLyj6M0cc05qXfjMcw",
+        databaseURL: "https://ramadan-2385b-default-rtdb.firebaseio.com",
+        projectId: "ramadan-2385b",
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // --- LOGIN PROTECTION ---
+    function checkLogin() {
+        const p = document.getElementById('admin-pass').value;
+        if(p === 'mitv123456') {
+            document.getElementById('login-screen').style.display = 'none';
+            initSystem();
+        } else { alert("Incorrect Password Maaz Bhai!"); }
+    }
+
+    // --- CHANNEL MANAGEMENT ---
+    async function parseM3U() {
+        const input = document.getElementById('m3u-input').value;
+        if(!input) return alert("Kuch to dalo!");
+        
+        let rawM3U = input;
+        if(input.startsWith('http')) {
+            const res = await fetch(input);
+            rawM3U = await res.text();
         }
 
-        function toggleModal(id) {
-            const m = document.getElementById(id);
-            m.classList.contains('hidden') ? m.classList.remove('hidden') : m.classList.add('hidden');
+        const lines = rawM3U.split('\n');
+        let channelsAdded = 0;
+
+        for(let i=0; i<lines.length; i++) {
+            if(lines[i].includes('#EXTINF')) {
+                const info = lines[i];
+                const url = lines[i+1]?.trim();
+                if(url && url.startsWith('http')) {
+                    const name = info.split(',')[1] || "Unknown Channel";
+                    const logoMatch = info.match(/tvg-logo="([^"]+)"/);
+                    const logo = logoMatch ? logoMatch[1] : "";
+                    
+                    const cid = btoa(name).substring(0,10);
+                    db.ref('global_channels/' + cid).set({
+                        name: name.trim(),
+                        url: url,
+                        logo: logo,
+                        updated: Date.now()
+                    });
+                    channelsAdded++;
+                }
+            }
         }
+        alert(channelsAdded + " Channels Added to Pool!");
+        document.getElementById('m3u-input').value = '';
+    }
 
-        // M3U PROCESSING ENGINE
-        async function processM3U() {
-            const url = document.getElementById('m3u-input').value;
-            if(!url) return;
-            
-            try {
-                const res = await fetch(url);
-                const text = await res.text();
-                const lines = text.split('\n');
-                masterChannels = [];
-                let current = {};
-
-                lines.forEach(line => {
-                    if(line.startsWith("#EXTINF")) {
-                        current.name = line.split(',')[1]?.trim() || "Unknown Channel";
-                        const logoMatch = line.match(/tvg-logo="(.*?)"/);
-                        current.logo = logoMatch ? logoMatch[1] : "";
-                    } else if(line.startsWith("http")) {
-                        current.url = line.trim();
-                        current.id = Math.random().toString(36).substr(2, 9);
-                        masterChannels.push({...current});
-                        current = {};
-                    }
-                });
-                renderChannels();
-            } catch (e) { alert("Parsing Error: " + e.message); }
-        }
-
-        function renderChannels() {
-            const grid = document.getElementById('channels-grid');
-            grid.innerHTML = masterChannels.map((ch, i) => `
-                <div class="channel-card p-5 rounded-2xl relative group">
-                    <img src="${ch.logo}" class="w-full h-32 object-contain mb-4 rounded-lg bg-black p-2 border border-zinc-800" onerror="this.src='https://via.placeholder.com/200x100?text=MiTV+LOGO'">
-                    <input type="text" value="${ch.name}" onchange="updateCh(${i}, 'name', this.value)" class="w-full bg-zinc-950 border border-zinc-800 p-2 text-sm rounded mb-2">
-                    <input type="text" value="${ch.url}" onchange="updateCh(${i}, 'url', this.value)" class="w-full bg-zinc-950 border border-zinc-800 p-2 text-[10px] rounded text-zinc-500 truncate">
-                    <div class="flex justify-between mt-4">
-                        <button onclick="removeCh(${i})" class="text-red-600 hover:text-red-400 text-xs font-bold uppercase tracking-tighter">Remove</button>
-                        <div class="flex gap-2">
-                            <button onclick="move(${i}, -1)" class="text-zinc-500 hover:text-white"><i class="fas fa-chevron-up"></i></button>
-                            <button onclick="move(${i}, 1)" class="text-zinc-500 hover:text-white"><i class="fas fa-chevron-down"></i></button>
-                        </div>
+    function loadChannels() {
+        db.ref('global_channels').on('value', snap => {
+            const list = document.getElementById('channel-list');
+            list.innerHTML = '';
+            let count = 0;
+            snap.forEach(child => {
+                const c = child.val();
+                list.innerHTML += `
+                    <div class="item">
+                        <div style="font-weight:700; font-size:12px;">${c.name}</div>
+                        <div style="font-size:9px; color:#444; word-break:break-all;">${c.url}</div>
+                        <button onclick="delChannel('${child.key}')" class="btn-del" style="margin-top:5px;">Delete</button>
                     </div>
-                </div>
-            `).join('');
-            document.getElementById('stat-channels').innerText = masterChannels.length;
-        }
-
-        // USER CLOUD MANAGEMENT
-        function saveUser() {
-            const name = document.getElementById('u-name').value;
-            const phone = document.getElementById('u-phone').value;
-            const expiry = document.getElementById('u-expiry').value;
-            const status = document.getElementById('u-status').value;
-
-            if(!name || !phone) return alert("Fill required fields!");
-
-            const userData = {
-                name, phone, expiry, status,
-                token: btoa(name + phone).substr(0, 12),
-                createdAt: Date.now()
-            };
-
-            db.ref('users/' + userData.token).set(userData).then(() => {
-                toggleModal('user-modal');
-                loadUsers();
+                `;
+                count++;
             });
-        }
+            document.getElementById('ch-count').innerText = count;
+        });
+    }
 
-        function loadUsers() {
-            db.ref('users').on('value', snap => {
-                const users = snap.val();
-                let html = '';
-                let count = 0;
-                for(let id in users) {
-                    count++;
-                    const u = users[id];
-                    const maskedM3U = `https://mitv-network.vercel.app/api/m3u?token=${id}`;
-                    html += `
-                        <tr class="border-b border-zinc-800/50 hover:bg-zinc-900/20">
-                            <td class="p-5">
-                                <p class="font-bold text-white">${u.name}</p>
-                                <p class="text-[10px] text-zinc-600">ID: ${id}</p>
-                            </td>
-                            <td class="p-5 text-zinc-400">${u.phone}</td>
-                            <td class="p-5">
-                                <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase ${u.status === 'active' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}">
-                                    ${u.status}
-                                </span>
-                            </td>
-                            <td class="p-5 text-zinc-400">${u.expiry}</td>
-                            <td class="p-5">
-                                <div class="flex items-center gap-2">
-                                    <input value="${maskedM3U}" class="bg-black text-[10px] p-2 rounded w-48 border border-zinc-800" readonly>
-                                    <button onclick="copyLink('${maskedM3U}')" class="text-cyan-500"><i class="fas fa-copy"></i></button>
-                                </div>
-                            </td>
-                            <td class="p-5 text-right">
-                                <button onclick="deleteUser('${id}')" class="text-zinc-700 hover:text-red-500 transition"><i class="fas fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    `;
-                }
-                document.getElementById('user-table-body').innerHTML = html;
-                document.getElementById('stat-users').innerText = count;
-            });
-        }
+    function delChannel(id) { if(confirm("Channel delete kar den?")) db.ref('global_channels/'+id).remove(); }
 
-        // LIVE SCANNER TRACKING
-        function initTracking() {
-            db.ref('logs').limitToLast(20).on('value', snap => {
-                const logs = snap.val();
-                let html = '';
-                for(let id in logs) {
-                    const l = logs[id];
-                    html = `
-                        <div class="tracking-log p-5 rounded-xl flex justify-between items-center animate-[fadeIn_0.5s]">
-                            <div>
-                                <h4 class="font-bold text-white">${l.user}</h4>
-                                <p class="text-xs text-zinc-500">${l.ip} • ${l.device} • Port: ${l.port}</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-cyan-400 text-sm font-bold tracking-widest">${l.channel}</p>
-                                <p class="text-[10px] text-zinc-600 italic">${new Date(l.timestamp).toLocaleTimeString()}</p>
-                            </div>
+    // --- USER MANAGEMENT ---
+    function saveUser() {
+        const id = document.getElementById('u-id').value;
+        const name = document.getElementById('u-name').value;
+        const pass = document.getElementById('u-pass').value;
+        const status = document.getElementById('u-status').value;
+
+        if(!id || !pass) return alert("Username aur Password zaroori hain!");
+
+        db.ref('master_users/' + id).set({
+            name: name,
+            phone: pass,
+            status: status,
+            m3u_link: `https://mitv-tan.vercel.app/get/m3u/${id}`
+        }).then(() => alert("User Saved!"));
+    }
+
+    function loadUsers() {
+        db.ref('master_users').on('value', snap => {
+            const list = document.getElementById('user-list');
+            list.innerHTML = '';
+            snap.forEach(child => {
+                const u = child.val();
+                const id = child.key;
+                const sc = u.status === 'Paid' ? 'paid' : 'unpaid';
+                list.innerHTML += `
+                    <div class="item">
+                        <div style="display:flex; justify-content:space-between">
+                            <b>${u.name}</b>
+                            <span class="status ${sc}">${u.status}</span>
                         </div>
-                    ` + html;
-                }
-                document.getElementById('log-container').innerHTML = html;
-                document.getElementById('stat-active').innerText = Object.keys(logs || {}).length;
+                        <div style="font-size:11px; color:#64748b; margin:5px 0;">
+                            Login: ${id} | Pass: ${u.phone}
+                        </div>
+                        <input type="text" readonly value="${u.m3u_link}" style="background:#111; font-size:10px; padding:5px;">
+                        <button onclick="delUser('${id}')" class="btn-del">Delete User</button>
+                    </div>
+                `;
             });
-        }
+        });
+    }
 
-        function syncToFirebase() {
-            db.ref('master_playlist').set(masterChannels)
-                .then(() => alert("Cloud Synced Successfully!"));
-        }
+    function delUser(id) { if(confirm("User delete karein?")) db.ref('master_users/'+id).remove(); }
 
-        function copyLink(link) {
-            navigator.clipboard.writeText(link);
-            alert("M3U Link Copied for Subscriber!");
-        }
+    // --- LIVE TRACKING SYSTEM ---
+    function loadLogs() {
+        db.ref('activity_logs').on('value', snap => {
+            const list = document.getElementById('live-logs');
+            list.innerHTML = '';
+            let totalActive = 0;
+            
+            // Getting logs for each user
+            snap.forEach(userNode => {
+                const userId = userNode.key;
+                userNode.forEach(logNode => {
+                    const l = logNode.val();
+                    list.innerHTML = `
+                        <div class="log-item">
+                            <div><b style="color:var(--p)">[${userId}]</b> ${l.time}</div>
+                            <div>Action: <b>${l.action}</b></div>
+                            <div class="log-ch">Target: ${l.channel}</div>
+                            <div class="log-ip">IP: ${l.ip}</div>
+                            <div style="font-size:9px; color:#444;">${l.device}</div>
+                        </div>
+                    ` + list.innerHTML;
+                    totalActive++;
+                });
+            });
+            document.getElementById('stats').innerText = `Total Records: ${totalActive} | Monitoring Active`;
+        });
+    }
 
-        // Initial Load
+    function initSystem() {
+        loadChannels();
         loadUsers();
-        initTracking();
-    </script>
+        loadLogs();
+    }
+</script>
+
 </body>
 </html>
