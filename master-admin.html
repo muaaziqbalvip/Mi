@@ -1,885 +1,204 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ur">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MiTV Control Panel | MUSLIM ISLAM</title>
+    <title>MiTV Master Admin | MUSLIM ISLAM</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
         /* =========================================================
-           MITV NETWORK MOBILE APP CSS (PREMIUM DARK MODE)
+           MITV NETWORK - FULL DIGITAL 3D UI ENGINE
            =========================================================
         */
         :root {
             --primary: #00e5ff;
-            --secondary: #ff0055;
-            --bg-dark: #05080f;
-            --panel-bg: #0d121d;
-            --text-glow: 0 0 10px rgba(0, 229, 255, 0.5);
-            --card-radius: 15px;
-            --safe-bottom: env(safe-area-inset-bottom);
+            --primary-glow: rgba(0, 229, 255, 0.4);
+            --accent: #ff0055;
+            --bg-dark: #020408;
+            --panel-bg: rgba(10, 15, 25, 0.9);
+            --border: rgba(0, 229, 255, 0.2);
+            --text: #e0f7fa;
+            --success: #00ff88;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
             background-color: var(--bg-dark);
-            color: #fff;
+            color: var(--text);
             font-family: 'Rajdhani', sans-serif;
-            overflow-x: hidden;
+            overflow: hidden;
             height: 100vh;
             width: 100vw;
         }
 
-        /* Particles Background */
-        #bg-canvas {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+        /* Animated 3D Cyber Background */
+        #canvas-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
-            background: radial-gradient(circle at top, #0a192f 0%, #05080f 100%);
+            background: radial-gradient(circle at center, #0a1525 0%, #020408 100%);
         }
 
-        /* ---------------------------------------------------------
-           AUTHENTICATION (MOBILE DESIGN)
-           --------------------------------------------------------- */
-        #auth-screen {
-            position: fixed;
-            inset: 0;
+        /* --- AUTHENTICATION SCREEN --- */
+        #auth-overlay {
+            position: fixed; inset: 0; z-index: 10000;
             background: var(--bg-dark);
-            z-index: 10000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 30px;
-        }
-
-        .mi-logo-container {
-            margin-bottom: 40px;
-            text-align: center;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-        }
-
-        .mi-logo-circle {
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(135deg, var(--primary), #0077ff);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 38px;
-            font-weight: 900;
-            color: #000;
-            box-shadow: 0 0 40px var(--primary);
-            position: relative;
-        }
-
-        .mi-logo-circle::after {
-            content: 'NETWORK';
-            position: absolute;
-            bottom: -25px;
-            font-size: 12px;
-            letter-spacing: 5px;
-            color: var(--primary);
+            display: flex; justify-content: center; align-items: center;
+            transition: 0.8s cubic-bezier(0.85, 0, 0.15, 1);
         }
 
         .auth-card {
-            width: 100%;
-            max-width: 350px;
+            width: 90%; max-width: 400px;
             background: var(--panel-bg);
-            padding: 30px;
-            border-radius: var(--card-radius);
-            border: 1px solid rgba(0, 229, 255, 0.2);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .auth-input-group {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .auth-input-group input {
-            width: 100%;
-            padding: 15px;
-            background: rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-            color: #fff;
+            padding: 40px 25px;
+            border-radius: 30px;
+            border: 1px solid var(--border);
             text-align: center;
-            font-size: 18px;
-            letter-spacing: 4px;
-            outline: none;
-            transition: 0.3s;
+            box-shadow: 0 0 50px rgba(0, 229, 255, 0.15);
         }
 
-        .auth-input-group input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 15px;
-            border-radius: 10px;
-            border: none;
-            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
-            color: #fff;
+        .mi-logo-3d {
+            width: 100px; height: 100px;
+            background: linear-gradient(135deg, var(--primary), #0055ff);
+            margin: 0 auto 30px;
+            border-radius: 25px;
+            display: flex; justify-content: center; align-items: center;
             font-family: 'Orbitron', sans-serif;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            cursor: pointer;
+            font-size: 35px; font-weight: 900; color: #000;
+            box-shadow: 0 10px 30px var(--primary-glow);
+            transform: perspective(500px) rotateX(10deg);
         }
 
-        /* ---------------------------------------------------------
-           MAIN APP LAYOUT (MOBILE)
-           --------------------------------------------------------- */
-        #app-shell {
-            display: none;
-            flex-direction: column;
-            height: 100vh;
+        .mi-input {
+            width: 100%; background: rgba(0,0,0,0.5);
+            border: 1px solid var(--border);
+            padding: 16px; border-radius: 15px;
+            color: #fff; font-size: 18px; text-align: center;
+            margin-bottom: 20px; outline: none;
         }
 
-        /* Fixed Top Header */
+        .mi-btn {
+            width: 100%; padding: 16px; border: none;
+            border-radius: 15px; font-family: 'Orbitron', sans-serif;
+            font-weight: 900; cursor: pointer;
+            transition: 0.3s; text-transform: uppercase;
+        }
+
+        .btn-glow { background: var(--primary); color: #000; box-shadow: 0 0 20px var(--primary-glow); }
+
+        /* --- MAIN APP LAYOUT --- */
+        #app-container { display: none; flex-direction: column; height: 100vh; }
+
         .app-header {
-            height: 65px;
-            background: rgba(13, 18, 29, 0.95);
-            backdrop-filter: blur(10px);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            border-bottom: 1px solid rgba(0, 229, 255, 0.1);
-            position: sticky;
-            top: 0;
+            height: 70px; background: rgba(5, 10, 20, 0.8);
+            backdrop-filter: blur(20px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; border-bottom: 1px solid var(--border);
             z-index: 100;
         }
 
-        .header-logo {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 20px;
-            font-weight: 900;
-            color: #fff;
+        .brand-text { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 900; }
+        .brand-text span { color: var(--primary); }
+
+        .viewport { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
+
+        /* --- DASHBOARD WIDGETS --- */
+        .section-header {
+            font-family: 'Orbitron', sans-serif; font-size: 14px;
+            color: var(--primary); margin: 25px 0 15px 5px;
+            display: flex; align-items: center; gap: 10px;
         }
 
-        .header-logo span { color: var(--primary); }
-
-        .status-dot {
-            width: 10px; height: 10px;
-            background: #00ff88;
-            border-radius: 50%;
-            box-shadow: 0 0 8px #00ff88;
+        .glass-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 25px; padding: 20px; margin-bottom: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
         }
 
-        /* Scrollable Content Area */
-        .app-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            padding-bottom: 100px; /* Space for Nav */
+        /* --- M3U EDITOR STYLES --- */
+        .channel-item {
+            display: flex; align-items: center; gap: 15px;
+            background: rgba(255,255,255,0.03);
+            margin-bottom: 12px; padding: 12px;
+            border-radius: 18px; border: 1px solid rgba(255,255,255,0.05);
         }
 
-        /* Bottom Navigation Bar (App Style) */
+        .chan-img { width: 55px; height: 55px; border-radius: 12px; background: #fff; object-fit: contain; }
+        .chan-info { flex: 1; overflow: hidden; }
+        .chan-info h4 { font-size: 16px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chan-info p { font-size: 11px; color: #6b7c93; font-family: 'Share Tech Mono'; }
+
+        .chan-actions { display: flex; gap: 10px; }
+        .icon-btn {
+            width: 38px; height: 38px; border-radius: 12px;
+            background: rgba(255,255,255,0.05); border: none;
+            color: #fff; display: flex; justify-content: center; align-items: center;
+            font-size: 16px;
+        }
+        .icon-btn.edit { color: var(--primary); }
+        .icon-btn.del { color: var(--accent); }
+
+        /* --- RADAR / TRACKING --- */
+        .radar-container {
+            height: 350px; overflow-y: auto;
+            background: #000; border-radius: 20px;
+            padding: 15px; border: 1px solid var(--accent);
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .log-entry {
+            padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 12px;
+        }
+        .log-time { color: var(--primary); margin-right: 8px; }
+        .log-user { color: var(--success); font-weight: bold; }
+        .log-meta { display: block; font-size: 10px; color: #555; margin-top: 4px; }
+
+        /* --- BOTTOM NAV --- */
         .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 70px;
-            background: #0a0e17;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding-bottom: var(--safe-bottom);
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            height: 75px; background: rgba(5, 10, 20, 0.95);
+            backdrop-filter: blur(20px); border-top: 1px solid var(--border);
+            display: flex; justify-content: space-around; align-items: center;
+            padding-bottom: env(safe-area-inset-bottom);
             z-index: 1000;
         }
 
         .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #6b7c93;
-            text-decoration: none;
-            font-size: 11px;
-            font-weight: 700;
-            transition: 0.3s;
-            cursor: pointer;
+            display: flex; flex-direction: column; align-items: center;
+            gap: 5px; color: #5c6b80; font-size: 11px; font-weight: 700;
+            cursor: pointer; transition: 0.3s;
         }
+        .nav-item.active { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+        .nav-item i { font-size: 22px; }
 
-        .nav-item i { font-size: 20px; margin-bottom: 5px; }
-        .nav-item.active { color: var(--primary); }
-        .nav-item.active i { filter: drop-shadow(0 0 8px var(--primary)); }
-
-        /* ---------------------------------------------------------
-           CARDS & FORMS (MOBILE OPTIMIZED)
-           --------------------------------------------------------- */
-        .section-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 16px;
-            margin-bottom: 15px;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        /* --- MODAL SYSTEM --- */
+        #modal-overlay {
+            position: fixed; inset: 0; z-index: 5000;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+            display: none; justify-content: center; align-items: flex-end;
         }
-
-        .mobile-card {
-            background: var(--panel-bg);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.05);
+        .modal-body {
+            width: 100%; max-width: 500px; background: var(--bg-dark);
+            border-radius: 30px 30px 0 0; padding: 30px;
+            border-top: 2px solid var(--primary);
+            animation: slideUp 0.4s ease-out;
         }
-
-        .m-input {
-            width: 100%;
-            background: #05080f;
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 12px 15px;
-            border-radius: 10px;
-            color: #fff;
-            margin-bottom: 12px;
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 16px;
-        }
-
-        .m-btn {
-            width: 100%;
-            padding: 14px;
-            border-radius: 10px;
-            border: none;
-            background: var(--primary);
-            color: #000;
-            font-weight: 800;
-            font-family: 'Orbitron', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* ---------------------------------------------------------
-           MASKED USER LIST
-           --------------------------------------------------------- */
-        .user-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255,255,255,0.02);
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            border-left: 4px solid var(--primary);
-        }
-
-        .user-info h4 { font-size: 16px; margin-bottom: 2px; }
-        .user-info p { font-size: 12px; color: #6b7c93; font-family: 'Share Tech Mono'; }
-
-        .mask-badge {
-            background: rgba(0, 229, 255, 0.1);
-            color: var(--primary);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 10px;
-            font-weight: bold;
-        }
-
-        .action-btns {
-            display: flex;
-            gap: 10px;
-        }
-
-        .icon-btn {
-            width: 35px; height: 35px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.05);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-            border: none;
-        }
-
-        .icon-btn.delete { color: var(--secondary); }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
         /* Toast Notifications */
-        #toast-box {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10001;
-            width: 90%;
+        #mi-toast {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 11000; background: var(--primary); color: #000;
+            padding: 12px 30px; border-radius: 50px; font-weight: 800;
+            display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-
-        .toast {
-            background: #1a1a1a;
-            color: #fff;
-            padding: 15px;
-            border-radius: 10px;
-            border-bottom: 3px solid var(--primary);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            margin-bottom: 10px;
-            animation: slideDown 0.4s ease forwards;
-        }
-
-        @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-    </style>
-</head>
-<body>
-
-    <canvas id="bg-canvas"></canvas>
-
-    <div id="auth-screen">
-        <div class="mi-logo-container">
-            <div class="mi-logo-circle">Mi</div>
-        </div>
-        
-        <div class="auth-card">
-            <h2 style="text-align:center; font-family:'Orbitron'; font-size:18px; margin-bottom:20px;">ADMIN LOGIN</h2>
-            <div class="auth-input-group">
-                <input type="password" id="master-key" placeholder="••••••••" maxlength="12">
-            </div>
-            <button class="login-btn" onclick="handleLogin()">Unlock Access</button>
-            <p id="auth-msg" style="color:var(--secondary); font-size:12px; text-align:center; margin-top:15px; display:none;">Invalid Key!</p>
-        </div>
-    </div>
-
-    <div id="app-shell">
-        
-        <header class="app-header">
-            <div class="header-logo">MiTV <span>PRO</span></div>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <span style="font-size:12px; font-weight:bold; color:#6b7c93;">SERVER</span>
-                <div class="status-dot"></div>
-            </div>
-        </header>
-
-        <main class="app-content">
-            
-            <div id="view-users">
-                <div class="section-title"><i class="fas fa-user-plus"></i> GENERATE MASKED M3U</div>
-                
-                <div class="mobile-card">
-                    <input type="text" id="user-name" class="m-input" placeholder="Client Name (e.g. Maaz)">
-                    <input type="text" id="user-slug" class="m-input" placeholder="Custom ID (e.g. maaz-001)">
-                    <button class="m-btn" onclick="generateMaskedUser()">
-                        <i class="fas fa-shield-alt"></i> GENERATE SECURE LINK
-                    </button>
-                </div>
-
-                <div class="section-title"><i class="fas fa-users"></i> ACTIVE CLIENTS</div>
-                <div id="user-list-target">
-                    </div>
-            </div>
-
-            <div id="view-channels" style="display:none;">
-                <div class="section-title"><i class="fas fa-cloud-download-alt"></i> IMPORT POOL</div>
-                <div class="mobile-card">
-                    <textarea id="raw-m3u" class="m-input" style="height:100px;" placeholder="Paste M3U content or link here..."></textarea>
-                    <button class="m-btn" style="background:#0077ff; color:#fff;" onclick="parseM3U()">
-                        <i class="fas fa-sync"></i> SYNC WITH CLOUD
-                    </button>
-                </div>
-                <div id="channel-list-target"></div>
-            </div>
-
-            <div id="view-radar" style="display:none;">
-                <div class="section-title"><i class="fas fa-satellite-dish"></i> LIVE TRAFFIC</div>
-                <div id="radar-logs" style="font-family:'Share Tech Mono'; font-size:12px;">
-                    </div>
-            </div>
-
-        </main>
-
-        <nav class="bottom-nav">
-            <div class="nav-item active" onclick="switchView('users', this)">
-                <i class="fas fa-user-shield"></i>
-                <span>USERS</span>
-            </div>
-            <div class="nav-item" onclick="switchView('channels', this)">
-                <i class="fas fa-tv"></i>
-                <span>POOL</span>
-            </div>
-            <div class="nav-item" onclick="switchView('radar', this)">
-                <i class="fas fa-broadcast-tower"></i>
-                <span>RADAR</span>
-            </div>
-            <div class="nav-item" onclick="location.reload()">
-                <i class="fas fa-power-off"></i>
-                <span>EXIT</span>
-            </div>
-        </nav>
-    </div>
-
-    <div id="toast-box"></div>
-
-    <script>
-        /* =========================================================
-           MITV NETWORK - CORE LOGIC ENGINE (1000+ LINES CAPABLE)
-           =========================================================
-        */
-
-        // Firebase Setup
-        const config = {
-            apiKey: "AIzaSyBbnU8DkthpYQMHOLLyj6M0cc05qXfjMcw",
-            databaseURL: "https://ramadan-2385b-default-rtdb.firebaseio.com",
-            projectId: "ramadan-2385b",
-        };
-        firebase.initializeApp(config);
-        const db = firebase.database();
-
-        const MASTER_PASS = "mitv123456";
-        const VERCEL_URL = "https://mitv-tan.vercel.app"; // Apka masked backend
-
-        // UI View Switcher
-        function switchView(viewName, el) {
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            el.classList.add('active');
-
-            document.getElementById('view-users').style.display = 'none';
-            document.getElementById('view-channels').style.display = 'none';
-            document.getElementById('view-radar').style.display = 'none';
-
-            document.getElementById('view-' + viewName).style.display = 'block';
-        }
-
-        // Authentication
-        function handleLogin() {
-            const val = document.getElementById('master-key').value;
-            if(val === MASTER_PASS) {
-                document.getElementById('auth-screen').style.display = 'none';
-                document.getElementById('app-shell').style.display = 'flex';
-                showToast("Access Granted: Welcome Maaz", "success");
-                initApp();
-            } else {
-                document.getElementById('auth-msg').style.display = 'block';
-                setTimeout(() => document.getElementById('auth-msg').style.display = 'none', 2000);
-            }
-        }
-
-        // M3U MASKING LOGIC & USER GENERATION
-        function generateMaskedUser() {
-            const name = document.getElementById('user-name').value.trim();
-            const slug = document.getElementById('user-slug').value.trim().toLowerCase().replace(/\s+/g, '-');
-
-            if(!name || !slug) return showToast("Please fill all fields", "error");
-
-            // Generate a Masking Token (Base64 + Random Salt)
-            const salt = Math.random().toString(36).substring(7);
-            const token = btoa(slug + "|" + salt);
-
-            // MASKED LINK STRUCTURE: 
-            // Instead of showing actual IPTV links, we show this:
-            const maskedLink = `${VERCEL_URL}/api/stream?key=${token}`;
-
-            const userData = {
-                name: name,
-                token: token,
-                masked_m3u: maskedLink,
-                status: "active",
-                created: Date.now()
-            };
-
-            db.ref('m3u_users/' + slug).set(userData).then(() => {
-                showToast("User Generated & Masked!", "success");
-                document.getElementById('user-name').value = '';
-                document.getElementById('user-slug').value = '';
-            });
-        }
-
-        // Init App & Realtime Listeners
-        function initApp() {
-            // Listen Users
-            db.ref('m3u_users').on('value', snap => {
-                const data = snap.val();
-                const container = document.getElementById('user-list-target');
-                container.innerHTML = '';
-                
-                if(data) {
-                    Object.keys(data).forEach(id => {
-                        const u = data[id];
-                        container.innerHTML += `
-                            <div class="user-item">
-                                <div class="user-info">
-                                    <h4>${u.name} <span class="mask-badge">MASKED</span></h4>
-                                    <p>${u.masked_m3u.substring(0, 35)}...</p>
-                                </div>
-                                <div class="action-btns">
-                                    <button class="icon-btn" onclick="copyLink('${u.masked_m3u}')"><i class="fas fa-copy"></i></button>
-                                    <button class="icon-btn delete" onclick="deleteUser('${id}')"><i class="fas fa-trash"></i></button>
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
-            });
-
-            // Listen Radar
-            db.ref('m3u_activity_logs').limitToLast(10).on('value', snap => {
-                const logs = snap.val();
-                const container = document.getElementById('radar-logs');
-                container.innerHTML = '';
-                if(logs) {
-                    Object.values(logs).forEach(l => {
-                        container.innerHTML = `<div>[${new Date(l.timestamp).toLocaleTimeString()}] ${l.ip} -> ${l.target}</div>` + container.innerHTML;
-                    });
-                }
-            });
-        }
-
-        // Utilities
-        function copyLink(link) {
-            navigator.clipboard.writeText(link);
-            showToast("Masked link copied!", "success");
-        }
-
-        function deleteUser(id) {
-            if(confirm("Delete this user?")) db.ref('m3u_users/' + id).remove();
-        }
-
-        function showToast(msg, type) {
-            const box = document.getElementById('toast-box');
-            const t = document.createElement('div');
-            t.className = 'toast';
-            t.innerText = msg;
-            box.appendChild(t);
-            setTimeout(() => t.remove(), 3000);
-        }
-
-        // Particle Background Logic
-        const canvas = document.getElementById('bg-canvas');
-        const c
-            transform: translateX(-50%);
-            z-index: 10001;
-            width: 90%;
-        }
-
-        .toast {
-            background: #1a1a1a;
-            color: #fff;
-            padding: 15px;
-            border-radius: 10px;
-            border-bottom: 3px solid var(--primary);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            margin-bottom: 10px;
-            animation: slideDown 0.4s ease forwards;
-        }
-
-        @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-    </style>
-</head>
-<body>
-
-    <canvas id="bg-canvas"></canvas>
-
-    <div id="auth-screen">
-        <div class="mi-logo-container">
-            <div class="mi-logo-circle">Mi</div>
-        </div>
-        
-        <div class="auth-card">
-            <h2 style="text-align:center; font-family:'Orbitron'; font-size:18px; margin-bottom:20px;">ADMIN LOGIN</h2>
-            <div class="auth-input-group">
-                <input type="password" id="master-key" placeholder="••••••••" maxlength="12">
-            </div>
-            <button class="login-btn" onclick="handleLogin()">Unlock Access</button>
-            <p id="auth-msg" style="color:var(--secondary); font-size:12px; text-align:center; margin-top:15px; display:none;">Invalid Key!</p>
-        </div>
-    </div>
-
-    <div id="app-shell">
-        
-        <header class="app-header">
-            <div class="header-logo">MiTV <span>PRO</span></div>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <span style="font-size:12px; font-weight:bold; color:#6b7c93;">SERVER</span>
-                <div class="status-dot"></div>
-            </div>
-        </header>
-
-        <main class="app-content">
-            
-            <div id="view-users">
-                <div class="section-title"><i class="fas fa-user-plus"></i> GENERATE MASKED M3U</div>
-                
-                <div class="mobile-card">
-                    <input type="text" id="user-name" class="m-input" placeholder="Client Name (e.g. Maaz)">
-                    <input type="text" id="user-slug" class="m-input" placeholder="Custom ID (e.g. maaz-001)">
-                    <button class="m-btn" onclick="generateMaskedUser()">
-                        <i class="fas fa-shield-alt"></i> GENERATE SECURE LINK
-                    </button>
-                </div>
-
-                <div class="section-title"><i class="fas fa-users"></i> ACTIVE CLIENTS</div>
-                <div id="user-list-target">
-                    </div>
-            </div>
-
-            <div id="view-channels" style="display:none;">
-                <div class="section-title"><i class="fas fa-cloud-download-alt"></i> IMPORT POOL</div>
-                <div class="mobile-card">
-                    <textarea id="raw-m3u" class="m-input" style="height:100px;" placeholder="Paste M3U content or link here..."></textarea>
-                    <button class="m-btn" style="background:#0077ff; color:#fff;" onclick="parseM3U()">
-                        <i class="fas fa-sync"></i> SYNC WITH CLOUD
-                    </button>
-                </div>
-                <div id="channel-list-target"></div>
-            </div>
-
-            <div id="view-radar" style="display:none;">
-                <div class="section-title"><i class="fas fa-satellite-dish"></i> LIVE TRAFFIC</div>
-                <div id="radar-logs" style="font-family:'Share Tech Mono'; font-size:12px;">
-                    </div>
-            </div>
-
-        </main>
-
-        <nav class="bottom-nav">
-            <div class="nav-item active" onclick="switchView('users', this)">
-                <i class="fas fa-user-shield"></i>
-                <span>USERS</span>
-            </div>
-            <div class="nav-item" onclick="switchView('channels', this)">
-                <i class="fas fa-tv"></i>
-                <span>POOL</span>
-            </div>
-            <div class="nav-item" onclick="switchView('radar', this)">
-                <i class="fas fa-broadcast-tower"></i>
-                <span>RADAR</span>
-            </div>
-            <div class="nav-item" onclick="location.reload()">
-                <i class="fas fa-power-off"></i>
-                <span>EXIT</span>
-            </div>
-        </nav>
-    </div>
-
-    <div id="toast-box"></div>
-
-    <script>
-        /* =========================================================
-           MITV NETWORK - CORE LOGIC ENGINE (1000+ LINES CAPABLE)
-           =========================================================
-        */
-
-        // Firebase Setup
-        const config = {
-            apiKey: "AIzaSyBbnU8DkthpYQMHOLLyj6M0cc05qXfjMcw",
-            databaseURL: "https://ramadan-2385b-default-rtdb.firebaseio.com",
-            projectId: "ramadan-2385b",
-        };
-        firebase.initializeApp(config);
-        const db = firebase.database();
-
-        const MASTER_PASS = "mitv123456";
-        const VERCEL_URL = "https://mitv-tan.vercel.app"; // Apka masked backend
-
-        // UI View Switcher
-        function switchView(viewName, el) {
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            el.classList.add('active');
-
-            document.getElementById('view-users').style.display = 'none';
-            document.getElementById('view-channels').style.display = 'none';
-            document.getElementById('view-radar').style.display = 'none';
-
-            document.getElementById('view-' + viewName).style.display = 'block';
-        }
-
-        // Authentication
-        function handleLogin() {
-            const val = document.getElementById('master-key').value;
-            if(val === MASTER_PASS) {
-                document.getElementById('auth-screen').style.display = 'none';
-                document.getElementById('app-shell').style.display = 'flex';
-                showToast("Access Granted: Welcome Maaz", "success");
-                initApp();
-            } else {
-                document.getElementById('auth-msg').style.display = 'block';
-                setTimeout(() => document.getElementById('auth-msg').style.display = 'none', 2000);
-            }
-        }
-
-        // M3U MASKING LOGIC & USER GENERATION
-        function generateMaskedUser() {
-            const name = document.getElementById('user-name').value.trim();
-            const slug = document.getElementById('user-slug').value.trim().toLowerCase().replace(/\s+/g, '-');
-
-            if(!name || !slug) return showToast("Please fill all fields", "error");
-
-            // Generate a Masking Token (Base64 + Random Salt)
-            const salt = Math.random().toString(36).substring(7);
-            const token = btoa(slug + "|" + salt);
-
-            // MASKED LINK STRUCTURE: 
-            // Instead of showing actual IPTV links, we show this:
-            const maskedLink = `${VERCEL_URL}/api/stream?key=${token}`;
-
-            const userData = {
-                name: name,
-                token: token,
-                masked_m3u: maskedLink,
-                status: "active",
-                created: Date.now()
-            };
-
-            db.ref('m3u_users/' + slug).set(userData).then(() => {
-                showToast("User Generated & Masked!", "success");
-                document.getElementById('user-name').value = '';
-                document.getElementById('user-slug').value = '';
-            });
-        }
-
-        // Init App & Realtime Listeners
-        function initApp() {
-            // Listen Users
-            db.ref('m3u_users').on('value', snap => {
-                const data = snap.val();
-                const container = document.getElementById('user-list-target');
-                container.innerHTML = '';
-                
-                if(data) {
-                    Object.keys(data).forEach(id => {
-                        const u = data[id];
-                        container.innerHTML += `
-                            <div class="user-item">
-                                <div class="user-info">
-                                    <h4>${u.name} <span class="mask-badge">MASKED</span></h4>
-                                    <p>${u.masked_m3u.substring(0, 35)}...</p>
-                                </div>
-                                <div class="action-btns">
-                                    <button class="icon-btn" onclick="copyLink('${u.masked_m3u}')"><i class="fas fa-copy"></i></button>
-                                    <button class="icon-btn delete" onclick="deleteUser('${id}')"><i class="fas fa-trash"></i></button>
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
-            });
-
-            // Listen Radar
-            db.ref('m3u_activity_logs').limitToLast(10).on('value', snap => {
-                const logs = snap.val();
-                const container = document.getElementById('radar-logs');
-                container.innerHTML = '';
-                if(logs) {
-                    Object.values(logs).forEach(l => {
-                        container.innerHTML = `<div>[${new Date(l.timestamp).toLocaleTimeString()}] ${l.ip} -> ${l.target}</div>` + container.innerHTML;
-                    });
-                }
-            });
-        }
-
-        // Utilities
-        function copyLink(link) {
-            navigator.clipboard.writeText(link);
-            showToast("Masked link copied!", "success");
-        }
-
-        function deleteUser(id) {
-            if(confirm("Delete this user?")) db.ref('m3u_users/' + id).remove();
-        }
-
-        function showToast(msg, type) {
-            const box = document.getElementById('toast-box');
-            const t = document.createElement('div');
-            t.className = 'toast';
-            t.innerText = msg;
-            box.appendChild(t);
-            setTimeout(() => t.remove(), 3000);
-        }
-
-        // Particle Background Logic
-        const canvas = document.getElementById('bg-canvas');
-        const c color: var(--text-muted); word-break: break-all; margin-bottom: 10px; }
-        .badge { padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-        .badge-active { background: rgba(0,255,136,0.1); color: var(--success); border: 1px solid rgba(0,255,136,0.3); }
-        .badge-inactive { background: rgba(255,51,102,0.1); color: var(--danger); border: 1px solid rgba(255,51,102,0.3); }
-        .action-row { display: flex; gap: 8px; justify-content: flex-end; clear: both; }
-
-        /* M3U LINK BOX */
-        .m3u-box {
-            background: #000;
-            border: 1px dashed var(--primary);
-            padding: 8px;
-            border-radius: 6px;
-            font-family: monospace;
-            font-size: 10px;
-            color: var(--primary);
-            display: flex; justify-content: space-between; align-items: center;
-            margin-top: 10px;
-        }
-        .m3u-box i { cursor: pointer; font-size: 14px; transition: 0.2s; }
-        .m3u-box i:hover { color: #fff; transform: scale(1.2); }
-
-        /* LIVE TRACKER (HACKER TERMINAL STYLE) */
-        #terminal-logs { font-family: 'Courier New', Courier, monospace; }
-        .log-entry {
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding: 12px 0;
-            font-size: 12px;
-            line-height: 1.6;
-            animation: slideIn 0.3s ease-out;
-        }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
-        .log-time { color: var(--warning); font-size: 10px; }
-        .log-user { color: var(--primary); font-weight: bold; font-size: 14px; }
-        .log-action { color: #fff; }
-        .log-target { color: var(--success); font-weight: bold; }
-        .log-hardware { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
-        .hw-badge { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #ccc; }
-        .hw-ip { color: #00e5ff; border: 1px solid rgba(0,229,255,0.3); }
-        .hw-loc { color: #ff0055; border: 1px solid rgba(255,0,85,0.3); }
-
-        /* MODALS (EDITING) */
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
-            display: none; justify-content: center; align-items: center; z-index: 2000;
-            opacity: 0; transition: opacity 0.3s;
-        }
-        .modal-content {
-            background: var(--bg-dark); border: 1px solid var(--primary);
-            width: 500px; border-radius: 15px; padding: 30px;
-            transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-        }
-        .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-overlay.active .modal-content { transform: scale(1); }
-        .modal-header { font-family: 'Orbitron', sans-serif; color: var(--primary); font-size: 20px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;}
-
-        /* TOAST NOTIFICATIONS */
-        #toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-        .toast {
-            background: rgba(0,0,0,0.9); border-left: 4px solid var(--primary);
-            color: #fff; padding: 15px 25px; border-radius: 4px; font-weight: 600;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            animation: toastIn 0.3s forwards, toastOut 0.3s 3s forwards;
-            display: flex; align-items: center; gap: 10px;
-        }
-        @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes toastOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
 
     </style>
 </head>
@@ -887,349 +206,344 @@
 
     <canvas id="canvas-bg"></canvas>
 
-    <div id="login-gate">
-        <div class="login-card">
-            <i class="fas fa-shield-alt" style="font-size: 40px; color: var(--primary); margin-bottom: 15px; filter: drop-shadow(0 0 10px var(--primary));"></i>
-            <h1>MiTV SYSTEM</h1>
-            <p>Authorized Personnel Only</p>
-            <div class="input-group">
-                <input type="password" id="admin-pass" placeholder="Enter Master Key" style="text-align: center; font-size: 18px; letter-spacing: 3px;">
-            </div>
-            <button class="btn" onclick="authenticateUser()"><i class="fas fa-fingerprint"></i> DECRYPT SYSTEM</button>
-            <div id="login-error" style="color: var(--danger); font-size: 12px; margin-top: 15px; display: none;">ACCESS DENIED. Incorrect Key.</div>
+    <div id="auth-overlay">
+        <div class="auth-card">
+            <div class="mi-logo-3d">Mi</div>
+            <h2 style="font-family:'Orbitron'; font-size:18px; margin-bottom:10px;">MITV COMMAND CENTER</h2>
+            <p style="font-size:12px; color:var(--primary); letter-spacing:3px; margin-bottom:30px;">ADMIN ACCESS ONLY</p>
+            
+            <input type="password" id="admin-pass" class="mi-input" placeholder="••••••••">
+            <button class="mi-btn btn-glow" onclick="attemptLogin()">INITIATE SYSTEM</button>
         </div>
     </div>
 
     <div id="app-container">
         
-        <header class="top-nav">
-            <div class="nav-brand">
-                <i class="fas fa-satellite-dish"></i> MiTV <span>NETWORK</span>
-            </div>
-            <div class="system-status">
-                <div class="pulse-dot"></div>
-                <span id="conn-status">SYSTEM ONLINE</span>
-                <button class="btn btn-outline btn-small" onclick="location.reload()" style="margin-left: 20px;"><i class="fas fa-sync-alt"></i> REBOOT</button>
+        <header class="app-header">
+            <div class="brand-text">MITV <span>NETWORK</span></div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:10px; font-weight:bold; color:var(--success);">LIVE ENGINE</span>
+                <div style="width:8px; height:8px; background:var(--success); border-radius:50%; box-shadow: 0 0 10px var(--success);"></div>
             </div>
         </header>
 
-        <main class="main-workspace">
+        <main class="viewport">
             
-            <div class="glass-panel">
-                <div class="panel-header">
-                    <span><i class="fas fa-tv"></i> GLOBAL POOL</span>
-                    <span class="badge badge-active" id="count-channels">0</span>
+            <div id="view-pool" class="tab-content">
+                <div class="glass-card">
+                    <div class="section-header" style="margin:0 0 15px 0;"><i class="fas fa-file-import"></i> PARSE NEW M3U</div>
+                    <textarea id="m3u-raw-input" class="mi-input" style="height:80px; font-size:12px; text-align:left;" placeholder="#EXTM3U..."></textarea>
+                    <button class="mi-btn btn-glow" onclick="processM3U()">PARSE & SYNC CHANNELS</button>
                 </div>
-                <div class="panel-body">
-                    <div style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05);">
-                        <label><i class="fas fa-link"></i> Import New M3U Source</label>
-                        <textarea id="raw-m3u" rows="4" placeholder="Paste URL or Raw #EXTM3U text here..."></textarea>
-                        <button class="btn" onclick="parseAndExtractM3U()"><i class="fas fa-cogs"></i> EXTRACT CHANNELS</button>
-                    </div>
 
-                    <div class="input-group">
-                        <input type="text" id="search-ch" placeholder="Search Channels..." oninput="filterChannels()">
+                <div class="section-header"><i class="fas fa-list"></i> GLOBAL CHANNEL POOL (<span id="count-pool">0</span>)</div>
+                <div id="pool-list-render">
                     </div>
-
-                    <div id="channel-list-container">
-                        <div style="text-align:center; padding: 20px; color: var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Loading Data...</div>
-                    </div>
-                </div>
             </div>
 
-            <div class="glass-panel">
-                <div class="panel-header">
-                    <span><i class="fas fa-users"></i> USER M3U GENERATOR</span>
-                    <span class="badge badge-active" id="count-users">0</span>
+            <div id="view-users" class="tab-content" style="display:none;">
+                <div class="glass-card">
+                    <div class="section-header" style="margin:0 0 15px 0;"><i class="fas fa-user-plus"></i> NEW CLIENT LINK</div>
+                    <input type="text" id="user-name-in" class="mi-input" style="text-align:left;" placeholder="Client Name (e.g. Maaz)">
+                    <input type="text" id="user-slug-in" class="mi-input" style="text-align:left;" placeholder="Unique ID (e.g. maaz-mitv)">
+                    <button class="mi-btn btn-glow" onclick="createUser()">GENERATE SECURE M3U</button>
                 </div>
-                <div class="panel-body">
-                    <div style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05);">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <div class="input-group">
-                                <label>Client Name</label>
-                                <input type="text" id="new-u-name" placeholder="E.g., Muaaz">
-                            </div>
-                            <div class="input-group">
-                                <label>System ID (Username)</label>
-                                <input type="text" id="new-u-id" placeholder="E.g., mitv-123">
-                            </div>
-                        </div>
-                        <div class="input-group">
-                            <label>Account Status</label>
-                            <select id="new-u-status">
-                                <option value="Active">🟢 ACTIVE (Full Access)</option>
-                                <option value="Suspended">🔴 SUSPENDED (Block Streams)</option>
-                            </select>
-                        </div>
-                        <button class="btn" onclick="createNewUser()"><i class="fas fa-user-plus"></i> GENERATE M3U LINK</button>
-                    </div>
 
-                    <div class="input-group">
-                        <input type="text" id="search-usr" placeholder="Search Users..." oninput="filterUsers()">
+                <div class="section-header"><i class="fas fa-users-cog"></i> ACTIVE MASKED USERS</div>
+                <div id="user-list-render">
                     </div>
-
-                    <div id="user-list-container">
-                        </div>
-                </div>
             </div>
 
-            <div class="glass-panel" style="border-color: rgba(255,0,85,0.3);">
-                <div class="panel-header" style="color: var(--secondary);">
-                    <span><i class="fas fa-satellite"></i> DEEP TRACKING RADAR</span>
-                    <i class="fas fa-signal" style="animation: pulse-dot 1s infinite;"></i>
+            <div id="view-radar" class="tab-content" style="display:none;">
+                <div class="section-header"><i class="fas fa-satellite-dish"></i> TRAFFIC RADAR (LIVE)</div>
+                <div class="radar-container" id="radar-logs">
+                    <div style="color:#222; text-align:center; padding-top:150px;">AWAITING UPLINK...</div>
                 </div>
-                <div class="panel-body" id="terminal-logs" style="background: rgba(0,0,0,0.8); border-radius: 8px;">
-                    <div style="text-align:center; padding: 20px; color: var(--secondary);"><i class="fas fa-radar fa-spin"></i> Scanning for activity...</div>
+                
+                <div class="glass-card" style="margin-top:20px;">
+                    <div class="section-header" style="margin:0 0 10px 0;"><i class="fas fa-shield-virus"></i> PROTECTION STATS</div>
+                    <div style="display:flex; justify-content:space-between; font-size:13px;">
+                        <span>Encrypted Links:</span>
+                        <span style="color:var(--primary);">ENABLED</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:13px; margin-top:8px;">
+                        <span>Masking Protocol:</span>
+                        <span style="color:var(--primary);">BASE64_v5</span>
+                    </div>
                 </div>
             </div>
 
         </main>
+
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('pool', this)">
+                <i class="fas fa-tv"></i>
+                <span>POOL</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('users', this)">
+                <i class="fas fa-user-shield"></i>
+                <span>USERS</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('radar', this)">
+                <i class="fas fa-broadcast-tower"></i>
+                <span>RADAR</span>
+            </div>
+            <div class="nav-item" onclick="location.reload()">
+                <i class="fas fa-power-off"></i>
+                <span>EXIT</span>
+            </div>
+        </nav>
     </div>
 
-    <div class="modal-overlay" id="modal-channel">
-        <div class="modal-content">
-            <div class="modal-header">EDIT CHANNEL DETAILS</div>
-            <input type="hidden" id="edit-ch-id">
+    <div id="modal-overlay">
+        <div class="modal-body">
+            <h3 id="modal-title" style="font-family:'Orbitron'; margin-bottom:20px; color:var(--primary);">Edit Resource</h3>
+            <input type="hidden" id="edit-id">
             <div class="input-group">
-                <label>Channel Name</label>
-                <input type="text" id="edit-ch-name">
+                <label style="font-size:11px; color:#6b7c93; display:block; margin-bottom:5px;">NAME</label>
+                <input type="text" id="edit-name" class="mi-input" style="text-align:left;">
             </div>
             <div class="input-group">
-                <label>Logo URL</label>
-                <input type="text" id="edit-ch-logo">
+                <label style="font-size:11px; color:#6b7c93; display:block; margin-bottom:5px;">SOURCE URL / LOGO</label>
+                <input type="text" id="edit-val" class="mi-input" style="text-align:left;">
             </div>
-            <div class="input-group">
-                <label>Stream / Server URL</label>
-                <inp        .paid { background: rgba(0,242,255,0.1); color: var(--p); }
-        .unpaid { background: rgba(239,68,68,0.1); color: #ef4444; }
-
-        /* Activity Monitor */
-        .log-item { font-family: 'JetBrains Mono', monospace; font-size: 11px; border-bottom: 1px solid var(--b); padding: 10px 0; }
-        .log-ip { color: var(--p); }
-        .log-ch { color: #fbbf24; }
-    </style>
-</head>
-<body>
-
-<div id="login-screen">
-    <div class="login-box">
-        <h1 class="logo">MiTV MASTER</h1>
-        <p style="margin-bottom: 20px; font-size: 12px;">Authentication Required</p>
-        <input type="password" id="admin-pass" placeholder="Enter Admin Password">
-        <button class="btn" onclick="checkLogin()">Unlock System</button>
-    </div>
-</div>
-
-<div class="header">
-    <div class="logo">MiTV | COMMAND CENTER</div>
-    <div id="stats" style="font-size: 12px; color: #64748b;">Loading System Stats...</div>
-</div>
-
-<div class="wrapper">
-    <div class="col">
-        <div class="card">
-            <h2><i class="fas fa-plus-circle"></i> Add M3U Source</h2>
-            <textarea id="m3u-input" rows="4" placeholder="Paste M3U Link or Raw Content..."></textarea>
-            <button class="btn" onclick="parseM3U()">Import & Extract</button>
-        </div>
-
-        <div class="card">
-            <h2><i class="fas fa-tv"></i> Global Channels (<span id="ch-count">0</span>)</h2>
-            <input type="text" id="search-ch" placeholder="Search channels..." onkeyup="filterChannels()">
-            <div id="channel-list" class="list-container"></div>
-        </div>
-    </div>
-
-    <div class="col">
-        <div class="card">
-            <h2><i class="fas fa-user-plus"></i> Register User</h2>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <input type="text" id="u-name" placeholder="Full Name">
-                <input type="text" id="u-id" placeholder="Username (Xtream)">
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <input type="text" id="u-pass" placeholder="Password (Phone)">
-                <select id="u-status">
-                    <option value="Paid">Status: PAID</option>
-                    <option value="Unpaid">Status: UNPAID</option>
-                </select>
-            </div>
-            <button class="btn" onclick="saveUser()"><i class="fas fa-save"></i> Save User Profile</button>
-        </div>
-
-        <div class="card">
-            <h2><i class="fas fa-users"></i> Registered Users</h2>
-            <div id="user-list" class="list-container"></div>
-        </div>
-    </div>
-
-    <div class="col">
-        <div class="card" style="border-color: #ef4444;">
-            <h2><i class="fas fa-microscope"></i> Live Activity Tracker</h2>
-            <div id="live-logs" class="list-container" style="max-height: 800px;">
-                <p style="text-align:center; font-size:12px; color:#444;">No live tracking data...</p>
+            <div style="display:flex; gap:10px;">
+                <button class="mi-btn" style="background:rgba(255,255,255,0.05); color:#fff;" onclick="closeModal()">CANCEL</button>
+                <button class="mi-btn btn-glow" onclick="saveEdits()">SAVE CHANGES</button>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    // --- FIREBASE SETUP ---
-    const firebaseConfig = {
-        apiKey: "AIzaSyBbnU8DkthpYQMHOLLyj6M0cc05qXfjMcw",
-        databaseURL: "https://ramadan-2385b-default-rtdb.firebaseio.com",
-        projectId: "ramadan-2385b",
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    <div id="mi-toast">SYSTEM MESSAGE</div>
 
-    // --- LOGIN PROTECTION ---
-    function checkLogin() {
-        const p = document.getElementById('admin-pass').value;
-        if(p === 'mitv123456') {
-            document.getElementById('login-screen').style.display = 'none';
-            initSystem();
-        } else { alert("Incorrect Password Maaz Bhai!"); }
-    }
+    <script>
+        // 1. Initialize System
+        const ADMIN_KEY = "mitv123456";
+        const VERCEL_APP = "https://mitv-tan.vercel.app";
 
-    // --- CHANNEL MANAGEMENT ---
-    async function parseM3U() {
-        const input = document.getElementById('m3u-input').value;
-        if(!input) return alert("Kuch to dalo!");
-        
-        let rawM3U = input;
-        if(input.startsWith('http')) {
-            const res = await fetch(input);
-            rawM3U = await res.text();
-        }
+        const firebaseConfig = {
+            apiKey: "AIzaSyBbnU8DkthpYQMHOLLyj6M0cc05qXfjMcw",
+            databaseURL: "https://ramadan-2385b-default-rtdb.firebaseio.com",
+            projectId: "ramadan-2385b",
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-        const lines = rawM3U.split('\n');
-        let channelsAdded = 0;
+        let globalPool = {};
+        let activeUsers = {};
 
-        for(let i=0; i<lines.length; i++) {
-            if(lines[i].includes('#EXTINF')) {
-                const info = lines[i];
-                const url = lines[i+1]?.trim();
-                if(url && url.startsWith('http')) {
-                    const name = info.split(',')[1] || "Unknown Channel";
-                    const logoMatch = info.match(/tvg-logo="([^"]+)"/);
-                    const logo = logoMatch ? logoMatch[1] : "";
-                    
-                    const cid = btoa(name).substring(0,10);
-                    db.ref('global_channels/' + cid).set({
-                        name: name.trim(),
-                        url: url,
-                        logo: logo,
-                        updated: Date.now()
-                    });
-                    channelsAdded++;
-                }
+        // 2. Auth Logic
+        function attemptLogin() {
+            const pass = document.getElementById('admin-pass').value;
+            if(pass === ADMIN_KEY) {
+                document.getElementById('auth-overlay').style.transform = 'translateY(-100%)';
+                document.getElementById('app-container').style.display = 'flex';
+                toast("SYSTEM ONLINE - WELCOME MAAZ");
+                initListeners();
+            } else {
+                toast("ACCESS DENIED!");
             }
         }
-        alert(channelsAdded + " Channels Added to Pool!");
-        document.getElementById('m3u-input').value = '';
-    }
 
-    function loadChannels() {
-        db.ref('global_channels').on('value', snap => {
-            const list = document.getElementById('channel-list');
-            list.innerHTML = '';
-            let count = 0;
-            snap.forEach(child => {
-                const c = child.val();
-                list.innerHTML += `
-                    <div class="item">
-                        <div style="font-weight:700; font-size:12px;">${c.name}</div>
-                        <div style="font-size:9px; color:#444; word-break:break-all;">${c.url}</div>
-                        <button onclick="delChannel('${child.key}')" class="btn-del" style="margin-top:5px;">Delete</button>
-                    </div>
-                `;
-                count++;
+        // 3. Navigation
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('view-' + tabId).style.display = 'block';
+            el.classList.add('active');
+        }
+
+        // 4. M3U Processing & Editing
+        function processM3U() {
+            const raw = document.getElementById('m3u-raw-input').value.trim();
+            if(!raw) return;
+
+            toast("PARSING RESOURCES...");
+            const lines = raw.split('\n');
+            let batch = {};
+            let tempName = "", tempLogo = "";
+
+            lines.forEach(line => {
+                line = line.trim();
+                if(line.startsWith('#EXTINF:')) {
+                    const nameParts = line.split(',');
+                    tempName = nameParts.length > 1 ? nameParts[1].trim() : "Unknown";
+                    const logoMatch = line.match(/tvg-logo="([^"]+)"/);
+                    tempLogo = logoMatch ? logoMatch[1] : "";
+                } else if(line.startsWith('http')) {
+                    const id = btoa(line).substring(0, 12).replace(/\//g, '_');
+                    batch[id] = { name: tempName, logo: tempLogo, url: line };
+                }
             });
-            document.getElementById('ch-count').innerText = count;
-        });
-    }
 
-    function delChannel(id) { if(confirm("Channel delete kar den?")) db.ref('global_channels/'+id).remove(); }
+            db.ref('global_pool').update(batch).then(() => {
+                toast("POOL SYNCED TO CLOUD");
+                document.getElementById('m3u-raw-input').value = "";
+            });
+        }
 
-    // --- USER MANAGEMENT ---
-    function saveUser() {
-        const id = document.getElementById('u-id').value;
-        const name = document.getElementById('u-name').value;
-        const pass = document.getElementById('u-pass').value;
-        const status = document.getElementById('u-status').value;
+        function renderPool() {
+            const container = document.getElementById('pool-list-render');
+            document.getElementById('count-pool').innerText = Object.keys(globalPool).length;
+            container.innerHTML = "";
 
-        if(!id || !pass) return alert("Username aur Password zaroori hain!");
-
-        db.ref('master_users/' + id).set({
-            name: name,
-            phone: pass,
-            status: status,
-            m3u_link: `https://mitv-tan.vercel.app/get/m3u/${id}`
-        }).then(() => alert("User Saved!"));
-    }
-
-    function loadUsers() {
-        db.ref('master_users').on('value', snap => {
-            const list = document.getElementById('user-list');
-            list.innerHTML = '';
-            snap.forEach(child => {
-                const u = child.val();
-                const id = child.key;
-                const sc = u.status === 'Paid' ? 'paid' : 'unpaid';
-                list.innerHTML += `
-                    <div class="item">
-                        <div style="display:flex; justify-content:space-between">
-                            <b>${u.name}</b>
-                            <span class="status ${sc}">${u.status}</span>
+            Object.keys(globalPool).forEach(id => {
+                const item = globalPool[id];
+                container.innerHTML += `
+                    <div class="channel-item">
+                        <img src="${item.logo || 'https://via.placeholder.com/50'}" class="chan-img">
+                        <div class="chan-info">
+                            <h4>${item.name}</h4>
+                            <p>${item.url.substring(0, 45)}...</p>
                         </div>
-                        <div style="font-size:11px; color:#64748b; margin:5px 0;">
-                            Login: ${id} | Pass: ${u.phone}
+                        <div class="chan-actions">
+                            <button class="icon-btn edit" onclick="openEdit('pool', '${id}')"><i class="fas fa-edit"></i></button>
+                            <button class="icon-btn del" onclick="deleteRes('global_pool/${id}')"><i class="fas fa-trash"></i></button>
                         </div>
-                        <input type="text" readonly value="${u.m3u_link}" style="background:#111; font-size:10px; padding:5px;">
-                        <button onclick="delUser('${id}')" class="btn-del">Delete User</button>
                     </div>
                 `;
             });
-        });
-    }
+        }
 
-    function delUser(id) { if(confirm("User delete karein?")) db.ref('master_users/'+id).remove(); }
+        // 5. User Masking & Management
+        function createUser() {
+            const name = document.getElementById('user-name-in').value.trim();
+            const slug = document.getElementById('user-slug-in').value.trim().toLowerCase();
 
-    // --- LIVE TRACKING SYSTEM ---
-    function loadLogs() {
-        db.ref('activity_logs').on('value', snap => {
-            const list = document.getElementById('live-logs');
-            list.innerHTML = '';
-            let totalActive = 0;
+            if(!name || !slug) return toast("FILL ALL FIELDS");
+
+            // MASKING LOGIC: We create a unique token for the user
+            const token = btoa(slug + "_mitv_" + Date.now());
+            const maskedUrl = `${VERCEL_APP}/api/m3u?token=${token}`;
+
+            const userData = {
+                name: name,
+                token: token,
+                slug: slug,
+                masked_m3u: maskedUrl,
+                status: "active",
+                created_at: Date.now()
+            };
+
+            db.ref('users/' + slug).set(userData).then(() => {
+                toast("USER M3U GENERATED");
+                document.getElementById('user-name-in').value = "";
+                document.getElementById('user-slug-in').value = "";
+            });
+        }
+
+        function renderUsers() {
+            const container = document.getElementById('user-list-render');
+            container.innerHTML = "";
+
+            Object.keys(activeUsers).forEach(slug => {
+                const u = activeUsers[slug];
+                container.innerHTML += `
+                    <div class="channel-item" style="border-left: 4px solid var(--primary);">
+                        <div class="icon-btn" style="background:var(--primary); color:#000;"><i class="fas fa-user"></i></div>
+                        <div class="chan-info">
+                            <h4>${u.name}</h4>
+                            <p>ID: ${u.slug}</p>
+                        </div>
+                        <div class="chan-actions">
+                            <button class="icon-btn edit" onclick="copyText('${u.masked_m3u}')"><i class="fas fa-copy"></i></button>
+                            <button class="icon-btn del" onclick="deleteRes('users/${slug}')"><i class="fas fa-user-minus"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // 6. Live Radar Tracking
+        function initListeners() {
+            db.ref('global_pool').on('value', snap => { globalPool = snap.val() || {}; renderPool(); });
+            db.ref('users').on('value', snap => { activeUsers = snap.val() || {}; renderUsers(); });
             
-            // Getting logs for each user
-            snap.forEach(userNode => {
-                const userId = userNode.key;
-                userNode.forEach(logNode => {
-                    const l = logNode.val();
-                    list.innerHTML = `
-                        <div class="log-item">
-                            <div><b style="color:var(--p)">[${userId}]</b> ${l.time}</div>
-                            <div>Action: <b>${l.action}</b></div>
-                            <div class="log-ch">Target: ${l.channel}</div>
-                            <div class="log-ip">IP: ${l.ip}</div>
-                            <div style="font-size:9px; color:#444;">${l.device}</div>
+            // ACTIVITY MONITOR
+            db.ref('activity_logs').limitToLast(30).on('value', snap => {
+                const logs = snap.val();
+                const container = document.getElementById('radar-logs');
+                container.innerHTML = "";
+                if(!logs) return;
+
+                Object.values(logs).reverse().forEach(log => {
+                    const time = new Date(log.timestamp).toLocaleTimeString();
+                    container.innerHTML += `
+                        <div class="log-entry">
+                            <span class="log-time">[${time}]</span>
+                            <span class="log-user">${log.user_name}</span> » 
+                            <span style="color:#fff">${log.target}</span>
+                            <span class="log-meta">
+                                IP: ${log.ip} | LOC: ${log.location} | DEV: ${log.software}
+                            </span>
                         </div>
-                    ` + list.innerHTML;
-                    totalActive++;
+                    `;
                 });
             });
-            document.getElementById('stats').innerText = `Total Records: ${totalActive} | Monitoring Active`;
-        });
-    }
+        }
 
-    function initSystem() {
-        loadChannels();
-        loadUsers();
-        loadLogs();
-    }
-</script>
+        // 7. Modals & Helpers
+        function openEdit(type, id) {
+            const item = globalPool[id];
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-name').value = item.name;
+            document.getElementById('edit-val').value = item.url;
+            document.getElementById('modal-overlay').style.display = 'flex';
+        }
 
+        function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+
+        function saveEdits() {
+            const id = document.getElementById('edit-id').value;
+            const name = document.getElementById('edit-name').value;
+            const url = document.getElementById('edit-val').value;
+            
+            db.ref('global_pool/' + id).update({ name, url }).then(() => {
+                toast("RESOURCE UPDATED");
+                closeModal();
+            });
+        }
+
+        function deleteRes(path) {
+            if(confirm("PERMANENTLY DELETE THIS?")) {
+                db.ref(path).remove().then(() => toast("REMOVED FROM SYSTEM"));
+            }
+        }
+
+        function copyText(txt) {
+            navigator.clipboard.writeText(txt);
+            toast("LINK COPIED");
+        }
+
+        function toast(msg) {
+            const t = document.getElementById('mi-toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
+        }
+
+        // Background Particles
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        function initP() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            particles = [];
+            for(let i=0; i<60; i++) particles.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*2, vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5 });
+        }
+        function drawP() {
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+            ctx.fillStyle = "rgba(0, 229, 255, 0.2)";
+            particles.forEach(p => {
+                p.x += p.vx; p.y += p.vy;
+                if(p.x<0 || p.x>canvas.width) p.vx*=-1;
+                if(p.y<0 || p.y>canvas.height) p.vy*=-1;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fill();
+            });
+            requestAnimationFrame(drawP);
+        }
+        window.onresize = initP; initP(); drawP();
+
+    </script>
 </body>
 </html>
