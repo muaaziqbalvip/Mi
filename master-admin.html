@@ -569,6 +569,250 @@
 
         // Particle Background Logic
         const canvas = document.getElementById('bg-canvas');
+        const c
+            transform: translateX(-50%);
+            z-index: 10001;
+            width: 90%;
+        }
+
+        .toast {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            border-bottom: 3px solid var(--primary);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
+            animation: slideDown 0.4s ease forwards;
+        }
+
+        @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <div id="auth-screen">
+        <div class="mi-logo-container">
+            <div class="mi-logo-circle">Mi</div>
+        </div>
+        
+        <div class="auth-card">
+            <h2 style="text-align:center; font-family:'Orbitron'; font-size:18px; margin-bottom:20px;">ADMIN LOGIN</h2>
+            <div class="auth-input-group">
+                <input type="password" id="master-key" placeholder="••••••••" maxlength="12">
+            </div>
+            <button class="login-btn" onclick="handleLogin()">Unlock Access</button>
+            <p id="auth-msg" style="color:var(--secondary); font-size:12px; text-align:center; margin-top:15px; display:none;">Invalid Key!</p>
+        </div>
+    </div>
+
+    <div id="app-shell">
+        
+        <header class="app-header">
+            <div class="header-logo">MiTV <span>PRO</span></div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:12px; font-weight:bold; color:#6b7c93;">SERVER</span>
+                <div class="status-dot"></div>
+            </div>
+        </header>
+
+        <main class="app-content">
+            
+            <div id="view-users">
+                <div class="section-title"><i class="fas fa-user-plus"></i> GENERATE MASKED M3U</div>
+                
+                <div class="mobile-card">
+                    <input type="text" id="user-name" class="m-input" placeholder="Client Name (e.g. Maaz)">
+                    <input type="text" id="user-slug" class="m-input" placeholder="Custom ID (e.g. maaz-001)">
+                    <button class="m-btn" onclick="generateMaskedUser()">
+                        <i class="fas fa-shield-alt"></i> GENERATE SECURE LINK
+                    </button>
+                </div>
+
+                <div class="section-title"><i class="fas fa-users"></i> ACTIVE CLIENTS</div>
+                <div id="user-list-target">
+                    </div>
+            </div>
+
+            <div id="view-channels" style="display:none;">
+                <div class="section-title"><i class="fas fa-cloud-download-alt"></i> IMPORT POOL</div>
+                <div class="mobile-card">
+                    <textarea id="raw-m3u" class="m-input" style="height:100px;" placeholder="Paste M3U content or link here..."></textarea>
+                    <button class="m-btn" style="background:#0077ff; color:#fff;" onclick="parseM3U()">
+                        <i class="fas fa-sync"></i> SYNC WITH CLOUD
+                    </button>
+                </div>
+                <div id="channel-list-target"></div>
+            </div>
+
+            <div id="view-radar" style="display:none;">
+                <div class="section-title"><i class="fas fa-satellite-dish"></i> LIVE TRAFFIC</div>
+                <div id="radar-logs" style="font-family:'Share Tech Mono'; font-size:12px;">
+                    </div>
+            </div>
+
+        </main>
+
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="switchView('users', this)">
+                <i class="fas fa-user-shield"></i>
+                <span>USERS</span>
+            </div>
+            <div class="nav-item" onclick="switchView('channels', this)">
+                <i class="fas fa-tv"></i>
+                <span>POOL</span>
+            </div>
+            <div class="nav-item" onclick="switchView('radar', this)">
+                <i class="fas fa-broadcast-tower"></i>
+                <span>RADAR</span>
+            </div>
+            <div class="nav-item" onclick="location.reload()">
+                <i class="fas fa-power-off"></i>
+                <span>EXIT</span>
+            </div>
+        </nav>
+    </div>
+
+    <div id="toast-box"></div>
+
+    <script>
+        /* =========================================================
+           MITV NETWORK - CORE LOGIC ENGINE (1000+ LINES CAPABLE)
+           =========================================================
+        */
+
+        // Firebase Setup
+        const config = {
+            apiKey: "AIzaSyBbnU8DkthpYQMHOLLyj6M0cc05qXfjMcw",
+            databaseURL: "https://ramadan-2385b-default-rtdb.firebaseio.com",
+            projectId: "ramadan-2385b",
+        };
+        firebase.initializeApp(config);
+        const db = firebase.database();
+
+        const MASTER_PASS = "mitv123456";
+        const VERCEL_URL = "https://mitv-tan.vercel.app"; // Apka masked backend
+
+        // UI View Switcher
+        function switchView(viewName, el) {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+
+            document.getElementById('view-users').style.display = 'none';
+            document.getElementById('view-channels').style.display = 'none';
+            document.getElementById('view-radar').style.display = 'none';
+
+            document.getElementById('view-' + viewName).style.display = 'block';
+        }
+
+        // Authentication
+        function handleLogin() {
+            const val = document.getElementById('master-key').value;
+            if(val === MASTER_PASS) {
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('app-shell').style.display = 'flex';
+                showToast("Access Granted: Welcome Maaz", "success");
+                initApp();
+            } else {
+                document.getElementById('auth-msg').style.display = 'block';
+                setTimeout(() => document.getElementById('auth-msg').style.display = 'none', 2000);
+            }
+        }
+
+        // M3U MASKING LOGIC & USER GENERATION
+        function generateMaskedUser() {
+            const name = document.getElementById('user-name').value.trim();
+            const slug = document.getElementById('user-slug').value.trim().toLowerCase().replace(/\s+/g, '-');
+
+            if(!name || !slug) return showToast("Please fill all fields", "error");
+
+            // Generate a Masking Token (Base64 + Random Salt)
+            const salt = Math.random().toString(36).substring(7);
+            const token = btoa(slug + "|" + salt);
+
+            // MASKED LINK STRUCTURE: 
+            // Instead of showing actual IPTV links, we show this:
+            const maskedLink = `${VERCEL_URL}/api/stream?key=${token}`;
+
+            const userData = {
+                name: name,
+                token: token,
+                masked_m3u: maskedLink,
+                status: "active",
+                created: Date.now()
+            };
+
+            db.ref('m3u_users/' + slug).set(userData).then(() => {
+                showToast("User Generated & Masked!", "success");
+                document.getElementById('user-name').value = '';
+                document.getElementById('user-slug').value = '';
+            });
+        }
+
+        // Init App & Realtime Listeners
+        function initApp() {
+            // Listen Users
+            db.ref('m3u_users').on('value', snap => {
+                const data = snap.val();
+                const container = document.getElementById('user-list-target');
+                container.innerHTML = '';
+                
+                if(data) {
+                    Object.keys(data).forEach(id => {
+                        const u = data[id];
+                        container.innerHTML += `
+                            <div class="user-item">
+                                <div class="user-info">
+                                    <h4>${u.name} <span class="mask-badge">MASKED</span></h4>
+                                    <p>${u.masked_m3u.substring(0, 35)}...</p>
+                                </div>
+                                <div class="action-btns">
+                                    <button class="icon-btn" onclick="copyLink('${u.masked_m3u}')"><i class="fas fa-copy"></i></button>
+                                    <button class="icon-btn delete" onclick="deleteUser('${id}')"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            });
+
+            // Listen Radar
+            db.ref('m3u_activity_logs').limitToLast(10).on('value', snap => {
+                const logs = snap.val();
+                const container = document.getElementById('radar-logs');
+                container.innerHTML = '';
+                if(logs) {
+                    Object.values(logs).forEach(l => {
+                        container.innerHTML = `<div>[${new Date(l.timestamp).toLocaleTimeString()}] ${l.ip} -> ${l.target}</div>` + container.innerHTML;
+                    });
+                }
+            });
+        }
+
+        // Utilities
+        function copyLink(link) {
+            navigator.clipboard.writeText(link);
+            showToast("Masked link copied!", "success");
+        }
+
+        function deleteUser(id) {
+            if(confirm("Delete this user?")) db.ref('m3u_users/' + id).remove();
+        }
+
+        function showToast(msg, type) {
+            const box = document.getElementById('toast-box');
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.innerText = msg;
+            box.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+
+        // Particle Background Logic
+        const canvas = document.getElementById('bg-canvas');
         const c color: var(--text-muted); word-break: break-all; margin-bottom: 10px; }
         .badge { padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         .badge-active { background: rgba(0,255,136,0.1); color: var(--success); border: 1px solid rgba(0,255,136,0.3); }
