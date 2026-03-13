@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiTV Post Generator | Muslim Islam Network</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* =========================================================================
+           MITV PREMIUM DESIGN SYSTEM (CYBERPUNK NEON THEME)
+           FOUNDER: MUAAZ IQBAL
+           =========================================================================
+        */
+        :root {
+            --primary: #00f2ff;
+            --secondary: #7000ff;
+            --accent: #ff0055;
+            --bg-dark: #0a0b10;
+            --card-bg: rgba(20, 22, 32, 0.8);
+            --text-main: #ffffff;
+            --text-muted: #8b8f9d;
+            --glow: 0 0 15px rgba(0, 242, 255, 0.4);
+            --neon-border: 1px solid rgba(0, 242, 255, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.1) 0%, transparent 40%);
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        /* Container Styling */
+        .master-container {
+            width: 100%;
+            max-width: 700px;
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            border: var(--neon-border);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header Section */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .brand-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: rgba(112, 0, 255, 0.15);
+            border: 1px solid var(--secondary);
+            border-radius: 100px;
+            color: var(--secondary);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+
+        /* Input Group */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            margin-left: 5px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 14px 14px 14px 45px;
+            border-radius: 12px;
+            color: white;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(0, 242, 255, 0.05);
+            box-shadow: var(--glow);
+        }
+
+        /* Action Button */
+        .btn-generate {
+            width: 100%;
+            background: linear-gradient(45deg, var(--secondary), var(--primary));
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.4s;
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 20px rgba(112, 0, 255, 0.3);
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0, 242, 255, 0.4);
+            filter: brightness(1.1);
+        }
+
+        /* Output Area */
+        .output-section {
+            margin-top: 35px;
+            display: none;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .output-header h3 {
+            font-size: 15px;
+            color: var(--primary);
+        }
+
+        .preview-box {
+            width: 100%;
+            min-height: 250px;
+            background: #11141d;
+            border: 1px dashed rgba(0, 242, 255, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            color: #d1d5db;
+            margin-bottom: 20px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .copy-btn {
+            background: #25d366; /* WhatsApp Green */
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #1eb954;
+            transform: scale(1.02);
+        }
+
+        /* Success Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--primary);
+            color: var(--bg-dark);
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 14px;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Footer Info */
+        .footer-credits {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        .footer-credits b {
+            color: var(--primary);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 480px) {
+            .master-container {
+                padding: 20px;
+            }
+            .header h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="master-container">
+        <div class="header">
+            <div class="brand-badge">Official MiTV Utility</div>
+            <h1>🅼🅸🆃🆅 🅿🅾🆂🆃 🅶🅴🅽🅴🆁🅰🆃🅾🆁</h1>
+            <p>Generate attractive WhatsApp activation messages instantly.</p>
+        </div>
+
+        <div class="input-group">
+            <label>Customer Name</label>
+            <div class="input-wrapper">
+                <i class="fa-solid fa-user-gear"></i>
+                <input type="text" id="cust-name" placeholder="e.g. Ali Khan">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>WhatsApp Number</label>
+            <div class="input-wrapper">
+                <i class="fa-solid fa-phone-flip"></i>
+                <input type="text" id="cust-phone" placeholder="e.g. +92 300 0000000">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>M3U Playlist URL</label>
+            <div class="input-wrapper">
+                <i class="fa-solid fa-link"></i>
+                <input type="text" id="cust-m3u" placeholder="https://mitv-tan.vercel.app/api/m3u?user=...">
+            </div>
+        </div>
+
+        <button class="btn-generate" onclick="generateMessage()">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> GENERATE MAGIC POST
+        </button>
+
+        <div class="output-section" id="output-section">
+            <div class="output-header">
+                <h3><i class="fa-solid fa-eye"></i> MESSAGE PREVIEW</h3>
+            </div>
+            <div class="preview-box" id="message-preview"></div>
+            
+            <button class="copy-btn" onclick="copyToClipboard()">
+                <i class="fa-brands fa-whatsapp"></i> COPY FOR WHATSAPP
+            </button>
+        </div>
+
+        <div class="footer-credits">
+            POWERED BY <b>MUSLIM ISLAM NETWORK</b><br>
+            DESIGNED FOR CEO <b>MUAAZ IQBAL</b>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">COPIED TO CLIPBOARD! ✅</div>
+
+    <script>
+        /**
+         * =========================================================================
+         * MITV POST LOGIC ENGINE
+         * =========================================================================
+         */
+
+        function generateMessage() {
+            const name = document.getElementById('cust-name').value || "Valued User";
+            const phone = document.getElementById('cust-phone').value || "Not Provided";
+            const m3u = document.getElementById('cust-m3u').value || "Link Pending";
+
+            // The Stylized Template
+            const message = `🌟 🅼🅸🆃🆅 🅽🅴🆃🆆🅾🆁🅺 🌟
+🚀 𝐀𝐜𝐜𝐨𝐮𝐧𝐭 𝐀𝐜𝐭𝐢𝐯𝐚𝐭𝐢𝐨𝐧 𝐒𝐮𝐜𝐜𝐞𝐬𝐬𝐟𝐮𝐥! 🚀
+
+Assalam o Alaikum! ✨
+${name} Humein batate hue khushi ho rahi hai ke aapka 🅼🅸🆃🆅 account successfully active kar diya gaya hai. 🎉 Ab aap unlimited premium entertainment enjoy kar sakte hain!
+
+📝 𝐘𝐨𝐮𝐫 𝐀𝐜𝐜𝐨𝐮𝐧𝐭 𝐃𝐞𝐭𝐚𝐢𝐥𝐬:
+👤 𝐍𝐚𝐦𝐞: ${name}
+📞 𝐍𝐮𝐦𝐛𝐞𝐫: ${phone}
+🔗 𝐌𝟑𝐔 𝐋𝐢𝐧𝐤: ${m3u}
+
+📥 𝐀𝐩𝐩 𝐈𝐧𝐬𝐭𝐚𝐥𝐥𝐚𝐭𝐢𝐨𝐧:
+Niche diye gaye link se official app install karein:
+📲 https://mitvnet.vercel.app/mitvnet.apk
+
+📸 𝐇𝐨𝐰 𝐭𝐨 𝐒𝐞𝐭-𝐮𝐩 (𝐃𝐞𝐭𝐚𝐢𝐥𝐞𝐝 𝐆𝐮𝐢𝐝𝐞):
+App ko sahi tareeke se chalane ke liye niche di gayi 𝐈𝐦𝐚𝐠𝐞𝐬 ko ghaur se dekhein. In images mein step-by-step settings samjhayi gayi hain taake aapka experience behtareen ho. 🛠️✨
+
+🏢 𝐏𝐫𝐨𝐣𝐞𝐜𝐭 𝐎𝐟: 🅼🆄🆂🅻🅸🅼🆼 🅸🆂🅻🅰🅼
+👑 𝐅𝐨𝐮𝐧𝐝𝐞𝐫 & 𝐂𝐄𝐎: 🅼🆄🆄🆉 🅸🆀🅱🅰🅻
+
+𝗛𝗨𝗠𝗘 𝗝𝗢𝗜𝗡 𝗞𝗔𝗥𝗡𝗘 𝗞𝗔 𝗦𝗛𝗨𝗞𝗔𝗥𝗬𝗔 𝗔𝗚𝗥 𝗞𝗢𝗜 𝗠𝗔𝗦𝗟𝗔 𝗛𝗢 𝗧𝗢 𝗛𝗨𝗠 𝗦𝗘 𝗥𝗔𝗕𝗧𝗔 𝗞𝗥𝗘. ❤️`;
+
+            // Display in preview
+            const previewBox = document.getElementById('message-preview');
+            const outputSection = document.getElementById('output-section');
+            
+            previewBox.innerText = message;
+            outputSection.style.display = 'block';
+            
+            // Scroll to preview
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById('message-preview').innerText;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showToast();
+            }).catch(err => {
+                alert("Error copying text: " + err);
+            });
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Initialize with smooth animations
+        window.onload = () => {
+            console.log("MiTV Post Engine Online - Welcome Muaaz Iqbal");
+        };
+    </script>
+</body>
+</html>
