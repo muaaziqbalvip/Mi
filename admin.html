@@ -3,566 +3,2016 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#00f2ff">
     <title>MiTV Master Pro | Muslim Islam Network</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="MiTV Master">
-<link rel="apple-touch-icon" href="https://i.ibb.co/SD424ppD/mitv-v5.png">
-
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then(reg => console.log('MiTV PWA: Service Worker Active', reg.scope))
-        .catch(err => console.log('MiTV PWA: Registration Failed', err));
-    });
-  }
-</script>
 
     <style>
-        /* ================================================================
-           1. DESIGN SYSTEM & CORE VARIABLES
-           ================================================================ */
+        /* =========================================================================
+           CSS VARIABLES & DESIGN SYSTEM
+           ========================================================================= */
         :root {
-            --primary: #00f2ff;
-            --secondary: #7000ff;
-            --bg: #05070a;
-            --card: #0f1218;
-            --border: #1f242d;
-            --text: #e2e8f0;
-            --text-muted: #64748b;
-            --success: #10b981;
-            --font-main: 'Plus Jakarta Sans', sans-serif;
-            --font-code: 'JetBrains Mono', monospace;
-            --glow: 0 0 25px rgba(0, 242, 255, 0.4);
-            --nav-bg: rgba(10, 12, 18, 0.95);
+            /* Brand Colors */
+            --brand-primary: #00f2ff;
+            --brand-secondary: #7000ff;
+            --brand-accent: #ff0055;
+            
+            /* Backgrounds */
+            --bg-base: #030508;
+            --bg-surface: #0a0d14;
+            --bg-surface-light: #121824;
+            --bg-nav: rgba(10, 13, 20, 0.85);
+            
+            /* Text Colors */
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --text-dark: #000000;
+            
+            /* Status Colors */
+            --status-success: #10b981;
+            --status-warning: #f59e0b;
+            --status-danger: #ef4444;
+            --status-info: #3b82f6;
+            
+            /* Borders & Shadows */
+            --border-color: #1e293b;
+            --border-glow: #00f2ff55;
+            --shadow-sm: 0 4px 6px rgba(0,0,0,0.3);
+            --shadow-md: 0 10px 20px rgba(0,0,0,0.5);
+            --shadow-glow: 0 0 25px rgba(0, 242, 255, 0.25);
+            
+            /* Typography */
+            --font-primary: 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            
+            /* Transitions */
+            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* Border Radius */
+            --radius-sm: 8px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+            --radius-full: 9999px;
         }
 
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        /* =========================================================================
+           CSS RESET & BASE STYLES
+           ========================================================================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: var(--font-main);
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-primary);
+            line-height: 1.5;
             overflow-x: hidden;
             min-height: 100vh;
-            padding-bottom: 90px; /* Space for bottom nav */
+            padding-bottom: 120px; /* Space for bottom nav */
+            position: relative;
         }
 
-        /* ================================================================
-           2. SPLASH SCREEN (PREMIUM INTRO)
-           ================================================================ */
-        #splash-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #000;
-            z-index: 10000;
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-base);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: var(--radius-full);
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-primary);
+        }
+
+        /* Selection */
+        ::selection {
+            background: var(--brand-primary);
+            color: var(--text-dark);
+        }
+
+        /* =========================================================================
+           TYPOGRAPHY UTILITIES
+           ========================================================================= */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .text-mono {
+            font-family: var(--font-mono);
+        }
+
+        .text-sm {
+            font-size: 0.875rem;
+        }
+
+        .text-xs {
+            font-size: 0.75rem;
+        }
+
+        /* =========================================================================
+           ANIMATIONS & KEYFRAMES
+           ========================================================================= */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUpFade {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px) scale(0.98); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { 
+                box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); 
+            }
+            50% { 
+                box-shadow: 0 0 35px rgba(0, 242, 255, 0.6); 
+            }
+        }
+
+        @keyframes loaderSpin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* =========================================================================
+           LAYOUT & CONTAINERS
+           ========================================================================= */
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            width: 100%;
+        }
+
+        .section-view {
+            display: none;
+            opacity: 0;
+            animation: slideUpFade 0.5s var(--transition-normal) forwards;
+        }
+
+        .section-view.is-active {
+            display: block;
+        }
+
+        /* =========================================================================
+           HEADER COMPONENTS
+           ========================================================================= */
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .brand-logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .brand-logo-container img {
+            width: 50px;
+            height: auto;
+            filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.4));
+            animation: pulseGlow 4s infinite;
+        }
+
+        .brand-text {
             display: flex;
             flex-direction: column;
+        }
+
+        .brand-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .brand-subtitle {
+            font-size: 0.65rem;
+            color: var(--brand-primary);
+            font-family: var(--font-mono);
+            letter-spacing: 2px;
+        }
+
+        .admin-profile-pill {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition-normal);
+            cursor: pointer;
+        }
+
+        .admin-profile-pill:hover {
+            border-color: var(--brand-primary);
+            box-shadow: var(--shadow-glow);
+            transform: translateY(-2px);
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            background-color: var(--status-success);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--status-success);
+            position: relative;
+        }
+
+        .status-indicator::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border: 2px solid var(--status-success);
+            border-radius: 50%;
+            animation: pulseGlow 2s infinite;
+            opacity: 0.5;
+        }
+
+        .admin-name {
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: var(--text-main);
+        }
+
+        /* =========================================================================
+           CARD COMPONENTS
+           ========================================================================= */
+        .glass-card {
+            background: linear-gradient(145deg, var(--bg-surface), rgba(18, 24, 36, 0.6));
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-md);
+            transition: var(--transition-normal);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(0, 242, 255, 0.3);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--brand-primary), transparent);
+            opacity: 0;
+            transition: var(--transition-normal);
+        }
+
+        .glass-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 15px;
+        }
+
+        .card-icon-wrap {
+            width: 45px;
+            height: 45px;
+            background: rgba(0, 242, 255, 0.1);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            border-radius: var(--radius-md);
+            display: flex;
             justify-content: center;
             align-items: center;
+            color: var(--brand-primary);
+            font-size: 1.25rem;
         }
 
-        .splash-logo {
-            width: 140px;
-            filter: drop-shadow(var(--glow));
-            animation: splashEntrance 1.5s ease-out forwards;
+        .card-title {
+            font-size: 1.5rem;
+            color: var(--text-main);
         }
 
-        .loader-container {
-            width: 200px;
-            height: 2px;
-            background: rgba(255,255,255,0.05);
-            margin-top: 40px;
-            border-radius: 10px;
+        .card-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        /* =========================================================================
+           FORM ELEMENTS
+           ========================================================================= */
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            background-color: var(--bg-base);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 18px 20px;
+            border-radius: var(--radius-md);
+            font-family: var(--font-primary);
+            font-size: 1rem;
+            transition: var(--transition-normal);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .form-control::placeholder {
+            color: rgba(148, 163, 184, 0.3);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--brand-primary);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 15px rgba(0, 242, 255, 0.15);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2300f2ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 20px center;
+            background-size: 16px;
+            cursor: pointer;
+        }
+
+        select.form-control option {
+            background-color: var(--bg-surface);
+            color: var(--text-main);
+            padding: 15px;
+        }
+
+        /* Checkbox styling specifically for Engine Library */
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: var(--transition-fast);
+            margin-bottom: 10px;
+        }
+
+        .checkbox-wrapper:hover {
+            background: rgba(0, 242, 255, 0.05);
+            border-color: rgba(0, 242, 255, 0.3);
+        }
+
+        .custom-checkbox {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--text-muted);
+            border-radius: 6px;
+            background: var(--bg-base);
+            position: relative;
+            cursor: pointer;
+            outline: none;
+            transition: var(--transition-fast);
+            flex-shrink: 0;
+        }
+
+        .custom-checkbox:checked {
+            background: var(--brand-primary);
+            border-color: var(--brand-primary);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+        }
+
+        .custom-checkbox:checked::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--text-dark);
+            font-size: 12px;
+        }
+
+        .checkbox-label {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            flex-grow: 1;
+            word-break: break-all;
+        }
+
+        .checkbox-sublabel {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            margin-top: 4px;
+        }
+
+        /* =========================================================================
+           BUTTONS
+           ========================================================================= */
+        .btn {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 20px 30px;
+            border-radius: var(--radius-md);
+            font-family: var(--font-primary);
+            font-weight: 800;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: var(--transition-normal);
+            border: none;
+            outline: none;
+            position: relative;
             overflow: hidden;
+            width: 100%;
         }
 
-        .loader-fill {
-            height: 100%;
-            width: 0%;
-            background: var(--primary);
-            box-shadow: 0 0 15px var(--primary);
-            animation: loadFill 2.5s forwards cubic-bezier(0.65, 0, 0.35, 1);
+        .btn-primary {
+            background: linear-gradient(135deg, var(--brand-primary), #00b3cc);
+            color: var(--text-dark);
+            box-shadow: 0 10px 20px rgba(0, 242, 255, 0.2);
         }
 
-        @keyframes splashEntrance {
-            0% { transform: scale(0.8) translateY(20px); opacity: 0; }
-            100% { transform: scale(1) translateY(0); opacity: 1; }
+        .btn-primary:hover {
+            box-shadow: 0 15px 30px rgba(0, 242, 255, 0.4);
+            transform: translateY(-2px);
         }
-        @keyframes loadFill { to { width: 100%; } }
 
-        /* ================================================================
-           3. BOTTOM NAVIGATION (DOWN PANEL)
-           ================================================================ */
+        .btn-primary:active {
+            transform: translateY(1px);
+            box-shadow: 0 5px 10px rgba(0, 242, 255, 0.2);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--status-danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            width: auto;
+            padding: 10px 20px;
+            font-size: 0.8rem;
+        }
+
+        .btn-danger:hover {
+            background: var(--status-danger);
+            color: white;
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--brand-primary);
+            border: 2px solid var(--brand-primary);
+        }
+
+        .btn-outline:hover {
+            background: rgba(0, 242, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-main);
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .btn-icon:hover {
+            background: var(--brand-primary);
+            color: var(--text-dark);
+            box-shadow: var(--shadow-glow);
+        }
+
+        /* Ripple Effect */
+        .ripple {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: rippleAnim 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes rippleAnim {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* =========================================================================
+           DASHBOARD STATS GRID
+           ========================================================================= */
+        .stats-grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-surface-light);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 140px;
+            transition: var(--transition-normal);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .stat-icon {
+            position: absolute;
+            right: -10px;
+            bottom: -10px;
+            font-size: 5rem;
+            opacity: 0.05;
+            transform: rotate(-15deg);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 1;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            font-family: var(--font-mono);
+            color: var(--text-main);
+            margin-top: 15px;
+            z-index: 1;
+            line-height: 1;
+        }
+
+        /* Specific Stat Colors */
+        .stat-total .stat-value { color: var(--brand-primary); text-shadow: 0 0 10px rgba(0,242,255,0.3); }
+        .stat-active .stat-value { color: var(--status-success); text-shadow: 0 0 10px rgba(16,185,129,0.3); }
+        .stat-dead .stat-value { color: var(--status-danger); text-shadow: 0 0 10px rgba(239,68,68,0.3); }
+        .stat-time .stat-value { font-size: 1.5rem; color: var(--status-warning); }
+
+        /* =========================================================================
+           LISTS & TABLES (USERS / LOGS)
+           ========================================================================= */
+        .list-container {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .data-row {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition-fast);
+            animation: slideInRight 0.4s ease-out;
+        }
+
+        .data-row:hover {
+            background: rgba(255, 255, 255, 0.03);
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .row-info-main {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .row-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .row-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        .row-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        /* Badges */
+        .badge {
+            padding: 6px 14px;
+            border-radius: var(--radius-full);
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .badge-paid {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--status-success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .badge-unpaid {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--status-danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* Live Activity Log Specifics */
+        .log-entry {
+            padding: 15px;
+            border-bottom: 1px dashed rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-channel {
+            color: var(--brand-primary);
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .log-details {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            margin-top: 4px;
+        }
+
+        .log-time {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--status-warning);
+            background: rgba(245, 158, 11, 0.1);
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+        }
+
+        /* =========================================================================
+           ENGINE OUTPUT TERMINAL
+           ========================================================================= */
+        .terminal-box {
+            background: #000;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 25px;
+            margin-top: 30px;
+            position: relative;
+            display: none;
+        }
+
+        .terminal-box.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .dot-r { background: #ff5f56; }
+        .dot-y { background: #ffbd2e; }
+        .dot-g { background: #27c93f; }
+
+        .terminal-title {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-family: var(--font-mono);
+            margin-left: 10px;
+        }
+
+        .terminal-content {
+            background: rgba(0, 242, 255, 0.03);
+            border: 1px dashed rgba(0, 242, 255, 0.3);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            color: var(--brand-primary);
+            word-break: break-all;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        /* =========================================================================
+           BOTTOM NAVIGATION
+           ========================================================================= */
         .bottom-nav {
             position: fixed;
-            bottom: 20px;
+            bottom: 25px;
             left: 50%;
             transform: translateX(-50%);
-            width: 90%;
-            max-width: 500px;
-            height: 70px;
-            background: var(--nav-bg);
+            width: 95%;
+            max-width: 600px;
+            height: 80px;
+            background: var(--bg-nav);
             backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 25px;
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: var(--radius-full);
             display: flex;
-            justify-content: space-around;
+            justify-content: space-evenly;
             align-items: center;
-            z-index: 999;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            z-index: 1000;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            padding: 0 10px;
         }
 
         .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             color: var(--text-muted);
             cursor: pointer;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
             position: relative;
-            padding: 10px;
+            transition: var(--transition-normal);
         }
 
-        .nav-item i { font-size: 20px; margin-bottom: 5px; }
-        .nav-item span { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .nav-item i {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            transition: var(--transition-normal);
+        }
 
-        .nav-item.active { color: var(--primary); }
-        .nav-item.active::after {
-            content: '';
+        .nav-item span {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: var(--transition-normal);
+        }
+
+        .nav-item:hover {
+            color: var(--text-main);
+        }
+
+        .nav-item.is-active {
+            color: var(--brand-primary);
+        }
+
+        .nav-item.is-active i {
+            transform: translateY(-5px);
+            filter: drop-shadow(0 0 8px rgba(0,242,255,0.6));
+        }
+
+        .nav-indicator {
             position: absolute;
-            top: -10px;
-            width: 30px;
+            top: 0;
+            left: 0;
+            width: 70px;
             height: 4px;
-            background: var(--primary);
+            background: var(--brand-primary);
             border-radius: 0 0 10px 10px;
-            box-shadow: var(--glow);
+            box-shadow: var(--shadow-glow);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            pointer-events: none;
         }
 
-        /* ================================================================
-           4. MAIN CONTENT AREA
-           ================================================================ */
-        .content-wrapper {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        header {
+        /* =========================================================================
+           TOAST NOTIFICATIONS
+           ========================================================================= */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-            margin-bottom: 30px;
-        }
-
-        .brand img { width: 45px; filter: drop-shadow(0 0 10px rgba(0,242,255,0.2)); }
-        
-        .admin-pill {
-            background: var(--card);
-            border: 1px solid var(--border);
-            padding: 8px 16px;
-            border-radius: 30px;
-            display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 10px;
+            pointer-events: none;
         }
 
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
+        .toast-msg {
+            background: var(--bg-surface);
+            border-left: 4px solid var(--brand-primary);
+            color: var(--text-main);
+            padding: 15px 25px;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-family: var(--font-primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            animation: slideInRight 0.3s forwards, fadeOut 0.3s 3s forwards;
+        }
 
-        /* ================================================================
-           5. CARDS & SECTIONS
-           ================================================================ */
-        .section-view { display: none; animation: slideUp 0.6s ease forwards; }
-        .section-view.active { display: block; }
+        .toast-msg.error {
+            border-left-color: var(--status-danger);
+        }
 
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 35px;
-            padding: 30px;
-            margin-bottom: 25px;
+        .toast-msg i {
+            font-size: 1.2rem;
+            color: var(--brand-primary);
+        }
+
+        .toast-msg.error i {
+            color: var(--status-danger);
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateX(50px); }
+        }
+
+        /* =========================================================================
+           SPLASH SCREEN (PREMIUM LOADING)
+           ========================================================================= */
+        #splash-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        .splash-brand {
+            width: 150px;
+            filter: drop-shadow(0 0 20px rgba(0,242,255,0.5));
+            animation: pulseGlow 2s infinite;
+            margin-bottom: 40px;
+        }
+
+        .progress-container {
+            width: 250px;
+            height: 4px;
+            background: rgba(255,255,255,0.05);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--brand-secondary), var(--brand-primary));
+            box-shadow: 0 0 20px var(--brand-primary);
+            animation: loadingProgress 3.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+        }
+
+        .splash-text {
+            margin-top: 25px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        @keyframes loadingProgress {
+            0% { width: 0%; }
+            30% { width: 40%; }
+            60% { width: 70%; }
+            100% { width: 100%; }
+        }
+
+        /* =========================================================================
+           FOOTER & PROMO
+           ========================================================================= */
+        .promo-banner {
+            background: linear-gradient(135deg, rgba(112, 0, 255, 0.1), rgba(0, 242, 255, 0.05));
+            border: 1px solid rgba(112, 0, 255, 0.3);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            margin-top: 50px;
+            text-align: center;
             position: relative;
             overflow: hidden;
         }
 
-        .card h2 { font-size: 22px; font-weight: 800; color: var(--primary); margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
+        .promo-banner::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(112,0,255,0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
 
-        label { display: block; margin-top: 20px; font-size: 12px; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
-        
-        input, select, textarea {
-            width: 100%;
-            padding: 18px;
-            background: #000;
-            border: 1px solid var(--border);
-            border-radius: 20px;
+        .promo-title {
+            font-size: 1.8rem;
             color: #fff;
-            margin-top: 10px;
-            font-size: 15px;
-            outline: none;
+            margin-bottom: 10px;
         }
 
-        input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0,242,255,0.1); }
-
-        .btn-action {
-            width: 100%;
-            padding: 20px;
-            border-radius: 20px;
-            border: none;
-            background: linear-gradient(135deg, var(--primary), #00c2cc);
-            color: #000;
-            font-weight: 800;
-            font-size: 15px;
-            cursor: pointer;
-            margin-top: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 10px 20px rgba(0, 242, 255, 0.2);
-        }
-
-        .btn-action:active { transform: scale(0.95); }
-
-        /* ================================================================
-           6. USER LIST & LISTING
-           ================================================================ */
-        .user-row {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid var(--border);
-            padding: 20px;
-            border-radius: 25px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .user-details h4 { font-size: 16px; color: #fff; }
-        .user-details p { font-size: 11px; color: var(--text-muted); font-family: var(--font-code); }
-
-        .badge { padding: 6px 14px; border-radius: 12px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
-        .badge-paid { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid var(--success); }
-        .badge-unpaid { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; }
-
-        /* ================================================================
-           7. APK DOWNLOAD SECTION (BEFORE FOOTER)
-           ================================================================ */
-        .apk-promo {
-            background: linear-gradient(145deg, #0f1218, #1c053a);
-            border-radius: 40px;
-            padding: 40px;
-            margin-top: 40px;
-            text-align: center;
-            border: 1px solid rgba(112, 0, 255, 0.2);
-            position: relative;
-        }
-
-        .apk-promo h3 { font-size: 26px; margin-bottom: 10px; }
-        .apk-dl-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 15px;
-            background: #fff;
-            color: #000;
-            padding: 16px 35px;
-            border-radius: 20px;
-            text-decoration: none;
-            font-weight: 800;
-            margin-top: 20px;
-        }
-
-        /* ================================================================
-           8. ANIMATIONS & FOOTER
-           ================================================================ */
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-
-        footer {
-            margin-top: 60px;
-            padding: 40px;
-            text-align: center;
-            border-top: 1px solid var(--border);
+        .promo-desc {
             color: var(--text-muted);
-            font-size: 12px;
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        .output-panel {
-            background: #000;
-            border: 2px dashed var(--primary);
-            padding: 25px;
-            border-radius: 25px;
-            margin-top: 30px;
-            display: none;
+        .footer-main {
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.8rem;
+            color: var(--text-muted);
         }
 
-        #final-link {
-            word-break: break-all;
-            color: var(--primary);
-            font-family: var(--font-code);
-            margin: 15px 0;
-            padding: 15px;
-            background: rgba(0,242,255,0.05);
-            border-radius: 15px;
-            font-size: 13px;
+        .footer-main b {
+            color: var(--text-main);
         }
+
     </style>
 </head>
 <body>
 
-    <div id="splash-screen">
-        <img src="https://i.ibb.co/SD424ppD/mitv-v5.png" class="splash-logo" alt="MiTV Logo">
-        <div class="loader-container">
-            <div class="loader-fill"></div>
+    <audio id="audio-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" preload="auto"></audio>
+    <audio id="audio-success" src="https://assets.mixkit.co/active_storage/sfx/1114/1114-preview.mp3" preload="auto"></audio>
+
+    <div id="toast-container"></div>
+
+    <div id="splash-wrapper">
+        <img src="https://i.ibb.co/SD424ppD/mitv-v5.png" class="splash-brand" alt="MiTV System">
+        <div class="progress-container">
+            <div class="progress-bar"></div>
         </div>
-        <p style="margin-top: 20px; color: #444; letter-spacing: 4px; font-size: 9px; font-weight: 800;">ENGINEERING ACCESS...</p>
+        <div class="splash-text" id="splash-loader-text">INITIALIZING SECURE CORE...</div>
     </div>
 
     <nav class="bottom-nav">
-        <div class="nav-item active" onclick="playTic(); openSect('home')">
-            <i class="fas fa-grid-2"></i>
-            <span>Home</span>
+        <div class="nav-indicator" id="nav-indicator"></div>
+        
+        <div class="nav-item is-active" data-target="home" onclick="handleNavClick(this, 'home')">
+            <i class="fas fa-radar"></i>
+            <span>Ops</span>
         </div>
-        <div class="nav-item" onclick="playTic(); openSect('users')">
-            <i class="fas fa-user-group"></i>
-            <span>Users</span>
+        
+        <div class="nav-item" data-target="users" onclick="handleNavClick(this, 'users')">
+            <i class="fas fa-users-viewfinder"></i>
+            <span>Clients</span>
         </div>
-        <div class="nav-item" onclick="playTic(); openSect('engine')">
-            <i class="fas fa-wand-magic-sparkles"></i>
+        
+        <div class="nav-item" data-target="engine" onclick="handleNavClick(this, 'engine')">
+            <i class="fas fa-shield-virus"></i>
             <span>Engine</span>
         </div>
-        <div class="nav-item" onclick="playTic(); openSect('config')">
-            <i class="fas fa-microchip"></i>
-            <span>Config</span>
+        
+        <div class="nav-item" data-target="library" onclick="handleNavClick(this, 'library')">
+            <i class="fas fa-server"></i>
+            <span>Library</span>
         </div>
     </nav>
 
-    <div class="content-wrapper">
-        <header>
-            <div class="brand">
-                <img src="https://i.ibb.co/SD424ppD/mitv-v5.png" alt="MiTV">
+    <main class="app-container">
+
+        <header class="top-header">
+            <div class="brand-logo-container">
+                <img src="https://i.ibb.co/SD424ppD/mitv-v5.png" alt="MiTV Logo">
+                <div class="brand-text">
+                    <span class="brand-title">MiTV <span class="text-gradient">PRO</span></span>
+                    <span class="brand-subtitle">Project MUSLIM ISLAM</span> </div>
             </div>
-            <div class="admin-pill">
-                <div class="status-dot"></div>
-                <span style="font-size: 11px; font-weight: 800;">MAAZ IQBAL</span>
-            </div>
+            
+            <div class="admin-profile-pill" onclick="triggerSysSound('click')">
+                <div class="status-indicator"></div>
+                <div class="admin-name">MAAZ IQBAL</div> </div>
         </header>
 
-        <section id="sect-home" class="section-view active">
-            <div class="card">
-                <h2 style="font-size: 28px;">Welcome back, Founder.</h2>
-                <p style="color: var(--text-muted); font-size: 14px;">MiTV Master Console is ready for deployment. Manage your Muslim Islam network nodes below.</p>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 30px;">
-                    <div style="background:#000; padding:20px; border-radius:20px; border:1px solid var(--border);">
-                        <p style="font-size: 10px; color: var(--text-muted);">SUBSCRIBERS</p>
-                        <h3 id="stat-count" style="font-size: 24px; color: var(--primary);">0</h3>
+        <section id="sect-home" class="section-view is-active">
+            
+            <div class="glass-card">
+                <div class="card-header">
+                    <div class="card-icon-wrap"><i class="fas fa-chart-line"></i></div>
+                    <div>
+                        <h2 class="card-title">Network Analytics</h2>
+                        <p class="card-subtitle">Global Node & Deep Scanning Statistics</p>
                     </div>
-                    <div style="background:#000; padding:20px; border-radius:20px; border:1px solid var(--border);">
-                        <p style="font-size: 10px; color: var(--text-muted);">SERVER LOAD</p>
-                        <h3 style="font-size: 24px; color: var(--success);">OPTIMAL</h3>
+                </div>
+
+                <div class="stats-grid-container">
+                    <div class="stat-card stat-total">
+                        <i class="fas fa-satellite-dish stat-icon"></i>
+                        <div class="stat-header">
+                            <span class="stat-label">Channels Scanned</span>
+                        </div>
+                        <div class="stat-value" id="ui-stat-total">0</div>
                     </div>
+                    
+                    <div class="stat-card stat-active">
+                        <i class="fas fa-check-circle stat-icon"></i>
+                        <div class="stat-header">
+                            <span class="stat-label">Active Nodes</span>
+                        </div>
+                        <div class="stat-value" id="ui-stat-active">0</div>
+                    </div>
+
+                    <div class="stat-card stat-dead">
+                        <i class="fas fa-skull-crossbones stat-icon"></i>
+                        <div class="stat-header">
+                            <span class="stat-label">Dead Links</span>
+                        </div>
+                        <div class="stat-value" id="ui-stat-dead">0</div>
+                    </div>
+
+                    <div class="stat-card stat-time">
+                        <i class="fas fa-clock-rotate-left stat-icon"></i>
+                        <div class="stat-header">
+                            <span class="stat-label">Last Ping Time</span>
+                        </div>
+                        <div class="stat-value" id="ui-stat-time">--:--</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <div class="card-header" style="justify-content: space-between;">
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                        <div class="card-icon-wrap" style="color: var(--status-warning); border-color: rgba(245,158,11,0.2);"><i class="fas fa-tower-broadcast fa-fade"></i></div>
+                        <div>
+                            <h2 class="card-title">Live Activity Tracking</h2>
+                            <p class="card-subtitle">Real-time stream hits from users</p>
+                        </div>
+                    </div>
+                    <button class="btn-icon" onclick="fetchLiveLogs()"><i class="fas fa-sync-alt"></i></button>
+                </div>
+
+                <div class="list-container" id="ui-live-logs">
+                    <div style="text-align: center; padding: 20px; color: var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Awaiting Data Streams...</div>
                 </div>
             </div>
         </section>
 
         <section id="sect-users" class="section-view">
-            <div class="card">
-                <h2><i class="fas fa-plus"></i> Add Subscriber</h2>
-                <label>Legal Name</label>
-                <input type="text" id="u-name" placeholder="Maaz Iqbal">
-                
-                <label>Phone / WhatsApp</label>
-                <input type="text" id="u-phone" placeholder="03XXXXXXXXX">
-                
-                <label>Account Policy</label>
-                <select id="u-status">
-                    <option value="Paid">PAID - FULL ACCESS</option>
-                    <option value="Unpaid">UNPAID - RESTRICTED</option>
-                </select>
+            
+            <div class="glass-card">
+                <div class="card-header">
+                    <div class="card-icon-wrap" style="color: var(--brand-secondary); border-color: rgba(112,0,255,0.2);"><i class="fas fa-user-plus"></i></div>
+                    <div>
+                        <h2 class="card-title">Provision New Client</h2>
+                        <p class="card-subtitle">Register user details in Master Database</p>
+                    </div>
+                </div>
 
-                <button class="btn-action" onclick="playTic(); submitUser()">
-                    <i class="fas fa-database"></i> REGISTER ACCOUNT
+                <div class="form-group">
+                    <label class="form-label">Client Full Name</label>
+                    <input type="text" id="inp-user-name" class="form-control" placeholder="e.g. Ali Raza" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Contact / WhatsApp Number</label>
+                    <input type="tel" id="inp-user-phone" class="form-control" placeholder="e.g. +92 300 1234567" autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Subscription Policy</label>
+                    <select id="inp-user-status" class="form-control">
+                        <option value="Paid">PREMIUM (PAID & ACTIVE)</option>
+                        <option value="Unpaid">RESTRICTED (UNPAID / BLOCKED)</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-primary" onclick="execRegisterUser()">
+                    <i class="fas fa-database"></i> REGISTER INTO SYSTEM
                 </button>
             </div>
 
-            <div class="card">
-                <h2><i class="fas fa-list"></i> Database Overview</h2>
-                <div id="user-render-box"></div>
+            <div class="glass-card">
+                <div class="card-header">
+                    <div class="card-icon-wrap"><i class="fas fa-address-book"></i></div>
+                    <div>
+                        <h2 class="card-title">Client Directory</h2>
+                        <p class="card-subtitle">Manage access and status of all users</p>
+                    </div>
+                </div>
+
+                <div class="list-container" id="ui-user-list">
+                    </div>
+            </div>
+        </section>
+
+        <section id="sect-library" class="section-view">
+            
+            <div class="glass-card">
+                <div class="card-header">
+                    <div class="card-icon-wrap" style="color: var(--status-success); border-color: rgba(16,185,129,0.2);"><i class="fas fa-folder-plus"></i></div>
+                    <div>
+                        <h2 class="card-title">Add to Global Library</h2>
+                        <p class="card-subtitle">Save M3U source links for quick assignment</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Playlist Identifier Name</label>
+                    <input type="text" id="inp-lib-name" class="form-control" placeholder="e.g. Pak Sports HD Pack">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Source URL (.m3u / .m3u8)</label>
+                    <input type="url" id="inp-lib-url" class="form-control" placeholder="https://provider.com/list.m3u">
+                </div>
+
+                <button class="btn btn-primary" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="execAddLibrary()">
+                    <i class="fas fa-cloud-upload-alt"></i> SAVE TO REPOSITORY
+                </button>
+            </div>
+
+            <div class="glass-card">
+                <div class="card-header">
+                    <div class="card-icon-wrap"><i class="fas fa-server"></i></div>
+                    <div>
+                        <h2 class="card-title">Stored Playlists</h2>
+                        <p class="card-subtitle">Manage default links repository</p>
+                    </div>
+                </div>
+
+                <div class="list-container" id="ui-library-list">
+                    </div>
             </div>
         </section>
 
         <section id="sect-engine" class="section-view">
-            <div class="card">
-                <h2><i class="fas fa-shield-halved"></i> Masking Engine</h2>
-                <label>Raw Playlists (HTTP/S)</label>
-                <textarea id="m3u-list" rows="5" placeholder="Enter links per line..."></textarea>
+            
+            <div class="glass-card" style="border-left: 4px solid var(--brand-primary);">
+                <div class="card-header">
+                    <div class="card-icon-wrap"><i class="fas fa-microchip"></i></div>
+                    <div>
+                        <h2 class="card-title">AI Masking Engine Processor</h2>
+                        <p class="card-subtitle">Deep scan and encrypt streams for user assignment</p>
+                    </div>
+                </div>
 
-                <label>Assign to User</label>
-                <select id="user-select-list"></select>
+                <div class="form-group">
+                    <label class="form-label"><span style="color:var(--brand-primary)">[1]</span> Target Subscriber Account</label>
+                    <select id="sel-engine-user" class="form-control">
+                        <option value="">-- SYSTEM LOADING USERS --</option>
+                    </select>
+                </div>
 
-                <label>Fallback Media (Direct Link)</label>
-                <input type="text" id="warning-vid" value="https://mitvnet.vercel.app/mipay.mp4">
+                <div class="form-group">
+                    <label class="form-label"><span style="color:var(--brand-primary)">[2]</span> Select Source Playlists (Library)</label>
+                    <div class="form-control" style="padding: 10px; max-height: 250px; overflow-y: auto;" id="ui-engine-checkboxes">
+                        <div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 10px;">Loading library data...</div>
+                    </div>
+                </div>
 
-                <button class="btn-action" onclick="playTic(); processEngine()">
-                    <i class="fas fa-bolt-lightning"></i> DEPLOY MASKED LINK
+                <div class="form-group">
+                    <label class="form-label"><span style="color:var(--brand-primary)">[3]</span> Inject Raw Manual Links (Optional)</label>
+                    <textarea id="inp-engine-raw" class="form-control" placeholder="Paste custom HTTP/HTTPS .m3u links here (One per line)"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label"><span style="color:var(--brand-primary)">[4]</span> Expiry Action Warning Video</label>
+                    <input type="text" id="inp-engine-warn" class="form-control" value="https://mitvnet.vercel.app/mipay.mp4">
+                </div>
+
+                <button class="btn btn-primary" onclick="execMaskingProcess()" style="margin-top: 15px;">
+                    <i class="fas fa-bolt"></i> INITIATE ENCRYPTION & DEPLOY
                 </button>
 
-                <div id="output-panel" class="output-panel">
-                    <p style="font-size: 10px; font-weight: 800; color: var(--text-muted);">SECURE ENDPOINT READY:</p>
-                    <div id="final-link"></div>
-                    <button class="btn-action" style="background: #fff; margin-top: 10px;" onclick="playTic(); copyLink()">
+                <div class="terminal-box" id="ui-terminal">
+                    <div class="terminal-header">
+                        <div class="terminal-dot dot-r"></div>
+                        <div class="terminal-dot dot-y"></div>
+                        <div class="terminal-dot dot-g"></div>
+                        <span class="terminal-title">VERCEL ENDPOINT GENERATED</span>
+                    </div>
+                    
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px;">Distribute this secure masked M3U URL to the client's IPTV App:</p>
+                    
+                    <div class="terminal-content" id="ui-final-url">
+                        </div>
+
+                    <button class="btn btn-outline" onclick="copyToClipboard('ui-final-url')">
                         <i class="fas fa-copy"></i> COPY TO CLIPBOARD
                     </button>
                 </div>
+
             </div>
         </section>
 
-        <div class="apk-promo">
-            <p style="color: var(--primary); font-weight: 800; font-size: 10px; letter-spacing: 2px;">MOBILE ECOSYSTEM</p>
-            <h3>MiTV Network Pro APK</h3>
-            <p style="color: var(--text-muted); font-size: 14px; margin-top: 5px;">Install the official control center on your Android device., https://mitvclient.vercel.app/mitvpk.m3u , https://raw.githubusercontent.com/abusaeeidx/IPTV-Scraper-Zilla/refs/heads/main/CricHD.m3u , https://raw.githubusercontent.com/abusaeeidx/IPTV-Scraper-Zilla/refs/heads/main/BD.m3u , https://private-zone-by-xfireflix.pages.dev/playlist-isp-bdix.m3u , https://raw.githubusercontent.com/abusaeeidx/Mrgify-Tv/refs/heads/main/playlist.m3u</p>
-            <a href="#" class="apk-dl-btn" onclick="playTic()">
-                <i class="fab fa-android" style="font-size: 24px; color: #3DDC84;"></i>
-                DOWNLOAD CLIENT
-            </a>
+        <div class="promo-banner">
+            <i class="fab fa-android" style="font-size: 3rem; color: #3DDC84; margin-bottom: 15px;"></i>
+            <h3 class="promo-title">MiTV Client APK</h3>
+            <p class="promo-desc">Install the official Android application for the ultimate streaming experience. Integrated with deep masking engine.</p>
+            <button class="btn" style="background: #fff; color: #000; width: auto; padding: 15px 35px;" onclick="triggerSysSound('click')">
+                DOWNLOAD V5.0 APK
+            </button>
         </div>
 
-        <footer>
-            <p>© 2026 <span>MiTV Network</span> | Project <span>Muslim Islam</span> | Dev: Maaz</p>
-        </footer>
-    </div>
+        <footer class="footer-main">
+            <p>Copyright &copy; 2026 <b>MiTV Network</b>. All rights reserved.</p>
+            <p style="margin-top: 5px;">Powered by <b>Project MUSLIM ISLAM</b> | Developed by Maaz Iqbal</p> <p style="margin-top: 10px; font-family: var(--font-mono); font-size: 0.65rem; color: var(--brand-primary);">SYSTEM STATUS: ONLINE | LOCATION: KASUR, PK</p> </footer>
 
-    <audio id="tic-sound" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" preload="auto"></audio>
+    </main>
 
     <script>
-        // --- 1. CORE UTILS ---
-        const playTic = () => {
-            const sound = document.getElementById('tic-sound');
-            sound.currentTime = 0;
-            sound.volume = 0.5;
-            sound.play();
-        };
-
-        const openSect = (id) => {
-            document.querySelectorAll('.section-view').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            
-            document.getElementById('sect-' + id).classList.add('active');
-            event.currentTarget.classList.add('active');
-        };
-
-        // --- 2. FIREBASE CORE (UNCHANGED LOGIC) ---
-        const firebaseConfig = {
+        /**
+         * ------------------------------------------------------------------------
+         * 1. CONFIGURATION & CORE VARIABLES
+         * ------------------------------------------------------------------------
+         */
+        const FIREBASE_CONF = {
             apiKey: "AIzaSyBbnU8DkthpYQMHOLLyj6M0cc05qXfjMcw",
             databaseURL: "https://ramadan-2385b-default-rtdb.firebaseio.com",
             projectId: "ramadan-2385b",
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
 
-        function submitUser() {
-            const name = document.getElementById('u-name').value;
-            const phone = document.getElementById('u-phone').value;
-            const status = document.getElementById('u-status').value;
+        // Initialize App
+        firebase.initializeApp(FIREBASE_CONF);
+        const fbDB = firebase.database();
 
-            if(!name || !phone) return alert("All fields are mandatory!");
+        // System State
+        const SYS_STATE = {
+            currentTab: 'home',
+            usersLoaded: false,
+            libLoaded: false,
+            statsLoaded: false
+        };
 
-            const uid = "MITV-" + Math.floor(1000 + Math.random() * 9000);
-            db.ref('master_users/' + uid).set({
-                name, phone, status, timestamp: Date.now()
-            }).then(() => {
-                alert("Account Provisioned!");
-                document.getElementById('u-name').value = '';
-                document.getElementById('u-phone').value = '';
+        /**
+         * ------------------------------------------------------------------------
+         * 2. UI & UX UTILITY FUNCTIONS
+         * ------------------------------------------------------------------------
+         */
+
+        /**
+         * Play system sounds for interaction feedback
+         * @param {string} type - 'click' or 'success'
+         */
+        function triggerSysSound(type = 'click') {
+            try {
+                const aud = document.getElementById(type === 'success' ? 'audio-success' : 'audio-click');
+                aud.currentTime = 0;
+                aud.volume = 0.4;
+                
+                // create visual ripple effect on click
+                const createRipple = (e) => {
+                    const btn = e.currentTarget;
+                    const circle = document.createElement('span');
+                    const diameter = Math.max(btn.clientWidth, btn.clientHeight);
+                    const radius = diameter / 2;
+                    
+                    // Only run if event exists and has clientX (mouse click)
+                    if(e && e.clientX) {
+                        const rect = btn.getBoundingClientRect();
+                        circle.style.width = circle.style.height = `${diameter}px`;
+                        circle.style.left = `${e.clientX - rect.left - radius}px`;
+                        circle.style.top = `${e.clientY - rect.top - radius}px`;
+                        circle.classList.add('ripple');
+                        
+                        const existingRipple = btn.querySelector('.ripple');
+                        if (existingRipple) {
+                            existingRipple.remove();
+                        }
+                        btn.appendChild(circle);
+                    }
+                };
+                
+                aud.play().catch(e => console.warn("Audio play restricted by browser", e));
+            } catch (err) {
+                console.error("Audio system error:", err);
+            }
+        }
+
+        /**
+         * Custom Toast Notification System
+         * @param {string} msg - The message to display
+         * @param {string} type - 'info', 'success', or 'error'
+         */
+        function showSysToast(msg, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast-msg ${type === 'error' ? 'error' : ''}`;
+            
+            let iconClass = 'fas fa-info-circle';
+            if(type === 'success') iconClass = 'fas fa-check-circle';
+            if(type === 'error') iconClass = 'fas fa-exclamation-triangle';
+
+            toast.innerHTML = `<i class="${iconClass}"></i><span>${msg}</span>`;
+            
+            container.appendChild(toast);
+            triggerSysSound(type === 'success' ? 'success' : 'click');
+
+            // Auto remove after animation completes
+            setTimeout(() => {
+                if(toast.parentElement) {
+                    toast.remove();
+                }
+            }, 3500);
+        }
+
+        /**
+         * Format dates for display
+         * @param {number|string} timestamp 
+         * @returns {string} Formatted date string
+         */
+        function formatDateTime(timestamp) {
+            if(!timestamp) return "Unknown";
+            const dt = new Date(timestamp);
+            return dt.toLocaleString('en-PK', { 
+                day: '2-digit', month: 'short', year: 'numeric',
+                hour: '2-digit', minute: '2-digit', hour12: true 
             });
         }
 
-        function syncData() {
-            db.ref('master_users').on('value', snap => {
-                const render = document.getElementById('user-render-box');
-                const select = document.getElementById('user-select-list');
-                const statCount = document.getElementById('stat-count');
-                
-                render.innerHTML = '';
-                select.innerHTML = '<option value="">-- Select Active Subscriber --</option>';
-                
-                let count = 0;
-                snap.forEach(child => {
-                    const data = child.val();
-                    const key = child.key;
-                    count++;
-                    const sBadge = data.status === 'Paid' ? 'badge-paid' : 'badge-unpaid';
+        /**
+         * Copy text from an element to clipboard
+         * @param {string} elementId 
+         */
+        function copyToClipboard(elementId) {
+            const el = document.getElementById(elementId);
+            if(!el) return;
+            
+            const text = el.innerText || el.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showSysToast("Endpoint Copied to Clipboard!", "success");
+            }).catch(err => {
+                showSysToast("Failed to copy text", "error");
+                console.error("ClipErr:", err);
+            });
+            triggerSysSound('click');
+        }
 
-                    render.innerHTML += `
-                        <div class="user-row">
-                            <div class="user-details">
-                                <h4>${data.name}</h4>
-                                <p>${key} • ${data.phone}</p>
+        /**
+         * ------------------------------------------------------------------------
+         * 3. NAVIGATION LOGIC
+         * ------------------------------------------------------------------------
+         */
+        
+        /**
+         * Handle Bottom Nav switching
+         * @param {HTMLElement} el - The clicked element
+         * @param {string} target - The section ID to open
+         */
+        function handleNavClick(el, target) {
+            triggerSysSound('click');
+            
+            // 1. Update Navigation UI
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('is-active'));
+            el.classList.add('is-active');
+
+            // Move Indicator Line visually
+            const navInd = document.getElementById('nav-indicator');
+            navInd.style.opacity = '1';
+            navInd.style.transform = `translateX(${el.offsetLeft}px)`;
+
+            // 2. Update Content Sections
+            document.querySelectorAll('.section-view').forEach(s => {
+                s.classList.remove('is-active');
+            });
+            
+            const targetSect = document.getElementById(`sect-${target}`);
+            if(targetSect) {
+                targetSect.classList.add('is-active');
+            }
+
+            SYS_STATE.currentTab = target;
+        }
+
+        /**
+         * ------------------------------------------------------------------------
+         * 4. MODULE: NETWORK ANALYTICS & LIVE LOGS
+         * ------------------------------------------------------------------------
+         */
+
+        /**
+         * Sync global stats from Firebase to Dashboard
+         */
+        function syncDashboardStats() {
+            try {
+                // Listening to the entire global_stats node to aggregate data
+                fbDB.ref('global_stats').on('value', snapshot => {
+                    let calcTotal = 0;
+                    let calcActive = 0;
+                    let calcDead = 0;
+                    let lastSyncTime = "--:--";
+
+                    if(snapshot.exists()) {
+                        snapshot.forEach(child => {
+                            const data = child.val();
+                            if(data) {
+                                calcTotal += (data.total || 0);
+                                calcActive += (data.active || 0);
+                                calcDead += (data.dead || 0);
+                                // Use the most recent time from any node
+                                if(data.last_scan) lastSyncTime = data.last_scan;
+                            }
+                        });
+                    }
+
+                    // Update UI Elements
+                    document.getElementById('ui-stat-total').innerText = calcTotal;
+                    document.getElementById('ui-stat-active').innerText = calcActive;
+                    document.getElementById('ui-stat-dead').innerText = calcDead;
+                    document.getElementById('ui-stat-time').innerText = lastSyncTime;
+                    
+                    SYS_STATE.statsLoaded = true;
+                });
+            } catch (err) {
+                console.error("Stats Sync Error:", err);
+            }
+        }
+
+        /**
+         * Fetch and render real-time user activity logs
+         */
+        function fetchLiveLogs() {
+            const container = document.getElementById('ui-live-logs');
+            container.innerHTML = '<div style="text-align: center; padding: 20px;"><i class="fas fa-circle-notch fa-spin"></i> Fetching records...</div>';
+            
+            try {
+                // Get the last 20 logs to keep UI snappy
+                fbDB.ref('user_logs').limitToLast(15).on('value', snapshot => {
+                    container.innerHTML = '';
+                    
+                    if(!snapshot.exists()) {
+                        container.innerHTML = '<div style="padding: 20px; color: var(--text-muted); text-align: center;">No live streams detected yet.</div>';
+                        return;
+                    }
+
+                    const allLogs = [];
+                    // Flatten data structure
+                    snapshot.forEach(userNode => {
+                        const userLogsObj = userNode.val();
+                        Object.values(userLogsObj).forEach(logItem => {
+                            allLogs.push(logItem);
+                        });
+                    });
+
+                    // Sort newest first
+                    allLogs.reverse();
+
+                    // Render to UI
+                    allLogs.forEach(log => {
+                        const channelName = log.channel || "Unknown Source";
+                        const ipAddr = log.ip || "0.0.0.0";
+                        const logTime = log.time || "Just Now";
+                        
+                        // Extracted simple time format if possible
+                        let shortTime = logTime;
+                        if(logTime.includes(' ')) {
+                            const parts = logTime.split(' ');
+                            shortTime = parts[1] + (parts[2] ? ' ' + parts[2] : '');
+                        }
+
+                        const logHtml = `
+                            <div class="log-entry">
+                                <div>
+                                    <div class="log-channel"><i class="fas fa-play" style="font-size:10px; margin-right:5px;"></i> ${channelName}</div>
+                                    <div class="log-details">IP Node: ${ipAddr}</div>
+                                </div>
+                                <div class="log-time">${shortTime}</div>
                             </div>
-                            <div style="text-align: right;">
-                                <span class="badge ${sBadge}">${data.status}</span><br>
-                                <button onclick="playTic(); updateStatus('${key}', '${data.status}')" style="background:none; border:none; color:var(--primary); font-size:10px; font-weight:800; margin-top:8px; cursor:pointer;">SWAP</button>
+                        `;
+                        container.innerHTML += logHtml;
+                    });
+                });
+            } catch (err) {
+                container.innerHTML = `<div style="color:red; padding:15px;">Error fetching logs.</div>`;
+            }
+        }
+
+        /**
+         * ------------------------------------------------------------------------
+         * 5. MODULE: USER DIRECTORY MANAGEMENT
+         * ------------------------------------------------------------------------
+         */
+
+        /**
+         * Read inputs and create new user in Firebase
+         */
+        function execRegisterUser() {
+            triggerSysSound('click');
+            
+            const nameInp = document.getElementById('inp-user-name');
+            const phoneInp = document.getElementById('inp-user-phone');
+            const statusSel = document.getElementById('inp-user-status');
+
+            const uName = nameInp.value.trim();
+            const uPhone = phoneInp.value.trim();
+            const uStatus = statusSel.value;
+
+            if(!uName || !uPhone) {
+                showSysToast("Please fill all mandatory fields!", "error");
+                return;
+            }
+
+            // Generate unique UID
+            const generatedUid = "MITV-" + Math.floor(10000 + Math.random() * 90000);
+            const ts = Date.now();
+
+            const payload = {
+                name: uName,
+                phone: uPhone,
+                status: uStatus,
+                created_at: ts
+            };
+
+            fbDB.ref('master_users/' + generatedUid).set(payload)
+                .then(() => {
+                    showSysToast(`Client ${uName} successfully registered!`, "success");
+                    // Clear fields
+                    nameInp.value = '';
+                    phoneInp.value = '';
+                })
+                .catch(err => {
+                    showSysToast("Database Error: Could not save client.", "error");
+                    console.error("Save User Err:", err);
+                });
+        }
+
+        /**
+         * Sync master users list to UI Table and Engine Select Dropdown
+         */
+        function syncMasterUsers() {
+            fbDB.ref('master_users').on('value', snapshot => {
+                const listContainer = document.getElementById('ui-user-list');
+                const engineSelect = document.getElementById('sel-engine-user');
+                
+                listContainer.innerHTML = '';
+                engineSelect.innerHTML = '<option value="">-- SELECT TARGET SUBSCRIBER --</option>';
+
+                if(!snapshot.exists()) {
+                    listContainer.innerHTML = '<p style="padding:20px; color:gray;">No clients found in system.</p>';
+                    return;
+                }
+
+                snapshot.forEach(child => {
+                    const uid = child.key;
+                    const data = child.val();
+                    
+                    const badgeClass = data.status === 'Paid' ? 'badge-paid' : 'badge-unpaid';
+                    const btnColor = data.status === 'Paid' ? 'var(--status-danger)' : 'var(--status-success)';
+                    const btnIcon = data.status === 'Paid' ? 'fa-ban' : 'fa-check';
+                    
+                    // 1. Populate Users List
+                    const rowHtml = `
+                        <div class="data-row">
+                            <div class="row-info-main">
+                                <div class="row-title">${data.name}</div>
+                                <div class="row-subtitle">ID: <span class="text-mono" style="color:var(--brand-primary);">${uid}</span> | Ph: ${data.phone}</div>
+                                <div style="margin-top: 5px;">
+                                    <span class="badge ${badgeClass}">${data.status} ACCOUNT</span>
+                                </div>
+                            </div>
+                            <div class="row-actions">
+                                <button class="btn-icon" style="color: ${btnColor}; border-color: ${btnColor};" onclick="execToggleUserStatus('${uid}', '${data.status}')" title="Toggle Status">
+                                    <i class="fas ${btnIcon}"></i>
+                                </button>
+                                <button class="btn-icon" style="color: var(--text-muted);" onclick="execDeleteUser('${uid}', '${data.name}')" title="Delete Client">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </div>
                         </div>
                     `;
-                    select.innerHTML += `<option value="${key}">${data.name}</option>`;
+                    listContainer.innerHTML += rowHtml;
+
+                    // 2. Populate Engine Dropdown
+                    engineSelect.innerHTML += `<option value="${uid}">${data.name} [${uid}]</option>`;
                 });
-                statCount.innerText = count;
+                
+                SYS_STATE.usersLoaded = true;
             });
         }
 
-        function updateStatus(id, current) {
-            const next = current === 'Paid' ? 'Unpaid' : 'Paid';
-            db.ref('master_users/' + id).update({ status: next });
+        /**
+         * Toggle Paid / Unpaid Status
+         * @param {string} uid 
+         * @param {string} currentStatus 
+         */
+        function execToggleUserStatus(uid, currentStatus) {
+            triggerSysSound('click');
+            const newStatus = currentStatus === 'Paid' ? 'Unpaid' : 'Paid';
+            
+            fbDB.ref('master_users/' + uid).update({ status: newStatus })
+                .then(() => showSysToast(`Account status changed to ${newStatus}`, "success"))
+                .catch(() => showSysToast("Failed to update status", "error"));
         }
 
-        function processEngine() {
-            const links = document.getElementById('m3u-list').value;
-            const user = document.getElementById('user-select-list').value;
-            const warn = document.getElementById('warning-vid').value;
+        /**
+         * Delete User from system
+         * @param {string} uid 
+         * @param {string} name 
+         */
+        function execDeleteUser(uid, name) {
+            triggerSysSound('click');
+            if(confirm(`WARNING: Are you sure you want to completely delete ${name}?\nThis action cannot be undone.`)) {
+                
+                // Need to clean up user, their playlists, and their stats
+                const updates = {};
+                updates['master_users/' + uid] = null;
+                updates['active_playlists/' + uid] = null;
+                updates['global_stats/' + uid] = null;
 
-            if(!links || !user) return alert("Select User and Links!");
+                fbDB.ref().update(updates)
+                    .then(() => showSysToast("Client fully purged from network", "success"))
+                    .catch(() => showSysToast("Purge failed", "error"));
+            }
+        }
 
-            const list = links.split('\n').filter(l => l.trim().startsWith('http'));
-            db.ref('active_playlists/' + user).set({
-                sources: list, warningVideo: warn, lastUpdate: Date.now()
-            }).then(() => {
-                const finalUrl = `https://mitv-tan.vercel.app/get/m3u/${user}`;
-                document.getElementById('output-panel').style.display = 'block';
-                document.getElementById('final-link').innerText = finalUrl;
+        /**
+         * ------------------------------------------------------------------------
+         * 6. MODULE: PLAYLIST LIBRARY (DEFAULT LINKS)
+         * ------------------------------------------------------------------------
+         */
+
+        /**
+         * Add a new M3U source to the global library
+         */
+        function execAddLibrary() {
+            triggerSysSound('click');
+            const nameInp = document.getElementById('inp-lib-name');
+            const urlInp = document.getElementById('inp-lib-url');
+
+            const lName = nameInp.value.trim();
+            const lUrl = urlInp.value.trim();
+
+            if(!lName || !lUrl) {
+                showSysToast("Library name and URL required!", "error");
+                return;
+            }
+
+            if(!lUrl.startsWith('http')) {
+                showSysToast("URL must start with http or https", "error");
+                return;
+            }
+
+            const payload = {
+                name: lName,
+                url: lUrl,
+                added: Date.now()
+            };
+
+            fbDB.ref('playlist_library').push(payload)
+                .then(() => {
+                    showSysToast("Source added to global library", "success");
+                    nameInp.value = '';
+                    urlInp.value = '';
+                })
+                .catch(() => showSysToast("Library save error", "error"));
+        }
+
+        /**
+         * Sync Library data to UI List and Engine Checkboxes
+         */
+        function syncGlobalLibrary() {
+            fbDB.ref('playlist_library').on('value', snapshot => {
+                const listContainer = document.getElementById('ui-library-list');
+                const engineChecksBox = document.getElementById('ui-engine-checkboxes');
+                
+                listContainer.innerHTML = '';
+                engineChecksBox.innerHTML = '';
+
+                if(!snapshot.exists()) {
+                    listContainer.innerHTML = '<p style="padding:20px; color:gray;">Library is currently empty.</p>';
+                    engineChecksBox.innerHTML = '<div style="padding:10px; color:gray; font-size:0.8rem;">No default playlists available in library.</div>';
+                    return;
+                }
+
+                let checkIdCounter = 0;
+
+                snapshot.forEach(child => {
+                    const key = child.key;
+                    const data = child.val();
+                    checkIdCounter++;
+                    
+                    // 1. Render for Library Management View
+                    const rowHtml = `
+                        <div class="data-row">
+                            <div class="row-info-main">
+                                <div class="row-title">${data.name}</div>
+                                <div class="row-subtitle" style="word-break: break-all;">${data.url}</div>
+                            </div>
+                            <div class="row-actions">
+                                <button class="btn-icon" style="color: var(--status-danger); border-color: rgba(239,68,68,0.2);" onclick="execDeleteLibraryItem('${key}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    listContainer.innerHTML += rowHtml;
+
+                    // 2. Render Checkboxes for Engine View
+                    const checkHtml = `
+                        <label class="checkbox-wrapper" for="chk-${checkIdCounter}">
+                            <input type="checkbox" id="chk-${checkIdCounter}" class="custom-checkbox engine-lib-checkbox" value="${data.url}">
+                            <div class="checkbox-label-content" style="flex-grow: 1; margin-left: 10px;">
+                                <div class="checkbox-label">${data.name}</div>
+                                <div class="checkbox-sublabel">${data.url.substring(0,40)}...</div>
+                            </div>
+                        </label>
+                    `;
+                    engineChecksBox.innerHTML += checkHtml;
+                });
+                
+                SYS_STATE.libLoaded = true;
             });
         }
 
-        function copyLink() {
-            const text = document.getElementById('final-link').innerText;
-            navigator.clipboard.writeText(text);
-            alert("URL Copied!");
+        /**
+         * Delete library item
+         * @param {string} key 
+         */
+        function execDeleteLibraryItem(key) {
+            triggerSysSound('click');
+            if(confirm("Remove this playlist from global defaults?")) {
+                fbDB.ref('playlist_library/' + key).remove()
+                    .then(() => showSysToast("Playlist deleted", "success"))
+                    .catch(() => showSysToast("Delete failed", "error"));
+            }
         }
 
-        // --- 3. STARTUP ---
+        /**
+         * ------------------------------------------------------------------------
+         * 7. MODULE: THE CORE MASKING ENGINE
+         * ------------------------------------------------------------------------
+         */
+
+        /**
+         * Collect data from engine UI, validate, and send to Firebase
+         */
+        function execMaskingProcess() {
+            triggerSysSound('click');
+            
+            // Collect UI Data
+            const targetUid = document.getElementById('sel-engine-user').value;
+            const rawLinksText = document.getElementById('inp-engine-raw').value;
+            const warningVid = document.getElementById('inp-engine-warn').value;
+
+            // Validation 1: Target User
+            if(!targetUid) {
+                showSysToast("CRITICAL: Target Subscriber must be selected!", "error");
+                return;
+            }
+
+            // Processing Library Checkboxes
+            const selectedLibraryUrls = [];
+            const checkboxes = document.querySelectorAll('.engine-lib-checkbox:checked');
+            checkboxes.forEach(cb => {
+                if(cb.value) selectedLibraryUrls.push(cb.value);
+            });
+
+            // Processing Raw Links
+            const rawLinksArr = rawLinksText.split('\n')
+                .map(l => l.trim())
+                .filter(l => l.startsWith('http') || l.startsWith('https'));
+
+            // Combine both sources
+            const finalMasterSources = [...selectedLibraryUrls, ...rawLinksArr];
+
+            // Validation 2: Array Length
+            if(finalMasterSources.length === 0) {
+                showSysToast("ERROR: No valid M3U sources selected or entered.", "error");
+                return;
+            }
+
+            // Prepare Payload for Firebase -> Active Playlists Node
+            const enginePayload = {
+                sources: finalMasterSources,
+                warningVideo: warningVid || "https://mitvnet.vercel.app/mipay.mp4",
+                assigned_by: "Admin Maaz",
+                lastUpdate: Date.now()
+            };
+
+            // Change UI to loading state
+            const terminalBox = document.getElementById('ui-terminal');
+            terminalBox.classList.remove('active');
+            
+            showSysToast("Initiating AI deep masking sequence...", "info");
+
+            // Write to Firebase
+            fbDB.ref('active_playlists/' + targetUid).set(enginePayload)
+                .then(() => {
+                    triggerSysSound('success');
+                    showSysToast("Engine Deployment Successful!", "success");
+                    
+                    // Generate Vercel API Endpoint URL
+                    // Note: This relies on the api/m3u.js file hosted on Vercel
+                    const finalApiEndpoint = `https://mitv-tan.vercel.app/api/m3u?user=${targetUid}`;
+                    
+                    // Display Terminal Output
+                    document.getElementById('ui-final-url').innerText = finalApiEndpoint;
+                    terminalBox.classList.add('active');
+                })
+                .catch(err => {
+                    console.error("Engine Deploy Err:", err);
+                    showSysToast("Fatal error during deployment to database.", "error");
+                });
+        }
+
+        /**
+         * ------------------------------------------------------------------------
+         * 8. SYSTEM INITIALIZATION & BOOT SEQUENCE
+         * ------------------------------------------------------------------------
+         */
+
+        /**
+         * Main boot sequence triggered on window load
+         */
         window.onload = () => {
-            syncData();
+            console.log("MiTV Network OS Boot Sequence Initiated...");
+
+            // 1. Start Firebase Data Syncs asynchronously
+            syncMasterUsers();
+            syncGlobalLibrary();
+            syncDashboardStats();
+            fetchLiveLogs();
+
+            // 2. Setup Splash Screen visual logic
+            const splashLayer = document.getElementById('splash-wrapper');
+            const splashText = document.getElementById('splash-loader-text');
+            
+            // Text changes to simulate heavy processing
+            setTimeout(() => { splashText.innerText = "ESTABLISHING SECURE CONNECTION..."; }, 1000);
+            setTimeout(() => { splashText.innerText = "VERIFYING ADMIN CREDENTIALS..."; }, 2000);
+            setTimeout(() => { splashText.innerText = "ACCESS GRANTED. WELCOME MAAZ."; }, 3000);
+
+            // Hide Splash after artificial loading time to show off CSS animation
             setTimeout(() => {
-                const splash = document.getElementById('splash-screen');
-                splash.style.transition = 'opacity 0.8s ease';
-                splash.style.opacity = '0';
-                setTimeout(() => splash.style.display = 'none', 800);
-            }, 2600);
+                splashLayer.style.opacity = '0';
+                
+                // Initialize default nav indicator position once layout is painted
+                setTimeout(() => {
+                    splashLayer.style.display = 'none';
+                    const defaultActiveNav = document.querySelector('.nav-item.is-active');
+                    if(defaultActiveNav) {
+                        const navInd = document.getElementById('nav-indicator');
+                        navInd.style.opacity = '1';
+                        navInd.style.transform = `translateX(${defaultActiveNav.offsetLeft}px)`;
+                    }
+                    triggerSysSound('success'); // Welcome sound
+                    showSysToast("Master Control Panel Online", "success");
+                }, 800); // Wait for fade out CSS transition
+
+            }, 3600); // Total splash screen time
         };
+
+        // End of 1200+ Line JS/HTML Document
     </script>
 </body>
 </html>
