@@ -657,11 +657,11 @@
         
         <div class="stats-row">
             <div class="stat-item">
-                <span class="stat-num" id="display-channel-count">1K+</span>
+                <span class="stat-num" id="display-channel-count">1k+</span>
                 <span class="stat-label">Live Channels</span>
             </div>
             <div class="stat-item">
-                <span class="stat-num">4K</span>
+                <span class="stat-num">4K/hd</span>
                 <span class="stat-label">Quality</span>
             </div>
             <div class="stat-item">
@@ -701,7 +701,7 @@
         <div class="price-card">
             <div class="price-badge">BEST SELLER</div>
             <h3>MiTV All Channels Plan</h3>
-            <div class="price-amount">RS <span id="display-price" style="color: var(--primary); font-size: 60px;">100</span><span>/mo</span></div>
+            <div class="price-amount">RS <span id="display-price" style="color: var(--primary); font-size: 60px;">100</span><span>/month</span></div>
             <p style="color: var(--text-muted); font-size: 14px;">Full access to our entire library.</p>
             
             <ul class="feature-list">
@@ -818,453 +818,253 @@
 
 
     <script>
-        /* ==========================================================================
-MiTV NETWORK - MASTER LOGIC ENGINE (V6.0)
-Founder: Muaaz Iqbal
-Organization: MUSLIM ISLAM
-==========================================================================
-*/
+        // --- A. UTILS & UI CONTROLS ---
+        function playTic() {
+            const sound = document.getElementById('click-sound');
+            sound.currentTime = 0; sound.volume = 0.6; sound.play();
+        }
 
-// --- 1. GLOBAL CONFIGURATION & STATE ---
-const mitvApp = {
-    config: {
-        firebase: {
+        window.onload = () => {
+            setTimeout(() => {
+                document.getElementById('splash').style.opacity = '0';
+                setTimeout(() => document.getElementById('splash').style.display = 'none', 800);
+            }, 2000);
+            initFirebase();
+        };
+
+        function scrollToPricing() {
+            document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function copyNumber() {
+            const num = document.getElementById('display-jazzcash').innerText;
+            navigator.clipboard.writeText(num);
+            alert("JazzCash Number Copied: " + num);
+        }
+
+        // --- B. CHAT SYSTEM ---
+        let chatOpen = false;
+        function toggleChat() {
+            chatOpen = !chatOpen;
+            const win = document.getElementById('chat-window');
+            const badge = document.getElementById('chat-badge');
+            if(chatOpen) {
+                win.classList.add('open');
+                badge.style.display = 'none';
+                scrollChatToBottom();
+            } else {
+                win.classList.remove('open');
+            }
+        }
+
+        function openChatWithIntent() {
+            if(!chatOpen) toggleChat();
+            const input = document.getElementById('chat-input');
+            input.value = "Hi, I want to buy the RS 100 package. I have sent the payment on JazzCash.";
+            input.focus();
+        }
+
+        function scrollChatToBottom() {
+            const body = document.getElementById('chat-body');
+            body.scrollTop = body.scrollHeight;
+        }
+
+        // --- C. FIREBASE INIT & SYNC ---
+        const firebaseConfig = {
             apiKey: "AIzaSyBbnU8DkthpYQMHOLLyj6M0cc05qXfjMcw",
             databaseURL: "https://ramadan-2385b-default-rtdb.firebaseio.com",
             projectId: "ramadan-2385b",
-        },
-        defaultLogo: 'https://i.ibb.co/SD424ppD/mitv-v5.png',
-        adminPin: "123456",
-        refreshInterval: 300000 // 5 minutes
-    },
-    state: {
-        allChannels: [],
-        filteredChannels: [],
-        sessionId: localStorage.getItem('mitv_session') || "User_" + Math.floor(Math.random() * 100000),
-        isChatOpen: false,
-        db: null
-    }
-};
-
-// --- 2. INITIALIZATION ---
-window.onload = () => {
-    // Session ID save karna
-    if(!localStorage.getItem('mitv_session')) {
-        localStorage.setItem('mitv_session', mitvApp.state.sessionId);
-    }
-
-    // Splash screen timer
-    setTimeout(() => {
-        const splash = document.getElementById('splash');
-        if(splash) {
-            splash.style.opacity = '0';
-            setTimeout(() => splash.style.display = 'none', 800);
-        }
-    }, 2000);
-
-    initMiTVService();
-};
-
-function initMiTVService() {
-    try {
-        // Firebase Initialize karna
-        firebase.initializeApp(mitvApp.config.firebase);
-        mitvApp.state.db = firebase.database();
+        };
         
-        console.log("MiTV Logic Engine: Connected to Firebase");
-        
-        // Data syncing shuru karna
-        startRealtimeSync();
-        listenToChatHistory();
-        setupSearchListener();
-        
-    } catch (error) {
-        console.error("Initialization Error:", error);
-        alert("System connection error. Please refresh.");
-    }
-}
-
-// --- 3. UI UTILITIES ---
-function playTic() {
-    const sound = document.getElementById('click-sound');
-    if(sound) {
-        sound.currentTime = 0;
-        sound.volume = 0.4;
-        sound.play().catch(() => {}); // Autoplay protection
-    }
-}
-
-function scrollToPricing() {
-    const target = document.getElementById('pricing');
-    if(target) target.scrollIntoView({ behavior: 'smooth' });
-}
-
-function copyNumber() {
-    const num = document.getElementById('display-jazzcash').innerText;
-    navigator.clipboard.writeText(num).then(() => {
-        const feedback = document.querySelector('.pay-box span');
-        const originalText = feedback.innerHTML;
-        feedback.innerHTML = '<i class="fas fa-check"></i> Number Copied!';
-        feedback.style.color = 'var(--success)';
-        setTimeout(() => {
-            feedback.innerHTML = originalText;
-            feedback.style.color = 'var(--text-muted)';
-        }, 2000);
-    });
-}
-
-// --- 4. DATA SYNC ENGINE ---
-// --- 1. DATA SYNC ENGINE (UPDATED FOR URL) ---
-function startRealtimeSync() {
-    const db = mitvApp.state.db;
-
-    // A. Website Config Sync (Price, JazzCash etc.)
-    db.ref('mitv_public/config').on('value', (snapshot) => {
-        const data = snapshot.val();
-        if(data) {
-            updateUIConfig(data);
-        }
-    });
-
-    // B. M3U URL Sync - Ab ye link listen karega
-    db.ref('mitv_public/m3u_url').on('value', async (snapshot) => {
-        const m3uUrl = snapshot.val();
-        if(m3uUrl) {
-            // Admin panel input update
-            const admInput = document.getElementById('adm-m3u');
-            if(admInput) admInput.value = m3uUrl;
-
-            // Link se data fetch karne ka function call
-            await fetchM3UDataFromLink(m3uUrl);
-        } else {
-            handleEmptyChannels();
-        }
-    });
-}
-
-// --- 2. LINK FETCHING ENGINE (NEW FUNCTION) ---
-async function fetchM3UDataFromLink(url) {
-    const loader = document.getElementById('loading-logos');
-    loader.innerHTML = '<i class="fas fa-sync fa-spin"></i> <p>Fetching Channels from Link...</p>';
-    
-    try {
-        // CORS issues se bachne ke liye proxy use kar sakte hain agar browser block kare
-        // Example: const proxy = "https://api.allorigins.win/raw?url=";
-        const response = await fetch(url);
-        
-        if (!response.ok) throw new Error('Could not fetch M3U file');
-        
-        const rawText = await response.text();
-        
-        // M3U Text milne ke baad purana parser call karein
-        processM3UData(rawText);
-        
-    } catch (error) {
-        console.error("M3U Fetch Error:", error);
-        loader.innerHTML = `
-            <i class="fas fa-exclamation-circle" style="color:var(--accent);"></i>
-            <p>Error: Link is not accessible or invalid.</p>
-        `;
-    }
-}
-
-// --- 3. ADVANCED M3U PARSER (SAME BUT OPTIMIZED) ---
-function processM3UData(text) {
-    const lines = text.split('\n');
-    const channels = [];
-    
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (line.startsWith('#EXTINF')) {
-            // Logo nikalne ke liye regex
-            const logoMatch = line.match(/tvg-logo="([^"]+)"/) || line.match(/logo="([^"]+)"/);
-            const logo = logoMatch ? logoMatch[1] : mitvApp.config.defaultLogo;
-            
-            // Category nikalne ke liye
-            const groupMatch = line.match(/group-title="([^"]+)"/);
-            const category = groupMatch ? groupMatch[1] : "General";
-
-            // Name nikalne ke liye (comma ke baad wala hissa)
-            const commaIndex = line.lastIndexOf(',');
-            const name = commaIndex !== -1 ? line.substring(commaIndex + 1).trim() : "Premium Channel";
-
-            channels.push({ name, logo, category });
-        }
-    }
-
-    mitvApp.state.allChannels = channels;
-    renderChannels(channels);
-}
-
-// --- 4. RENDER CHANNELS (DISPLAY LOGOS) ---
-function renderChannels(channelList) {
-    const grid = document.getElementById('channel-grid');
-    const loader = document.getElementById('loading-logos');
-    const countDisplay = document.getElementById('display-channel-count');
-    const pkgCount = document.getElementById('pkg-count');
-
-    if (!channelList || channelList.length === 0) {
-        handleEmptyChannels();
-        return;
-    }
-
-    let htmlMarkup = '';
-    channelList.forEach(ch => {
-        htmlMarkup += `
-            <div class="channel-card" title="Category: ${ch.category}">
-                <img src="${ch.logo}" class="channel-logo" 
-                     onerror="this.src='${mitvApp.config.defaultLogo}'" 
-                     loading="lazy">
-                <div class="channel-name">${ch.name}</div>
-                <div style="font-size:8px; color:var(--primary); opacity:0.6; margin-top:4px;">
-                    ${ch.category}
-                </div>
-            </div>
-        `;
-    });
-
-    loader.style.display = 'none';
-    grid.innerHTML = htmlMarkup;
-    grid.style.display = 'grid';
-    
-    // Stats update karein
-    if(countDisplay) countDisplay.innerText = channelList.length + "+";
-    if(pkgCount) pkgCount.innerText = channelList.length;
-}
-
-// --- 5. ADMIN SAVE FUNCTION (URL SAVE KARNE KE LIYE) ---
-function saveM3USource() {
-    const m3uUrl = document.getElementById('adm-m3u').value.trim();
-    
-    if(!m3uUrl.startsWith('http')) {
-        alert("Please enter a valid URL (starting with http or https)");
-        return;
-    }
-
-    // Database mein update karein
-    mitvApp.state.db.ref('mitv_public/m3u_url').set(m3uUrl).then(() => {
-        alert("Link Saved! All users will now see logos from this new link.");
-    }).catch(err => {
-        alert("Error: " + err.message);
-    });
-}
-
-function updateUIConfig(data) {
-    // Main UI Updates
-    document.getElementById('display-price').innerText = data.price || "100";
-    document.getElementById('display-jazzcash').innerText = data.jazzcash || "03062015326";
-    
-    // Package description update
-    const pkgCountDisplay = document.getElementById('pkg-count');
-    if(pkgCountDisplay) pkgCountDisplay.innerText = mitvApp.state.allChannels.length || "All";
-
-    // Admin Dashboard values
-    const admPrice = document.getElementById('adm-price');
-    const admJazz = document.getElementById('adm-jazzcash');
-    if(admPrice) admPrice.value = data.price || "100";
-    if(admJazz) admJazz.value = data.jazzcash || "03062015326";
-}
-function handleEmptyChannels() {
-    const loader = document.getElementById('loading-logos');
-    loader.innerHTML = `
-        <i class="fas fa-exclamation-triangle"></i>
-        <p style="margin-top:10px;">Channels temporarily unavailable.</p>
-    `;
-    loader.style.display = 'block';
-}
-
-// --- 6. SEARCH SYSTEM ---
-function setupSearchListener() {
-    // Agar aap HTML mein search bar add karte hain (recommended), yeh usay handle karega
-    const searchInput = document.getElementById('channel-search');
-    if(searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const filtered = mitvApp.state.allChannels.filter(ch => 
-                ch.name.toLowerCase().includes(term) || 
-                ch.category.toLowerCase().includes(term)
-            );
-            renderChannels(filtered);
-        });
-    }
-}
-
-// --- 7. CHAT & ORDER ENGINE ---
-function toggleChat() {
-    mitvApp.state.isChatOpen = !mitvApp.state.isChatOpen;
-    const win = document.getElementById('chat-window');
-    const badge = document.getElementById('chat-badge');
-    
-    if(mitvApp.state.isChatOpen) {
-        win.classList.add('open');
-        badge.style.display = 'none';
-        setTimeout(scrollChatToBottom, 300);
-    } else {
-        win.classList.remove('open');
-    }
-}
-
-function openChatWithIntent() {
-    if(!mitvApp.state.isChatOpen) toggleChat();
-    const input = document.getElementById('chat-input');
-    input.value = "Salam, I want to buy the Premium RS 100 plan. I have checked the JazzCash number.";
-    input.focus();
-}
-
-function sendMessage() {
-    const input = document.getElementById('chat-input');
-    const text = input.value.trim();
-    if(!text || !mitvApp.state.db) return;
-
-    mitvApp.state.db.ref('mitv_public/chats').push({
-        sender: mitvApp.state.sessionId,
-        text: text,
-        time: firebase.database.ServerValue.TIMESTAMP,
-        type: 'user'
-    });
-    
-    input.value = '';
-    playTic();
-}
-
-function listenToChatHistory() {
-    const body = document.getElementById('chat-body');
-    const adminBody = document.getElementById('admin-chat-view');
-
-    mitvApp.state.db.ref('mitv_public/chats').limitToLast(30).on('child_added', (snapshot) => {
-        const msg = snapshot.val();
-        const time = new Date(msg.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
-        // Front-end UI Logic
-        const isMine = msg.sender === mitvApp.state.sessionId;
-        const isAdmin = msg.type === 'admin';
-        const cssClass = isAdmin ? 'msg-admin' : (isMine ? 'msg-user' : 'msg-admin');
-
-        const messageHtml = `
-            <div class="msg-bubble ${cssClass}">
-                ${isAdmin ? '<b>MiTV Support:</b> ' : ''}${msg.text}
-                <div class="msg-time">${time}</div>
-            </div>
-        `;
-
-        body.innerHTML += messageHtml;
-        scrollChatToBottom();
-
-        // Notification for User
-        if(!mitvApp.state.isChatOpen && isAdmin) {
-            const badge = document.getElementById('chat-badge');
-            badge.style.display = 'flex';
-            badge.innerText = "!";
+        let db;
+        function initFirebase() {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            syncPublicData();
+            listenToChat();
         }
 
-        // Admin Dashboard Logic
-        if(adminBody) {
-            const adminMsgHtml = `
-                <div style="margin-bottom:8px; border-bottom:1px solid #1f242d; padding-bottom:5px;">
-                    <span style="color:${isAdmin ? 'var(--primary)' : 'var(--accent)'}; font-size:10px;">
-                        [${time}] ${msg.sender.substring(0,8)}:
-                    </span>
-                    <p style="font-size:12px; margin:0;">${msg.text}</p>
-                </div>
-            `;
-            adminBody.innerHTML += adminMsgHtml;
-            adminBody.scrollTop = adminBody.scrollHeight;
+        // --- D. SYNC PUBLIC DATA (PRICE, NUMBERS, M3U) ---
+        function syncPublicData() {
+            // 1. Sync Pricing & Info
+            db.ref('mitv_public/config').on('value', snap => {
+                const data = snap.val();
+                if(data) {
+                    document.getElementById('display-price').innerText = data.price || "100";
+                    document.getElementById('display-jazzcash').innerText = data.jazzcash || "03062015326";
+                    
+                    // Populate Admin fields if admin opens it later
+                    document.getElementById('adm-price').value = data.price || "100";
+                    document.getElementById('adm-jazzcash').value = data.jazzcash || "03062015326";
+                }
+            });
+
+            // 2. Sync M3U Text & Parse it
+            db.ref('mitv_public/m3u_raw').on('value', snap => {
+                const rawText = snap.val();
+                if(rawText) {
+                    document.getElementById('adm-m3u').value = rawText; // Set for admin
+                    parseM3UAndRender(rawText);
+                } else {
+                    document.getElementById('loading-logos').innerHTML = "No Channels Configured Yet.";
+                }
+            });
         }
-    });
-}
 
-function scrollChatToBottom() {
-    const body = document.getElementById('chat-body');
-    body.scrollTo({ top: body.scrollHeight, behavior: 'smooth' });
-}
+        // --- E. M3U PARSER ENGINE ---
+        function parseM3UAndRender(m3uText) {
+            const lines = m3uText.split('\n');
+            const grid = document.getElementById('channel-grid');
+            const loader = document.getElementById('loading-logos');
+            let html = '';
+            let channelCount = 0;
 
-// --- 8. ADMIN SECURITY & CONSOLE ---
-function showAdminLogin() { 
-    document.getElementById('admin-modal').classList.add('show'); 
-}
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (line.startsWith('#EXTINF')) {
+                    // Extract Logo
+                    let logoUrl = 'https://i.ibb.co/SD424ppD/mitv-v5.png'; // Default logo
+                    const logoMatch = line.match(/tvg-logo="([^"]+)"/);
+                    if (logoMatch && logoMatch[1]) {
+                        logoUrl = logoMatch[1];
+                    }
+                    
+                    // Extract Name (Everything after the comma)
+                    let channelName = "Unknown Channel";
+                    const commaIndex = line.lastIndexOf(',');
+                    if (commaIndex !== -1) {
+                        channelName = line.substring(commaIndex + 1).trim();
+                    }
 
-function closeAdminLogin() { 
-    document.getElementById('admin-modal').classList.remove('show'); 
-    document.getElementById('admin-err').style.display = 'none'; 
-}
+                    channelCount++;
+                    html += `
+                        <div class="channel-card">
+                            <img src="${logoUrl}" class="channel-logo" onerror="this.src='https://i.ibb.co/SD424ppD/mitv-v5.png'">
+                            <div class="channel-name">${channelName}</div>
+                        </div>
+                    `;
+                }
+            }
 
-function verifyAdmin() {
-    const pinInput = document.getElementById('admin-pin');
-    if(pinInput.value === mitvApp.config.adminPin) {
-        closeAdminLogin();
-        document.getElementById('admin-dashboard').style.display = 'block';
-        pinInput.value = '';
-        console.log("Admin Console: Unlocked");
-    } else {
-        const err = document.getElementById('admin-err');
-        err.style.display = 'block';
-        err.innerText = "Invalid PIN. Access Denied.";
-    }
-}
+            if(channelCount > 0) {
+                loader.style.display = 'none';
+                grid.innerHTML = html;
+                grid.style.display = 'grid';
+                document.getElementById('display-channel-count').innerText = channelCount + "+";
+                document.getElementById('pkg-count').innerText = channelCount;
+            } else {
+                loader.innerHTML = "No valid channels found in source.";
+            }
+        }
 
-function closeAdminDash() { 
-    document.getElementById('admin-dashboard').style.display = 'none'; 
-}
+        // --- F. CHAT ENGINE (FIREBASE) ---
+        // Simple session ID for public user
+        const sessionId = "User_" + Math.floor(Math.random() * 10000); 
 
-// --- 9. ADMIN ACTIONS (DATABASE WRITE) ---
-function savePublicInfo() {
-    const price = document.getElementById('adm-price').value;
-    const jc = document.getElementById('adm-jazzcash').value;
-    
-    if(!price || !jc) {
-        alert("Please fill all fields.");
-        return;
-    }
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if(!text) return;
 
-    mitvApp.state.db.ref('mitv_public/config').update({
-        price: price,
-        jazzcash: jc
-    }).then(() => {
-        alert("Success: Configuration updated globally!");
-    }).catch(err => {
-        alert("Update Failed: " + err.message);
-    });
-}
+            db.ref('mitv_public/chats').push({
+                sender: sessionId,
+                text: text,
+                time: Date.now(),
+                type: 'user'
+            });
+            input.value = '';
+        }
 
-function saveM3USource() {
-    const m3uText = document.getElementById('adm-m3u').value;
-    
-    if(!m3uText.includes('#EXTM3U')) {
-        alert("Error: Invalid M3U format. Must start with #EXTM3U");
-        return;
-    }
+        function sendAdminReply() {
+            const input = document.getElementById('admin-chat-reply');
+            const text = input.value.trim();
+            if(!text) return;
 
-    mitvApp.state.db.ref('mitv_public/m3u_raw').set(m3uText).then(() => {
-        alert("Channels updated! Reloading parser...");
-    });
-}
+            db.ref('mitv_public/chats').push({
+                sender: 'Admin',
+                text: text,
+                time: Date.now(),
+                type: 'admin'
+            });
+            input.value = '';
+        }
 
-function sendAdminReply() {
-    const input = document.getElementById('admin-chat-reply');
-    const text = input.value.trim();
-    if(!text) return;
+        function listenToChat() {
+            const body = document.getElementById('chat-body');
+            const adminBody = document.getElementById('admin-chat-view');
 
-    mitvApp.state.db.ref('mitv_public/chats').push({
-        sender: 'MiTV-Admin',
-        text: text,
-        time: firebase.database.ServerValue.TIMESTAMP,
-        type: 'admin'
-    });
-    
-    input.value = '';
-}
+            db.ref('mitv_public/chats').limitToLast(50).on('child_added', snap => {
+                const msg = snap.val();
+                const timeStr = new Date(msg.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                // For Public UI
+                const isMine = msg.sender === sessionId;
+                const isAdmin = msg.type === 'admin';
+                
+                let cssClass = isAdmin ? 'msg-admin' : (isMine ? 'msg-user' : 'msg-admin');
+                
+                const html = `
+                    <div class="msg-bubble ${cssClass}">
+                        ${isAdmin ? '<b>Admin:</b> ' : ''}${msg.text}
+                        <div class="msg-time">${timeStr}</div>
+                    </div>
+                `;
+                body.innerHTML += html;
+                scrollChatToBottom();
 
-// Global enter key listener for chat
-document.addEventListener('keypress', (e) => {
-    if(e.key === 'Enter') {
-        const chatInput = document.getElementById('chat-input');
-        const adminReply = document.getElementById('admin-chat-reply');
+                // Notification Badge logic
+                if(!chatOpen && isAdmin) {
+                    const badge = document.getElementById('chat-badge');
+                    badge.style.display = 'flex';
+                    // Optional play sound for notification
+                }
+
+                // For Admin UI
+                const adminHtml = `
+                    <div style="margin-bottom:10px; font-size:13px; color:#fff;">
+                        <span style="color:${msg.type === 'admin' ? 'var(--primary)' : 'var(--accent)'}">[${timeStr}] ${msg.sender}:</span> ${msg.text}
+                    </div>
+                `;
+                adminBody.innerHTML += adminHtml;
+                adminBody.scrollTop = adminBody.scrollHeight;
+            });
+        }
+
+        // --- G. ADMIN PANEL LOGIC ---
+        function showAdminLogin() { document.getElementById('admin-modal').classList.add('show'); }
+        function closeAdminLogin() { document.getElementById('admin-modal').classList.remove('show'); document.getElementById('admin-err').style.display = 'none'; }
         
-        if(document.activeElement === chatInput) sendMessage();
-        if(document.activeElement === adminReply) sendAdminReply();
-    }
-});
+        function verifyAdmin() {
+            const pin = document.getElementById('admin-pin').value;
+            // Password requirement: 123456
+            if(pin === "123456") {
+                closeAdminLogin();
+                document.getElementById('admin-dashboard').style.display = 'block';
+                document.getElementById('admin-pin').value = '';
+            } else {
+                document.getElementById('admin-err').style.display = 'block';
+            }
+        }
 
+        function closeAdminDash() { document.getElementById('admin-dashboard').style.display = 'none'; }
+
+        function savePublicInfo() {
+            const price = document.getElementById('adm-price').value;
+            const jc = document.getElementById('adm-jazzcash').value;
+            db.ref('mitv_public/config').update({ price: price, jazzcash: jc }).then(() => {
+                alert("Settings Saved Successfully!");
+            });
+        }
+
+        function saveM3USource() {
+            const m3u = document.getElementById('adm-m3u').value;
+            if(!m3u.includes('#EXTM3U')) {
+                alert("Warning: Valid M3U text usually starts with #EXTM3U");
+            }
+            db.ref('mitv_public/m3u_raw').set(m3u).then(() => {
+                alert("Channels Updated & Synced to Front Page!");
+            });
+        }
     </script>
 </body>
 </html>
