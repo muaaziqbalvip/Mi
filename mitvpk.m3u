@@ -1,6 +1,8 @@
 #EXTM3U
 #EXTINF:-1 tvg-id="mitv@SD" tvg-logo="https://i.ibb.co/5g6VKmyL/IMG-20260314-173309.png" group-title="🅜🅘🅣🅥",🅼🅸🆃🆅 𝐖𝐄𝐋𝐋𝐂𝐎𝐌𝐄
 https://mitvnet.vercel.app/welcomemitv.mp4
+#EXTINF:-1 tvg-id="mitv@SD" tvg-logo="https://i.ibb.co/5g6VKmyL/IMG-20260314-173309.png" group-title="🅜🅘🅣🅥",99🅽🅰🅼🅴🆂 𝐀𝐋𝐋𝐀𝐇
+https://www.dropbox.com/scl/fi/dpmmffawhbi23xsk0xm7l/99name_ALLAH.mp4?rlkey=4enqckm1zihs44y1a05pp7iuf&st=5aaopshv&raw=1
 #EXTINF:-1 tvg-id="saudi.quran.makkah.pk@SD" tvg-logo="https://canvas.tamashaweb.com/jazzlive/uploads/channels/logo/saudi-quran-makkah-tv-hd-live.webp" group-title="Free data 🆓📡",Saudi quran makkah tv hd live
 https://cdn22lhr.tamashaweb.com:8087/jazzauth/Saudimakkah(nw)-abr/playlist.m3u8
 #EXTINF:-1 tvg-id="saudi.sunnah.madinah.pk@SD" tvg-logo="https://canvas.tamashaweb.com/jazzlive/uploads/channels/logo/saudi-sunnah-madinah-tv-hd-live.webp?id=17" group-title="Free data 🆓📡",Saudi sunnah madinah tv hd live
