@@ -87,7 +87,7 @@ module.exports = async (req, res) => {
         let finalM3U = "#EXTM3U\n";
 
         if (userData.status !== 'Paid') {
-            finalM3U += `#EXTINF:-1, ACCOUNT EXPIRED\n${offlineVideo}\n`;
+            finalM3U += `#EXTINF:-1 tvg-logo="https://cdn-icons-png.flaticon.com/512/5972/5972778.png", PLEASE PAY BILL - MiTV\nhttps://mitvnet.vercel.app/mipay.mp4\n`;
         } else {
             for (let sourceUrl of config.sources) {
                 try {
