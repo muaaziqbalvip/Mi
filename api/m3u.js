@@ -1,7 +1,7 @@
 /**
- * MITV NETWORK - OMNI STREAM ENGINE (v4.0 - ULTRA RETRY)
+ * MITV NETWORK - OMNI STREAM ENGINE (v4.0 - ULTRA RETRY + HISTORY)
  * OWNER: MUAAZ IQBAL (MiTV Network)
- * Logic: 20x Aggressive Retry, Deep Masking, Device Tracking.
+ * Logic: 20x Aggressive Retry, Deep Masking, Device Tracking & History Logging.
  */
 
 const axios = require('axios');
@@ -21,15 +21,26 @@ module.exports = async (req, res) => {
             const realLink = Buffer.from(sid, 'base64').toString('ascii');
             const userAgent = req.headers['user-agent'] || "Unknown Device";
             const channelName = cname ? decodeURIComponent(cname) : "Direct Stream";
+            const timestamp = new Date().toISOString();
+            const userIP = req.headers['x-forwarded-for'] || "0.0.0.0";
 
-            // 1. Parallel Security & Tracking (No Wait)
+            // 1. Parallel Security, Real-time Tracking & History Saving
+            // Hum .patch se current status update kar rahe hain aur .post se history mein naya record add kar rahe hain
             const [userCheck] = await Promise.all([
                 axios.get(`${dbUrl}/master_users/${user}/status.json`),
+                // Update Current Activity (Dashboard ke liye)
                 axios.patch(`${dbUrl}/master_users/${user}/tracking.json`, {
                     last_played: channelName,
-                    last_seen: new Date().toISOString(),
+                    last_seen: timestamp,
                     device: userAgent,
-                    ip: req.headers['x-forwarded-for'] || "0.0.0.0"
+                    ip: userIP
+                }).catch(() => {}),
+                // Save to History (Deep Trace ke liye - Har click save hoga)
+                axios.post(`${dbUrl}/master_users/${user}/history.json`, {
+                    channel: channelName,
+                    time: timestamp,
+                    device: userAgent,
+                    ip: userIP
                 }).catch(() => {})
             ]);
 
