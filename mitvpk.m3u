@@ -1,7 +1,7 @@
 #EXTM3U
 #EXTINF:-1 tvg-id="mitv@SD" tvg-logo="https://i.ibb.co/5g6VKmyL/IMG-20260314-173309.png" group-title="🅜🅘🅣🅥",🅼🅸🆃🆅 𝐖𝐄𝐋𝐋𝐂𝐎𝐌𝐄
 https://mitvnet.vercel.app/welcomemitv.mp4
-#EXTINF:-1 tvg-id="mitv@SD" tvg-logo="https://i.ibb.co/5g6VKmyL/IMG-20260314-173309.png" group-title="🅜🅘🅣🅥",99🅽🅰🅼🅴🆂 𝐀𝐋𝐋𝐀𝐇
+#EXTINF:-1 tvg-id="mitv@SD" tvg-logo="https://i.ibb.co/gHP9KjQ/IMG-20260315-151351.png" group-title="🅜🅘🅣🅥",99🅽🅰🅼🅴🆂 𝐀𝐋𝐋𝐀𝐇
 https://www.dropbox.com/scl/fi/dpmmffawhbi23xsk0xm7l/99name_ALLAH.mp4?rlkey=4enqckm1zihs44y1a05pp7iuf&st=5aaopshv&raw=1
 #EXTINF:-1 tvg-id="saudi.quran.makkah.pk@SD" tvg-logo="https://canvas.tamashaweb.com/jazzlive/uploads/channels/logo/saudi-quran-makkah-tv-hd-live.webp" group-title="Free data 🆓📡",Saudi quran makkah tv hd live
 https://cdn22lhr.tamashaweb.com:8087/jazzauth/Saudimakkah(nw)-abr/playlist.m3u8
@@ -9,10 +9,8 @@ https://cdn22lhr.tamashaweb.com:8087/jazzauth/Saudimakkah(nw)-abr/playlist.m3u8
 https://cdn22lhr.tamashaweb.com:8087/jazzauth/SaudiSunnah(NW)-abr/live/vsat-149L/chunks.m3u8
 #EXTINF:-1 tvg-id="pegham.pk@SD" tvg-logo="https://i.ibb.co/gMhwDPS8/Pegamtv.jpg" group-title="Free data 🆓📡",Pegam tv
 https://cdn22lhr.tamashaweb.com:8087/jazzauth/PaighamTV-abr/playlist.m3u8
-#EXTINF:-1 tvg-id="T20.pk@SD" tvg-logo="https://canvas.tamashaweb.com/jazzlive/uploads/channels/logo/1769427358086.webp?id=10" group-title="Free data 🆓📡",T20 WORLD CUP
-https://cdn16lhr.tamashaweb.com:8087/jazzauth/ICC-MEN-T20-abr/playlist.m3u8
-#EXTINF:-1 tvg-id="T20@SD" tvg-logo="https://canvas.tamashaweb.com/jazzlive/uploads/channels/logo/1769663665878.webp?id=32" group-title="Free data 🆓📡",T20 WORLD CUP NO AD
-https://cdn01fsd-n.tamashaweb.com:8087/jazzauth/T20-WC-SVOD-A-abr/playlist.m3u8
+#EXTINF:-1 tvg-id="PTV.SPIRT.pk@SD" tvg-logo="https://canvas.tamashaweb.com/jazzlive/uploads/channels/logo/1750321954030.webp?id=92" group-title="Free data 🆓📡",PTV SPORT
+https://cdn22lhr.tamashaweb.com:8087/jazzauth/PTVSports-abr/playlist.m3u8
 #EXTINF:-1 tvg-id="geo.news.pk@SD" tvg-logo="https://canvas.tamashaweb.com/jazzlive/uploads/channels/logo/geo-news-live.webp?id=52" group-title="Free data 🆓📡",Geo news
 https://cdn07isb.tamashaweb.com:8087/jazzauth/vsat-geonews-abr/playlist_dvr_timeshift-0-3600.m3u8
 #EXTINF:-1 tvg-id="discovery.hd.in@SD" tvg-logo="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMJ-bU7at-8zBpPb6pgxLFV0Lgm3PdUvpxL2Vu0U9WnQ&s=10" group-title="Free data 🆓📡",Discovery hd
