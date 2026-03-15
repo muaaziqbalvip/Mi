@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiTV Admin | Global Network Control</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --brand-primary: #3b82f6;
+            --brand-glow: rgba(59, 130, 246, 0.5);
+            --bg-ultra-dark: #020617;
+            --card-surface: rgba(15, 23, 42, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* Prevents text selection for App-like feel */
+        }
+
+        body {
+            background-color: var(--bg-ultra-dark);
+            color: #f1f5f9;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 35%),
+                radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.05) 0%, transparent 35%);
+            background-attachment: fixed;
+        }
+
+        /* --- SMOOTH SCROLLING --- */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 20px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--brand-primary); }
+
+        /* --- GLASSMORPHISM EFFECTS --- */
+        .glass-card {
+            background: var(--card-surface);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            transition: var(--transition-smooth);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            background: rgba(30, 41, 59, 0.8);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -20px rgba(0,0,0,0.5);
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-up { animation: slideInUp 0.6s ease-out forwards; }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { opacity: 0.5; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .online-dot { background: #10b981; box-shadow: 0 0 10px #10b981; }
+        .online-dot::after {
+            content: '';
+            position: absolute;
+            width: 100%; height: 100%;
+            background: inherit;
+            border-radius: inherit;
+            animation: pulse-ring 2s infinite;
+        }
+
+        /* --- MODAL DESIGN --- */
+        .modal-overlay {
+            background: rgba(2, 6, 23, 0.85);
+            backdrop-filter: blur(10px);
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-active { display: flex; opacity: 1; }
+
+        .modal-content {
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-active .modal-content { transform: scale(1); }
+
+        /* --- DATA TABLE STYLING --- */
+        .user-row {
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            transition: var(--transition-smooth);
+        }
+        .user-row:hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .search-container input:focus {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+        }
+
+        /* --- GLOW TEXT --- */
+        .glow-text {
+            text-shadow: 0 0 10px var(--brand-glow);
+        }
+
+    </style>
+</head>
+<body class="overflow-x-hidden">
+
+    <header class="sticky top-0 z-[100] glass-card !rounded-none border-x-0 border-t-0 py-4 px-6 md:px-12 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-900/40">
+                <i class="fas fa-satellite-dish text-white text-xl animate-pulse"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl font-black tracking-tighter">MiTV <span class="text-blue-500">OPS</span></h1>
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Global Master Control</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-6">
+            <div class="hidden lg:flex flex-col text-right">
+                <span class="text-xs font-bold text-slate-400">Server Time</span>
+                <span id="live-time" class="text-sm font-mono text-blue-400">00:00:00</span>
+            </div>
+            <button onclick="syncAll()" class="group bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-3 transition-all shadow-xl shadow-blue-900/20 active:scale-95">
+                <i class="fas fa-sync-alt group-hover:rotate-180 transition-transform duration-500"></i>
+                <span class="hidden sm:inline">Refresh Engine</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-[1600px] mx-auto p-6 md:p-12">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            
+            <div class="glass-card p-8 animate-up" style="animation-delay: 0.1s;">
+                <div class="flex justify-between items-start mb-6">
+                    <div class="p-4 bg-blue-500/10 rounded-2xl text-blue-500"><i class="fas fa-users-viewfinder text-2xl"></i></div>
+                    <span class="text-[10px] font-black text-slate-500 uppercase">Registered</span>
+                </div>
+                <h2 id="stat-total" class="text-4xl font-black glow-text">0</h2>
+                <div class="mt-2 flex items-center text-xs text-slate-400">
+                    <i class="fas fa-arrow-up text-emerald-500 mr-1"></i> <span>Overall Users</span>
+                </div>
+            </div>
+
+            <div class="glass-card p-8 animate-up" style="animation-delay: 0.2s;">
+                <div class="flex justify-between items-start mb-6">
+                    <div class="p-4 bg-emerald-500/10 rounded-2xl text-emerald-500"><i class="fas fa-play text-2xl"></i></div>
+                    <span class="text-[10px] font-black text-slate-500 uppercase">Live Streaming</span>
+                </div>
+                <h2 id="stat-active" class="text-4xl font-black text-emerald-400 glow-text">0</h2>
+                <div class="mt-2 flex items-center text-xs text-slate-400">
+                    <i class="fas fa-circle text-emerald-500 animate-pulse mr-2 text-[6px]"></i> <span>Watching Now</span>
+                </div>
+            </div>
+
+            <div class="glass-card p-8 animate-up" style="animation-delay: 0.3s;">
+                <div class="flex justify-between items-start mb-6">
+                    <div class="p-4 bg-amber-500/10 rounded-2xl text-amber-500"><i class="fas fa-crown text-2xl"></i></div>
+                    <span class="text-[10px] font-black text-slate-500 uppercase">Revenue Access</span>
+                </div>
+                <h2 id="stat-paid" class="text-4xl font-black text-amber-400 glow-text">0</h2>
+                <div class="mt-2 flex items-center text-xs text-slate-400">
+                    <i class="fas fa-shield-alt text-amber-500 mr-1"></i> <span>Paid Subscriptions</span>
+                </div>
+            </div>
+
+            <div class="glass-card p-8 animate-up" style="animation-delay: 0.4s;">
+                <div class="flex justify-between items-start mb-6">
+                    <div class="p-4 bg-purple-500/10 rounded-2xl text-purple-500"><i class="fas fa-bolt text-2xl"></i></div>
+                    <span class="text-[10px] font-black text-slate-500 uppercase">Performance</span>
+                </div>
+                <h2 class="text-4xl font-black text-purple-400 glow-text">100%</h2>
+                <div class="mt-2 flex items-center text-xs text-slate-400">
+                    <i class="fas fa-check-double text-purple-500 mr-1"></i> <span>System Status</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            
+            <div class="lg:col-span-8 space-y-8 animate-up" style="animation-delay: 0.5s;">
+                <div class="glass-card overflow-hidden">
+                    <div class="p-8 border-b border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6 bg-slate-900/20">
+                        <div>
+                            <h3 class="text-xl font-bold">User Terminal</h3>
+                            <p class="text-xs text-slate-500">Live monitoring of user playback and device logs</p>
+                        </div>
+                        <div class="search-container relative w-full md:w-80">
+                            <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                            <input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="Search ID, IP, Device..." class="w-full bg-slate-900/80 border border-slate-800 rounded-2xl py-4 pl-14 pr-4 outline-none transition-all text-sm focus:border-blue-500/50">
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-900/50 text-slate-500 text-[10px] font-black uppercase tracking-widest">
+                                <tr>
+                                    <th class="px-8 py-5">Network Identity</th>
+                                    <th class="px-8 py-5">Plan</th>
+                                    <th class="px-8 py-5">Current Playback</th>
+                                    <th class="px-8 py-5 text-right">Activity</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody">
+                                </tbody>
+                        </table>
+                    </div>
+
+                    <div id="mainLoader" class="py-20 flex flex-col items-center">
+                        <div class="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+                        <p class="text-xs text-slate-500 mt-4 font-bold tracking-widest uppercase">Fetching Stream Data...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-4 space-y-8 animate-up" style="animation-delay: 0.6s;">
+                <div class="glass-card p-8 h-full">
+                    <h3 class="text-xl font-bold mb-6 flex items-center gap-3">
+                        <i class="fas fa-history text-blue-500"></i> Global Logs
+                    </h3>
+                    <div id="globalLogs" class="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+                        <div class="flex gap-4 p-4 bg-slate-900/50 rounded-2xl border border-slate-800">
+                            <div class="text-blue-500"><i class="fas fa-info-circle"></i></div>
+                            <div>
+                                <p class="text-xs font-bold">System Online</p>
+                                <p class="text-[10px] text-slate-500">MiTV Command Center Initialized Successfully.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <div id="historyModal" class="modal-overlay fixed inset-0 z-[1000] items-center justify-center p-4">
+        <div class="modal-content glass-card w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
+            
+            <div class="p-8 border-b border-slate-800 flex justify-between items-center bg-slate-900/30">
+                <div class="flex items-center gap-5">
+                    <div id="modalAvatar" class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-3xl font-black shadow-lg shadow-blue-900/30">M</div>
+                    <div>
+                        <h2 id="modalName" class="text-3xl font-black tracking-tighter">User Name</h2>
+                        <div class="flex items-center gap-4 mt-1">
+                            <span id="modalIP" class="text-xs font-mono text-blue-400">0.0.0.0</span>
+                            <span id="modalStatus" class="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-500">Paid</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-800 hover:bg-red-500/20 hover:text-red-500 transition-all">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-8 grid grid-cols-1 lg:grid-cols-3 gap-10">
+                
+                <div class="space-y-8">
+                    <div class="bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
+                        <h4 class="text-[10px] font-black text-slate-500 uppercase mb-4 tracking-widest">Device Blueprint</h4>
+                        <p id="modalDevice" class="text-xs text-slate-300 leading-relaxed font-medium">Unknown Hardware</p>
+                    </div>
+
+                    <div class="bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
+                        <h4 class="text-[10px] font-black text-slate-500 uppercase mb-4 tracking-widest">Usage Insights</h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-500">Last Seen</span>
+                                <span id="modalLastSeen" class="font-bold">Just now</span>
+                            </div>
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-500">Engagement</span>
+                                <span class="text-emerald-500 font-bold">High</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 space-y-6">
+                    <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest flex justify-between">
+                        <span>All Recorded Activity</span>
+                        <span class="text-blue-500">Live Trace</span>
+                    </h4>
+                    <div id="modalHistoryList" class="space-y-4">
+                        </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <audio id="clickSound" preload="auto">
+        <source src="https://www.soundjay.com/buttons/sounds/button-50.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        /**
+         * MiTV ENGINE v6.0 - JAVASCRIPT LOGIC
+         */
+        
+        const FIREBASE_URL = "https://ramadan-2385b-default-rtdb.firebaseio.com/master_users.json";
+        const tick = document.getElementById('clickSound');
+
+        // Play Sound Function
+        function playTic() {
+            tick.currentTime = 0;
+            tick.volume = 0.2;
+            tick.play().catch(()=>{});
+        }
+
+        // Add event listener to all buttons for sound
+        document.addEventListener('click', (e) => {
+            if(e.target.closest('button') || e.target.closest('.user-row')) {
+                playTic();
+            }
+        });
+
+        // Live Clock
+        setInterval(() => {
+            document.getElementById('live-time').innerText = new Date().toLocaleTimeString('en-US', { hour12: false });
+        }, 1000);
+
+        /**
+         * DATA FETCHING CORE
+         */
+        async function syncAll() {
+            document.getElementById('mainLoader').classList.remove('hidden');
+            try {
+                const response = await fetch(FIREBASE_URL);
+                const users = await response.json();
+                if (users) {
+                    renderDashboard(users);
+                    addLog("Data Sync", "Latest user metrics updated successfully.", "info");
+                }
+            } catch (err) {
+                console.error("Sync Error:", err);
+                addLog("Sync Error", "Connection to Firebase failed.", "error");
+            } finally {
+                document.getElementById('mainLoader').classList.add('hidden');
+            }
+        }
+
+        /**
+         * DASHBOARD RENDERING
+         */
+        function renderDashboard(users) {
+            const tbody = document.getElementById('userTableBody');
+            const userIds = Object.keys(users);
+            
+            let activeStreaming = 0;
+            let paidUsers = 0;
+            const now = new Date();
+
+            tbody.innerHTML = '';
+
+            userIds.forEach(id => {
+                const u = users[id];
+                const t = u.tracking || {};
+                
+                // Analytics counters
+                if(u.status === 'Paid') paidUsers++;
+                
+                // Is user online? (Within last 5 mins)
+                let isOnline = false;
+                if(t.last_seen) {
+                    const diff = (now - new Date(t.last_seen)) / 1000 / 60;
+                    if(diff < 5) {
+                        isOnline = true;
+                        activeStreaming++;
+                    }
+                }
+
+                const statusColor = (u.status === 'Paid') ? 'text-emerald-500 bg-emerald-500/10' : 'text-red-500 bg-red-500/10';
+
+                const row = document.createElement('tr');
+                row.className = "user-row cursor-pointer";
+                row.onclick = () => showUserDetail(id, u);
+
+                row.innerHTML = `
+                    <td class="px-8 py-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center font-black text-blue-500 border border-slate-700">
+                                ${id.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <div class="text-sm font-bold flex items-center gap-2">
+                                    ${id}
+                                    ${isOnline ? '<div class="status-dot online-dot"></div>' : ''}
+                                </div>
+                                <div class="text-[10px] font-mono text-slate-500">${t.ip || '0.0.0.0'}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-8 py-6">
+                        <span class="text-[10px] font-black uppercase px-3 py-1 rounded-full ${statusColor}">
+                            ${u.status || 'Free'}
+                        </span>
+                    </td>
+                    <td class="px-8 py-6">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-play-circle text-blue-500 ${isOnline ? 'animate-pulse' : 'opacity-20'}"></i>
+                            <span class="text-xs font-bold ${isOnline ? 'text-white' : 'text-slate-600'}">
+                                ${isOnline ? (t.last_played || 'Browsing...') : 'Offline'}
+                            </span>
+                        </div>
+                    </td>
+                    <td class="px-8 py-6 text-right">
+                        <span class="text-[10px] font-mono text-slate-500">${t.last_seen ? formatTime(t.last_seen) : 'Never'}</span>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Update Statistics
+            updateCounter('stat-total', userIds.length);
+            updateCounter('stat-active', activeStreaming);
+            updateCounter('stat-paid', paidUsers);
+        }
+
+        /**
+         * COUNTER ANIMATION
+         */
+        function updateCounter(id, value) {
+            const el = document.getElementById(id);
+            const startValue = parseInt(el.innerText);
+            const duration = 1000;
+            let startTime = null;
+
+            function animate(currentTime) {
+                if (!startTime) startTime = currentTime;
+                const progress = Math.min((currentTime - startTime) / duration, 1);
+                el.innerText = Math.floor(progress * (value - startValue) + startValue);
+                if (progress < 1) requestAnimationFrame(animate);
+            }
+            requestAnimationFrame(animate);
+        }
+
+        /**
+         * MODAL FUNCTIONS
+         */
+        function showUserDetail(id, data) {
+            const t = data.tracking || {};
+            const modal = document.getElementById('historyModal');
+            
+            document.getElementById('modalAvatar').innerText = id.charAt(0).toUpperCase();
+            document.getElementById('modalName').innerText = id;
+            document.getElementById('modalIP').innerText = t.ip || '0.0.0.0';
+            document.getElementById('modalDevice').innerText = t.device || 'No device metadata recorded for this session.';
+            document.getElementById('modalLastSeen').innerText = t.last_seen ? formatTime(t.last_seen) : 'N/A';
+            
+            const statusEl = document.getElementById('modalStatus');
+            statusEl.innerText = data.status || 'Free';
+            statusEl.className = `text-[10px] font-black uppercase px-2 py-0.5 rounded ${data.status === 'Paid' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-red-500/20 text-red-500'}`;
+
+            // Render History Items
+            const historyList = document.getElementById('modalHistoryList');
+            historyList.innerHTML = '';
+
+            // Note: Since we are tracking "last_played", we show the current/last item.
+            // In a real app, you would fetch a "history" array from Firebase.
+            if(t.last_played) {
+                historyList.innerHTML += createHistoryCard(t.last_played, t.last_seen, true);
+            }
+
+            modal.classList.add('modal-active');
+        }
+
+        function createHistoryCard(channel, time, isLive) {
+            return `
+                <div class="flex items-center justify-between p-5 bg-slate-900/50 border border-slate-800 rounded-3xl group hover:border-blue-500/30 transition-all">
+                    <div class="flex items-center gap-5">
+                        <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-all">
+                            <i class="fas fa-play text-xs"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-white">${channel}</p>
+                            <p class="text-[10px] text-slate-500 font-medium">${isLive ? 'Currently Active Session' : 'Past Playback'}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] font-black text-slate-400 font-mono">${new Date(time).toLocaleTimeString()}</p>
+                        <p class="text-[9px] text-blue-500/50 uppercase font-bold tracking-widest">${new Date(time).toLocaleDateString()}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function closeModal() {
+            document.getElementById('historyModal').classList.remove('modal-active');
+        }
+
+        /**
+         * UTILS
+         */
+        function formatTime(isoStr) {
+            const date = new Date(isoStr);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function addLog(title, msg, type) {
+            const container = document.getElementById('globalLogs');
+            const log = document.createElement('div');
+            const color = type === 'error' ? 'text-red-500' : 'text-blue-500';
+            log.className = "flex gap-4 p-4 bg-slate-900/50 rounded-2xl border border-slate-800 animate-up";
+            log.innerHTML = `
+                <div class="${color} mt-1"><i class="fas ${type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i></div>
+                <div>
+                    <p class="text-xs font-bold">${title}</p>
+                    <p class="text-[10px] text-slate-500">${msg}</p>
+                </div>
+            `;
+            container.prepend(log);
+            if(container.children.length > 15) container.lastChild.remove();
+        }
+
+        function filterUsers() {
+            const query = document.getElementById('userSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('.user-row');
+            rows.forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+            });
+        }
+
+        // Auto Refresh Loop
+        syncAll();
+        setInterval(syncAll, 30000);
+
+    </script>
+</body>
+</html>
