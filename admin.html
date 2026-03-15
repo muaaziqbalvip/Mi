@@ -11,7 +11,21 @@
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MiTV Master">
+<link rel="apple-touch-icon" href="https://i.ibb.co/SD424ppD/mitv-v5.png">
 
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('MiTV PWA: Service Worker Active', reg.scope))
+        .catch(err => console.log('MiTV PWA: Registration Failed', err));
+    });
+  }
+</script>
     <style>
         /* =========================================================================
            CSS VARIABLES & DESIGN SYSTEM
