@@ -1,72 +1,49 @@
 /**
- * MITV NETWORK - DEEP STREAM MASKING ENGINE
+ * MITV NETWORK - DEEP STREAM MASKING ENGINE (PRO)
  * OWNER: MUAAZ IQBAL (MiTV Network)
- * Logic: Extracts every single channel and masks individual stream URLs.
- * Update: Smart Health Check (Range-based) with 3 retries & intelligent fallback.
+ * Features: High-speed redirect, User tracking, Device logging, Offline Fallback.
  */
 
 const axios = require('axios');
 
-// Retry delay function
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
 module.exports = async (req, res) => {
-    const { user, stream, sid } = req.query;
+    const { user, stream, sid, cname } = req.query;
     const dbUrl = `https://ramadan-2385b-default-rtdb.firebaseio.com`;
     const host = req.headers.host;
     const offlineVideo = `https://mitvnet.vercel.app/mipay.mp4`;
 
+    // --- CASE 1: STREAM REDIRECT & TRACKING ---
     if (stream && sid) {
         try {
             const realLink = Buffer.from(sid, 'base64').toString('ascii');
-            
-            // User status check
-            const userCheck = await axios.get(`${dbUrl}/master_users/${user}/status.json`);
+            const userAgent = req.headers['user-agent'] || "Unknown Device";
+            const channelName = cname || "Unknown Channel";
+
+            // 1. User Status & Tracking (Parallel execution for speed)
+            const [userCheck] = await Promise.all([
+                axios.get(`${dbUrl}/master_users/${user}/status.json`),
+                // Tracking data update in Firebase
+                axios.patch(`${dbUrl}/master_users/${user}/tracking.json`, {
+                    last_played: channelName,
+                    last_seen: new Date().toISOString(),
+                    device: userAgent,
+                    ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress
+                }).catch(e => console.log("Tracking Error"))
+            ]);
+
             if (userCheck.data !== 'Paid') return res.status(403).send("Payment Required");
 
-            // --- IMPROVED HEALTH CHECK LOGIC ---
-            let isAlive = false;
-            let attempts = 0;
-            const maxAttempts = 3;
-
-            while (attempts < maxAttempts && !isAlive) {
-                try {
-                    // Range header use kiya hai taake server 'Live' signal de de bina heavy load ke
-                    const response = await axios.get(realLink, { 
-                        timeout: 7000, 
-                        headers: { 'Range': 'bytes=0-0' },
-                        validateStatus: (status) => status >= 200 && status < 400 
-                    });
-                    
-                    if (response.status) {
-                        isAlive = true;
-                    }
-                } catch (err) {
-                    attempts++;
-                    if (attempts < maxAttempts) await delay(500); // 0.5 second ruk kar dobara koshish
-                }
-            }
-
-            if (isAlive) {
-                // Agar check pass ho gaya
-                return res.redirect(realLink);
-            } else {
-                // Agar 3 bar koshish fail hui, lekin hum ek 'Final Chance' redirect dete hain 
-                // taake agar hamara check block ho raha ho tab bhi user ko video mil sake.
-                // Agar bilkul hi dead link hai to player khud hi error dega ya offline video chalegi.
-                try {
-                    return res.redirect(realLink); 
-                } catch (finalErr) {
-                    return res.redirect(offlineVideo);
-                }
-            }
+            // 2. Instant Redirect (Fast Playback)
+            // Hum direct redirect kar rahe hain taake buffering na ho. 
+            // Agar link bilkul dead hoga to catch block isse handle karega.
+            return res.redirect(realLink);
 
         } catch (e) {
             return res.redirect(offlineVideo);
         }
     }
 
-    // --- CASE 2: M3U PLAYLIST GENERATION (Same as before) ---
+    // --- CASE 2: M3U GENERATION (With Tracking Parameters) ---
     if (!user) return res.status(400).send("No User ID");
 
     try {
@@ -88,7 +65,7 @@ module.exports = async (req, res) => {
         } else {
             for (let sourceUrl of config.sources) {
                 try {
-                    const m3uResponse = await axios.get(sourceUrl, { timeout: 10000 });
+                    const m3uResponse = await axios.get(sourceUrl, { timeout: 5000 });
                     const lines = m3uResponse.data.split('\n');
 
                     for (let i = 0; i < lines.length; i++) {
@@ -96,9 +73,16 @@ module.exports = async (req, res) => {
                         if (line.startsWith('#EXTINF')) {
                             let infoLine = line;
                             let streamLine = lines[i + 1] ? lines[i + 1].trim() : "";
+                            
                             if (streamLine.startsWith('http')) {
+                                // Channel name extract karna tracking ke liye
+                                const nameMatch = infoLine.match(/,(.*)$/);
+                                const cleanName = nameMatch ? encodeURIComponent(nameMatch[1]) : "Channel";
+                                
                                 const encodedStream = Buffer.from(streamLine).toString('base64');
-                                const maskedStreamUrl = `https://${host}/api/m3u?user=${user}&stream=true&sid=${encodedStream}`;
+                                // Naya Link: isme cname (channel name) bhi add kiya hai tracking ke liye
+                                const maskedStreamUrl = `https://${host}/api/m3u?user=${user}&stream=true&sid=${encodedStream}&cname=${cleanName}`;
+                                
                                 finalM3U += `${infoLine}\n${maskedStreamUrl}\n`;
                                 i++; 
                             }
