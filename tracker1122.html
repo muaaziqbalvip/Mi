@@ -1,559 +1,1124 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MiTV Admin | Global Network Control</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MiTV Network | Live Command Center</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    colors: {
+                        netflix: {
+                            red: '#E50914',
+                            darkRed: '#B81D24',
+                            black: '#141414',
+                            lightBlack: '#181818',
+                            darkGray: '#2B2B2B',
+                            lightGray: '#808080'
+                        }
+                    },
+                    boxShadow: {
+                        'netflix-glow': '0 0 20px rgba(229, 9, 20, 0.4)',
+                        'red-bottom': '0 4px 15px rgba(229, 9, 20, 0.3)'
+                    }
+                }
+            }
+        }
+    </script>
 
     <style>
-        :root {
-            --brand-primary: #3b82f6;
-            --brand-glow: rgba(59, 130, 246, 0.5);
-            --bg-ultra-dark: #020617;
-            --card-surface: rgba(15, 23, 42, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
+        /* CSS Reset & Core Settings */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none; /* Prevents text selection for App-like feel */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         body {
-            background-color: var(--bg-ultra-dark);
-            color: #f1f5f9;
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #000000;
+            color: #ffffff;
             overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 35%),
-                radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.05) 0%, transparent 35%);
+            background-image: radial-gradient(circle at 50% -20%, #B81D24 0%, #000000 40%);
             background-attachment: fixed;
         }
 
-        /* --- SMOOTH SCROLLING --- */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 20px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--brand-primary); }
-
-        /* --- GLASSMORPHISM EFFECTS --- */
-        .glass-card {
-            background: var(--card-surface);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            transition: var(--transition-smooth);
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #141414;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #E50914;
         }
 
-        .glass-card:hover {
-            border-color: rgba(59, 130, 246, 0.3);
-            background: rgba(30, 41, 59, 0.8);
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px -20px rgba(0,0,0,0.5);
+        /* App-Like UI Element Selection Prevention */
+        .no-select {
+            user-select: none;
+            -webkit-user-select: none;
         }
 
-        /* --- ANIMATIONS --- */
-        @keyframes slideInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Glassmorphism & Card Styles */
+        .mi-card {
+            background: rgba(20, 20, 20, 0.85);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .mi-card:hover {
+            border-color: rgba(229, 9, 20, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(229, 9, 20, 0.2);
         }
 
-        .animate-up { animation: slideInUp 0.6s ease-out forwards; }
-
-        @keyframes pulse-ring {
-            0% { transform: scale(0.3); opacity: 0; }
-            50% { opacity: 0.5; }
-            100% { transform: scale(1.5); opacity: 0; }
+        /* Advanced Animations */
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
         }
 
+        @keyframes slideUpFade {
+            0% { opacity: 0; transform: translateY(40px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(229, 9, 20, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(229, 9, 20, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(229, 9, 20, 0); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        .anim-fade-scale { animation: fadeInScale 0.6s ease-out forwards; }
+        .anim-slide-up { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        .anim-pulse-red { animation: pulseGlow 2s infinite; }
+
+        /* Skeleton Loader */
+        .skeleton {
+            background: #2B2B2B;
+            background-image: linear-gradient(to right, #2B2B2B 0%, #3a3a3a 20%, #2B2B2B 40%, #2B2B2B 100%);
+            background-repeat: no-repeat;
+            background-size: 800px 100%; 
+            animation-duration: 1.5s;
+            animation-fill-mode: forwards; 
+            animation-iteration-count: infinite;
+            animation-name: shimmer;
+            animation-timing-function: linear;
+        }
+
+        /* Status Indicators */
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            position: relative;
+            display: inline-block;
+        }
+        .status-online { background-color: #10b981; box-shadow: 0 0 10px #10b981; }
+        .status-offline { background-color: #4b5563; }
+        
+        .badge-pro {
+            background: linear-gradient(45deg, #E50914, #B81D24);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 2px 10px rgba(229, 9, 20, 0.4);
         }
 
-        .online-dot { background: #10b981; box-shadow: 0 0 10px #10b981; }
-        .online-dot::after {
+        .badge-free {
+            background: #2B2B2B;
+            color: #808080;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Table & List Styling */
+        .mi-table-row {
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .mi-table-row:hover {
+            background: rgba(229, 9, 20, 0.05);
+            cursor: pointer;
+        }
+        .mi-table-row:last-child {
+            border-bottom: none;
+        }
+
+        /* History Timeline Specific */
+        .timeline-container {
+            position: relative;
+            padding-left: 30px;
+        }
+        .timeline-container::before {
             content: '';
             position: absolute;
-            width: 100%; height: 100%;
-            background: inherit;
-            border-radius: inherit;
-            animation: pulse-ring 2s infinite;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: rgba(229, 9, 20, 0.3);
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 25px;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: -30px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #E50914;
+            border: 2px solid #141414;
+            box-shadow: 0 0 10px rgba(229, 9, 20, 0.8);
+            z-index: 10;
         }
 
-        /* --- MODAL DESIGN --- */
-        .modal-overlay {
-            background: rgba(2, 6, 23, 0.85);
+        /* Modal specific (App feel) */
+        .mi-modal-overlay {
+            background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(10px);
-            display: none;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            z-index: 999;
+        }
+        .mi-modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .mi-modal-content {
+            transform: scale(0.8) translateY(50px);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .mi-modal-overlay.active .mi-modal-content {
+            transform: scale(1) translateY(0);
+            opacity: 1;
         }
 
-        .modal-active { display: flex; opacity: 1; }
-
-        .modal-content {
-            transform: scale(0.9);
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
-        .modal-active .modal-content { transform: scale(1); }
-
-        /* --- DATA TABLE STYLING --- */
-        .user-row {
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-            transition: var(--transition-smooth);
+        .mi-toast {
+            background: #141414;
+            border-left: 4px solid #E50914;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transform: translateX(120%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .user-row:hover {
-            background: rgba(59, 130, 246, 0.05);
+        .mi-toast.show {
+            transform: translateX(0);
         }
-
-        .search-container input:focus {
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
-        }
-
-        /* --- GLOW TEXT --- */
-        .glow-text {
-            text-shadow: 0 0 10px var(--brand-glow);
-        }
-
     </style>
 </head>
-<body class="overflow-x-hidden">
 
-    <header class="sticky top-0 z-[100] glass-card !rounded-none border-x-0 border-t-0 py-4 px-6 md:px-12 flex justify-between items-center">
-        <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-900/40">
-                <i class="fas fa-satellite-dish text-white text-xl animate-pulse"></i>
-            </div>
+<body class="no-select">
+
+    <audio id="ui-click" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="flex h-screen w-full overflow-hidden">
+
+        <aside class="w-20 lg:w-64 flex-shrink-0 bg-netflix-black border-r border-netflix-darkGray flex flex-col justify-between transition-all duration-300 z-50">
             <div>
-                <h1 class="text-2xl font-black tracking-tighter">MiTV <span class="text-blue-500">OPS</span></h1>
-                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Global Master Control</p>
-            </div>
-        </div>
-
-        <div class="flex items-center gap-6">
-            <div class="hidden lg:flex flex-col text-right">
-                <span class="text-xs font-bold text-slate-400">Server Time</span>
-                <span id="live-time" class="text-sm font-mono text-blue-400">00:00:00</span>
-            </div>
-            <button onclick="syncAll()" class="group bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-3 transition-all shadow-xl shadow-blue-900/20 active:scale-95">
-                <i class="fas fa-sync-alt group-hover:rotate-180 transition-transform duration-500"></i>
-                <span class="hidden sm:inline">Refresh Engine</span>
-            </button>
-        </div>
-    </header>
-
-    <main class="max-w-[1600px] mx-auto p-6 md:p-12">
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-            
-            <div class="glass-card p-8 animate-up" style="animation-delay: 0.1s;">
-                <div class="flex justify-between items-start mb-6">
-                    <div class="p-4 bg-blue-500/10 rounded-2xl text-blue-500"><i class="fas fa-users-viewfinder text-2xl"></i></div>
-                    <span class="text-[10px] font-black text-slate-500 uppercase">Registered</span>
-                </div>
-                <h2 id="stat-total" class="text-4xl font-black glow-text">0</h2>
-                <div class="mt-2 flex items-center text-xs text-slate-400">
-                    <i class="fas fa-arrow-up text-emerald-500 mr-1"></i> <span>Overall Users</span>
-                </div>
-            </div>
-
-            <div class="glass-card p-8 animate-up" style="animation-delay: 0.2s;">
-                <div class="flex justify-between items-start mb-6">
-                    <div class="p-4 bg-emerald-500/10 rounded-2xl text-emerald-500"><i class="fas fa-play text-2xl"></i></div>
-                    <span class="text-[10px] font-black text-slate-500 uppercase">Live Streaming</span>
-                </div>
-                <h2 id="stat-active" class="text-4xl font-black text-emerald-400 glow-text">0</h2>
-                <div class="mt-2 flex items-center text-xs text-slate-400">
-                    <i class="fas fa-circle text-emerald-500 animate-pulse mr-2 text-[6px]"></i> <span>Watching Now</span>
-                </div>
-            </div>
-
-            <div class="glass-card p-8 animate-up" style="animation-delay: 0.3s;">
-                <div class="flex justify-between items-start mb-6">
-                    <div class="p-4 bg-amber-500/10 rounded-2xl text-amber-500"><i class="fas fa-crown text-2xl"></i></div>
-                    <span class="text-[10px] font-black text-slate-500 uppercase">Revenue Access</span>
-                </div>
-                <h2 id="stat-paid" class="text-4xl font-black text-amber-400 glow-text">0</h2>
-                <div class="mt-2 flex items-center text-xs text-slate-400">
-                    <i class="fas fa-shield-alt text-amber-500 mr-1"></i> <span>Paid Subscriptions</span>
-                </div>
-            </div>
-
-            <div class="glass-card p-8 animate-up" style="animation-delay: 0.4s;">
-                <div class="flex justify-between items-start mb-6">
-                    <div class="p-4 bg-purple-500/10 rounded-2xl text-purple-500"><i class="fas fa-bolt text-2xl"></i></div>
-                    <span class="text-[10px] font-black text-slate-500 uppercase">Performance</span>
-                </div>
-                <h2 class="text-4xl font-black text-purple-400 glow-text">100%</h2>
-                <div class="mt-2 flex items-center text-xs text-slate-400">
-                    <i class="fas fa-check-double text-purple-500 mr-1"></i> <span>System Status</span>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
-            
-            <div class="lg:col-span-8 space-y-8 animate-up" style="animation-delay: 0.5s;">
-                <div class="glass-card overflow-hidden">
-                    <div class="p-8 border-b border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6 bg-slate-900/20">
-                        <div>
-                            <h3 class="text-xl font-bold">User Terminal</h3>
-                            <p class="text-xs text-slate-500">Live monitoring of user playback and device logs</p>
+                <div class="h-24 flex items-center justify-center lg:justify-start lg:px-8 border-b border-netflix-darkGray cursor-pointer mi-click">
+                    <div class="relative flex items-center gap-3">
+                        <div class="w-10 h-10 bg-netflix-red rounded-lg flex items-center justify-center text-white font-black text-xl shadow-netflix-glow">
+                            M
                         </div>
-                        <div class="search-container relative w-full md:w-80">
-                            <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-500"></i>
-                            <input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="Search ID, IP, Device..." class="w-full bg-slate-900/80 border border-slate-800 rounded-2xl py-4 pl-14 pr-4 outline-none transition-all text-sm focus:border-blue-500/50">
+                        <h1 class="hidden lg:block text-2xl font-black tracking-tight text-white">Mi<span class="text-netflix-red">TV</span></h1>
+                    </div>
+                </div>
+
+                <nav class="mt-8 px-4 space-y-3">
+                    <a href="#" class="mi-click flex items-center gap-4 px-4 py-3 rounded-xl bg-netflix-red/10 text-netflix-red border border-netflix-red/30 transition-all">
+                        <i class="fas fa-satellite-dish text-lg"></i>
+                        <span class="hidden lg:block font-bold">Network Monitor</span>
+                    </a>
+                    <a href="#" class="mi-click flex items-center gap-4 px-4 py-3 rounded-xl text-netflix-lightGray hover:bg-white/5 hover:text-white transition-all">
+                        <i class="fas fa-users text-lg"></i>
+                        <span class="hidden lg:block font-medium">User Base</span>
+                    </a>
+                    <a href="#" class="mi-click flex items-center gap-4 px-4 py-3 rounded-xl text-netflix-lightGray hover:bg-white/5 hover:text-white transition-all">
+                        <i class="fas fa-chart-pie text-lg"></i>
+                        <span class="hidden lg:block font-medium">Analytics Engine</span>
+                    </a>
+                    <a href="#" class="mi-click flex items-center gap-4 px-4 py-3 rounded-xl text-netflix-lightGray hover:bg-white/5 hover:text-white transition-all">
+                        <i class="fas fa-shield-alt text-lg"></i>
+                        <span class="hidden lg:block font-medium">Security Logs</span>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="p-4 border-t border-netflix-darkGray">
+                <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-white/5 cursor-pointer mi-click transition-all">
+                    <img src="https://ui-avatars.com/api/?name=Muaaz+Iqbal&background=E50914&color=fff&bold=true" alt="Admin" class="w-10 h-10 rounded-full border-2 border-netflix-red">
+                    <div class="hidden lg:block overflow-hidden">
+                        <p class="text-sm font-bold text-white truncate">Muaaz Iqbal</p>
+                        <p class="text-[10px] text-netflix-red font-bold uppercase tracking-widest">Founder & CEO</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col h-full relative overflow-y-auto">
+            
+            <header class="sticky top-0 z-40 bg-black/60 backdrop-blur-xl border-b border-white/5 px-6 lg:px-10 py-5 flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-black">Command Center</h2>
+                    <p class="text-xs text-netflix-lightGray flex items-center gap-2 mt-1">
+                        <span class="status-dot status-online anim-pulse-red"></span>
+                        Live Server Engine Activated
+                    </p>
+                </div>
+                
+                <div class="flex items-center gap-6">
+                    <div class="relative hidden md:block">
+                        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-netflix-lightGray text-sm"></i>
+                        <input type="text" id="global-search" placeholder="Search user ID, device, IP..." class="bg-netflix-lightBlack border border-netflix-darkGray rounded-full py-2 pl-10 pr-6 text-sm text-white focus:outline-none focus:border-netflix-red focus:ring-1 focus:ring-netflix-red w-64 transition-all">
+                    </div>
+                    
+                    <div class="hidden sm:flex flex-col text-right">
+                        <span class="text-[10px] uppercase text-netflix-lightGray font-bold tracking-widest">System Time</span>
+                        <span id="sys-time" class="text-sm font-mono font-bold text-white">00:00:00</span>
+                    </div>
+
+                    <button onclick="CoreEngine.syncData(true)" class="mi-click w-10 h-10 rounded-full bg-netflix-lightBlack border border-netflix-darkGray flex items-center justify-center hover:border-netflix-red hover:text-netflix-red transition-all group">
+                        <i id="sync-icon" class="fas fa-sync-alt text-sm group-hover:rotate-180 transition-transform duration-500"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="p-6 lg:p-10 pb-24">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                    
+                    <div class="mi-card p-6 anim-slide-up" style="animation-delay: 0.1s;">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-[10px] uppercase text-netflix-lightGray font-bold tracking-widest mb-1">Total Audience</p>
+                                <h3 class="text-4xl font-black text-white" id="stat-total-users">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                                <i class="fas fa-users text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center gap-2 text-xs">
+                            <span class="text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded font-bold"><i class="fas fa-arrow-up"></i> All Time</span>
+                            <span class="text-netflix-lightGray">Registered records</span>
+                        </div>
+                    </div>
+
+                    <div class="mi-card p-6 anim-slide-up" style="animation-delay: 0.2s;">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-[10px] uppercase text-netflix-lightGray font-bold tracking-widest mb-1">Live Streaming</p>
+                                <h3 class="text-4xl font-black text-netflix-red" id="stat-active-now">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-netflix-red/10 flex items-center justify-center text-netflix-red shadow-netflix-glow">
+                                <i class="fas fa-play text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center gap-2 text-xs">
+                            <span class="text-netflix-red bg-netflix-red/10 px-2 py-0.5 rounded font-bold anim-pulse-red"><i class="fas fa-broadcast-tower"></i> Live</span>
+                            <span class="text-netflix-lightGray">Currently online users</span>
+                        </div>
+                    </div>
+
+                    <div class="mi-card p-6 anim-slide-up" style="animation-delay: 0.3s;">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-[10px] uppercase text-netflix-lightGray font-bold tracking-widest mb-1">Premium Subscriptions</p>
+                                <h3 class="text-4xl font-black text-yellow-500" id="stat-paid-users">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center text-yellow-500">
+                                <i class="fas fa-crown text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center gap-2 text-xs">
+                            <span class="text-yellow-500 bg-yellow-500/10 px-2 py-0.5 rounded font-bold"><i class="fas fa-check"></i> Verified</span>
+                            <span class="text-netflix-lightGray">Revenue generating accounts</span>
+                        </div>
+                    </div>
+
+                    <div class="mi-card p-6 anim-slide-up" style="animation-delay: 0.4s;">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-[10px] uppercase text-netflix-lightGray font-bold tracking-widest mb-1">System Health</p>
+                                <h3 class="text-4xl font-black text-emerald-500">100%</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                                <i class="fas fa-shield-check text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center gap-2 text-xs">
+                            <span class="text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded font-bold"><i class="fas fa-bolt"></i> Optimal</span>
+                            <span class="text-netflix-lightGray">Network routing perfect</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10 anim-slide-up" style="animation-delay: 0.5s;">
+                    
+                    <div class="lg:col-span-2 mi-card p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <div>
+                                <h3 class="font-bold text-lg">Network Traffic Trajectory</h3>
+                                <p class="text-xs text-netflix-lightGray">Based on incoming request volumes over time</p>
+                            </div>
+                            <div class="px-3 py-1 bg-netflix-lightBlack rounded-lg border border-netflix-darkGray text-xs font-bold text-netflix-lightGray">
+                                Live Feed
+                            </div>
+                        </div>
+                        <div class="w-full h-[250px]">
+                            <canvas id="mainTrafficChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="mi-card p-6 flex flex-col">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold text-lg">Engine Logs</h3>
+                            <button onclick="CoreEngine.clearLogs()" class="text-xs text-netflix-red hover:text-white transition-colors mi-click">Clear</button>
+                        </div>
+                        <div id="engine-logs" class="flex-1 overflow-y-auto space-y-3 pr-2">
+                            <div class="p-3 bg-netflix-lightBlack rounded-xl border border-netflix-darkGray border-l-2 border-l-blue-500 flex gap-3 text-xs">
+                                <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                                <div>
+                                    <p class="font-bold text-white">Dashboard Initialized</p>
+                                    <p class="text-netflix-lightGray text-[10px]">Awaiting Firebase connection...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="mi-card overflow-hidden anim-slide-up" style="animation-delay: 0.6s;">
+                    <div class="p-6 border-b border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#181818]">
+                        <div>
+                            <h3 class="font-black text-xl flex items-center gap-2">
+                                <i class="fas fa-satellite text-netflix-red"></i> Global User Matrix
+                            </h3>
+                            <p class="text-xs text-netflix-lightGray mt-1">Real-time data synchronization directly from Firebase backend.</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="mi-click px-4 py-2 bg-netflix-lightBlack rounded-lg text-xs font-bold border border-netflix-darkGray hover:bg-white/10 transition-colors">
+                                <i class="fas fa-filter mr-1"></i> Filter
+                            </button>
+                            <button onclick="CoreEngine.exportCSV()" class="mi-click px-4 py-2 bg-netflix-red/20 text-netflix-red rounded-lg text-xs font-bold border border-netflix-red/30 hover:bg-netflix-red hover:text-white transition-colors">
+                                <i class="fas fa-download mr-1"></i> Export Data
+                            </button>
                         </div>
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left">
-                            <thead class="bg-slate-900/50 text-slate-500 text-[10px] font-black uppercase tracking-widest">
-                                <tr>
-                                    <th class="px-8 py-5">Network Identity</th>
-                                    <th class="px-8 py-5">Plan</th>
-                                    <th class="px-8 py-5">Current Playback</th>
-                                    <th class="px-8 py-5 text-right">Activity</th>
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-netflix-black text-[10px] uppercase font-black tracking-widest text-netflix-lightGray">
+                                    <th class="p-5 pl-8">User Identity</th>
+                                    <th class="p-5">Subscription Tier</th>
+                                    <th class="p-5">Current Playback Engine</th>
+                                    <th class="p-5">Hardware Signature</th>
+                                    <th class="p-5">Last Ping</th>
+                                    <th class="p-5 text-right pr-8">Deep Trace</th>
                                 </tr>
                             </thead>
-                            <tbody id="userTableBody">
+                            <tbody id="user-table-body">
                                 </tbody>
                         </table>
                     </div>
-
-                    <div id="mainLoader" class="py-20 flex flex-col items-center">
-                        <div class="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
-                        <p class="text-xs text-slate-500 mt-4 font-bold tracking-widest uppercase">Fetching Stream Data...</p>
+                    
+                    <div id="table-loader" class="py-16 flex flex-col items-center justify-center border-t border-white/5">
+                        <div class="w-10 h-10 border-4 border-netflix-red/20 border-t-netflix-red rounded-full animate-spin"></div>
+                        <p class="text-xs font-bold text-netflix-lightGray mt-4 uppercase tracking-widest">Parsing Network Nodes...</p>
                     </div>
-                </div>
-            </div>
 
-            <div class="lg:col-span-4 space-y-8 animate-up" style="animation-delay: 0.6s;">
-                <div class="glass-card p-8 h-full">
-                    <h3 class="text-xl font-bold mb-6 flex items-center gap-3">
-                        <i class="fas fa-history text-blue-500"></i> Global Logs
-                    </h3>
-                    <div id="globalLogs" class="space-y-4 max-h-[600px] overflow-y-auto pr-2">
-                        <div class="flex gap-4 p-4 bg-slate-900/50 rounded-2xl border border-slate-800">
-                            <div class="text-blue-500"><i class="fas fa-info-circle"></i></div>
-                            <div>
-                                <p class="text-xs font-bold">System Online</p>
-                                <p class="text-[10px] text-slate-500">MiTV Command Center Initialized Successfully.</p>
-                            </div>
-                        </div>
+                    <div id="table-empty" class="hidden py-16 flex-col items-center justify-center border-t border-white/5">
+                        <i class="fas fa-ghost text-4xl text-netflix-darkGray mb-3"></i>
+                        <p class="text-sm font-bold text-netflix-lightGray">No users found in database.</p>
                     </div>
+
                 </div>
+
             </div>
+        </main>
+    </div>
 
-        </div>
-
-    </main>
-
-    <div id="historyModal" class="modal-overlay fixed inset-0 z-[1000] items-center justify-center p-4">
-        <div class="modal-content glass-card w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
+    <div id="user-modal" class="mi-modal-overlay fixed inset-0 flex items-center justify-center p-4">
+        <div class="mi-modal-content mi-card w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl shadow-netflix-red/10 border-netflix-darkGray">
             
-            <div class="p-8 border-b border-slate-800 flex justify-between items-center bg-slate-900/30">
-                <div class="flex items-center gap-5">
-                    <div id="modalAvatar" class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-3xl font-black shadow-lg shadow-blue-900/30">M</div>
+            <div class="p-6 md:p-8 border-b border-white/5 bg-[#141414] flex justify-between items-start relative overflow-hidden">
+                <div class="absolute -top-20 -right-20 w-64 h-64 bg-netflix-red/10 rounded-full blur-3xl"></div>
+                
+                <div class="flex items-center gap-6 relative z-10">
+                    <div id="modal-avatar" class="w-20 h-20 bg-gradient-to-br from-netflix-red to-netflix-darkRed rounded-2xl flex items-center justify-center text-4xl font-black shadow-netflix-glow">
+                        ?
+                    </div>
                     <div>
-                        <h2 id="modalName" class="text-3xl font-black tracking-tighter">User Name</h2>
-                        <div class="flex items-center gap-4 mt-1">
-                            <span id="modalIP" class="text-xs font-mono text-blue-400">0.0.0.0</span>
-                            <span id="modalStatus" class="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-500">Paid</span>
+                        <div class="flex items-center gap-3">
+                            <h2 id="modal-username" class="text-3xl font-black tracking-tight">Loading...</h2>
+                            <span id="modal-live-badge" class="hidden bg-netflix-red text-white text-[10px] font-black uppercase px-2 py-0.5 rounded anim-pulse-red">Live Now</span>
+                        </div>
+                        <div class="flex items-center gap-4 mt-2 text-sm">
+                            <span id="modal-ip" class="font-mono text-netflix-lightGray bg-white/5 px-2 py-1 rounded border border-white/10"><i class="fas fa-network-wired mr-1"></i> 0.0.0.0</span>
+                            <span id="modal-status" class="badge-free">Checking</span>
                         </div>
                     </div>
                 </div>
-                <button onclick="closeModal()" class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-800 hover:bg-red-500/20 hover:text-red-500 transition-all">
-                    <i class="fas fa-times text-xl"></i>
+                
+                <button onclick="CoreEngine.closeModal()" class="mi-click relative z-10 w-10 h-10 rounded-xl bg-white/5 hover:bg-netflix-red hover:text-white transition-all flex items-center justify-center border border-white/10">
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
 
-            <div class="flex-1 overflow-y-auto p-8 grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <div class="flex-1 overflow-y-auto bg-[#0a0a0a] p-6 md:p-8 flex flex-col lg:flex-row gap-8">
                 
-                <div class="space-y-8">
-                    <div class="bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
-                        <h4 class="text-[10px] font-black text-slate-500 uppercase mb-4 tracking-widest">Device Blueprint</h4>
-                        <p id="modalDevice" class="text-xs text-slate-300 leading-relaxed font-medium">Unknown Hardware</p>
+                <div class="lg:w-1/3 space-y-6">
+                    
+                    <div class="bg-[#141414] p-5 rounded-2xl border border-white/5 relative overflow-hidden group hover:border-netflix-red/30 transition-colors">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-white/5 rounded-bl-full flex items-start justify-end p-3">
+                            <i class="fas fa-microchip text-netflix-lightGray group-hover:text-netflix-red transition-colors"></i>
+                        </div>
+                        <h4 class="text-[10px] font-black uppercase text-netflix-lightGray tracking-widest mb-3">Hardware Signature</h4>
+                        <p id="modal-device" class="text-xs text-white leading-relaxed font-mono whitespace-pre-wrap break-words">Analyzing metadata...</p>
                     </div>
 
-                    <div class="bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
-                        <h4 class="text-[10px] font-black text-slate-500 uppercase mb-4 tracking-widest">Usage Insights</h4>
-                        <div class="space-y-3">
-                            <div class="flex justify-between text-xs">
-                                <span class="text-slate-500">Last Seen</span>
-                                <span id="modalLastSeen" class="font-bold">Just now</span>
-                            </div>
-                            <div class="flex justify-between text-xs">
-                                <span class="text-slate-500">Engagement</span>
-                                <span class="text-emerald-500 font-bold">High</span>
-                            </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-[#141414] p-4 rounded-2xl border border-white/5 text-center">
+                            <p class="text-[10px] uppercase text-netflix-lightGray font-bold mb-1">Total Streams</p>
+                            <p id="modal-total-streams" class="text-xl font-black text-white">0</p>
+                        </div>
+                        <div class="bg-[#141414] p-4 rounded-2xl border border-white/5 text-center">
+                            <p class="text-[10px] uppercase text-netflix-lightGray font-bold mb-1">Last Active</p>
+                            <p id="modal-last-active-time" class="text-xs font-bold text-netflix-red mt-2 text-center break-words">N/A</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#141414] p-5 rounded-2xl border border-white/5">
+                        <h4 class="text-[10px] font-black uppercase text-netflix-lightGray tracking-widest mb-3">Quick Actions</h4>
+                        <div class="space-y-2">
+                            <button class="mi-click w-full py-2.5 bg-white/5 hover:bg-white/10 rounded-lg text-xs font-bold transition-all border border-white/10 flex justify-between items-center px-4">
+                                <span>Copy IP Address</span> <i class="fas fa-copy text-netflix-lightGray"></i>
+                            </button>
+                            <button class="mi-click w-full py-2.5 bg-netflix-red/10 hover:bg-netflix-red text-netflix-red hover:text-white rounded-lg text-xs font-bold transition-all border border-netflix-red/20 flex justify-between items-center px-4">
+                                <span>Terminate Session</span> <i class="fas fa-power-off"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <div class="lg:col-span-2 space-y-6">
-                    <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest flex justify-between">
-                        <span>All Recorded Activity</span>
-                        <span class="text-blue-500">Live Trace</span>
-                    </h4>
-                    <div id="modalHistoryList" class="space-y-4">
+                <div class="lg:w-2/3 flex flex-col h-full">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4 class="text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                            <i class="fas fa-stream text-netflix-red"></i> Playback History Engine
+                        </h4>
+                        <span class="text-[10px] bg-netflix-red/20 text-netflix-red px-2 py-1 rounded font-bold border border-netflix-red/30">Auto-Synced</span>
+                    </div>
+
+                    <div class="flex-1 bg-[#141414] rounded-2xl border border-white/5 p-6 overflow-y-auto max-h-[500px]" id="history-container">
+                        
+                        <div class="timeline-container" id="history-timeline">
+                            <div class="py-10 text-center text-netflix-lightGray text-xs">
+                                <i class="fas fa-spinner fa-spin text-2xl mb-2 text-netflix-red"></i><br>
+                                Extracting historical logs...
+                            </div>
                         </div>
+
+                    </div>
                 </div>
 
             </div>
-
         </div>
     </div>
 
-    <audio id="clickSound" preload="auto">
-        <source src="https://www.soundjay.com/buttons/sounds/button-50.mp3" type="audio/mpeg">
-    </audio>
+    <div id="toast-container"></div>
+
 
     <script>
         /**
-         * MiTV ENGINE v6.0 - JAVASCRIPT LOGIC
+         * MiTV CORE ENGINE
+         * Logic: Real-time Firebase Sync, History Parsing, Chart Rendering, Audio Engine.
          */
-        
-        const FIREBASE_URL = "https://ramadan-2385b-default-rtdb.firebaseio.com/master_users.json";
-        const tick = document.getElementById('clickSound');
-
-        // Play Sound Function
-        function playTic() {
-            tick.currentTime = 0;
-            tick.volume = 0.2;
-            tick.play().catch(()=>{});
-        }
-
-        // Add event listener to all buttons for sound
-        document.addEventListener('click', (e) => {
-            if(e.target.closest('button') || e.target.closest('.user-row')) {
-                playTic();
-            }
-        });
-
-        // Live Clock
-        setInterval(() => {
-            document.getElementById('live-time').innerText = new Date().toLocaleTimeString('en-US', { hour12: false });
-        }, 1000);
-
-        /**
-         * DATA FETCHING CORE
-         */
-        async function syncAll() {
-            document.getElementById('mainLoader').classList.remove('hidden');
-            try {
-                const response = await fetch(FIREBASE_URL);
-                const users = await response.json();
-                if (users) {
-                    renderDashboard(users);
-                    addLog("Data Sync", "Latest user metrics updated successfully.", "info");
-                }
-            } catch (err) {
-                console.error("Sync Error:", err);
-                addLog("Sync Error", "Connection to Firebase failed.", "error");
-            } finally {
-                document.getElementById('mainLoader').classList.add('hidden');
-            }
-        }
-
-        /**
-         * DASHBOARD RENDERING
-         */
-        function renderDashboard(users) {
-            const tbody = document.getElementById('userTableBody');
-            const userIds = Object.keys(users);
+        const CoreEngine = (function() {
             
-            let activeStreaming = 0;
-            let paidUsers = 0;
-            const now = new Date();
+            // --- Configuration ---
+            const CONFIG = {
+                DB_URL: "https://ramadan-2385b-default-rtdb.firebaseio.com/master_users.json",
+                REFRESH_RATE: 20000, // 20 seconds auto-refresh
+                ONLINE_THRESHOLD_MINUTES: 5 // User is considered online if seen within 5 mins
+            };
 
-            tbody.innerHTML = '';
+            // --- State Management ---
+            let globalUserData = {};
+            let trafficChartInstance = null;
+            let syncTimer = null;
+            
+            // DOM Elements
+            const DOM = {
+                clickSound: document.getElementById('ui-click'),
+                sysTime: document.getElementById('sys-time'),
+                totalUsers: document.getElementById('stat-total-users'),
+                activeNow: document.getElementById('stat-active-now'),
+                paidUsers: document.getElementById('stat-paid-users'),
+                tableBody: document.getElementById('user-table-body'),
+                tableLoader: document.getElementById('table-loader'),
+                tableEmpty: document.getElementById('table-empty'),
+                engineLogs: document.getElementById('engine-logs'),
+                syncIcon: document.getElementById('sync-icon'),
+                searchInput: document.getElementById('global-search'),
+                
+                // Modal
+                modalOverlay: document.getElementById('user-modal'),
+                modalAvatar: document.getElementById('modal-avatar'),
+                modalUsername: document.getElementById('modal-username'),
+                modalLiveBadge: document.getElementById('modal-live-badge'),
+                modalIP: document.getElementById('modal-ip'),
+                modalStatus: document.getElementById('modal-status'),
+                modalDevice: document.getElementById('modal-device'),
+                modalTotalStreams: document.getElementById('modal-total-streams'),
+                modalLastActive: document.getElementById('modal-last-active-time'),
+                modalTimeline: document.getElementById('history-timeline')
+            };
 
-            userIds.forEach(id => {
-                const u = users[id];
-                const t = u.tracking || {};
+            // --- Utilities ---
+
+            function playClickSound() {
+                try {
+                    DOM.clickSound.currentTime = 0;
+                    DOM.clickSound.volume = 0.3;
+                    DOM.clickSound.play().catch(e => { /* Ignore auto-play blocks */ });
+                } catch(e) {}
+            }
+
+            function setupClickListeners() {
+                document.querySelectorAll('.mi-click').forEach(el => {
+                    el.addEventListener('click', playClickSound);
+                });
+            }
+
+            function formatTimeAgo(dateString) {
+                if (!dateString) return "Never";
+                const date = new Date(dateString);
+                const seconds = Math.floor((new Date() - date) / 1000);
                 
-                // Analytics counters
-                if(u.status === 'Paid') paidUsers++;
+                let interval = seconds / 31536000;
+                if (interval > 1) return Math.floor(interval) + " yrs ago";
+                interval = seconds / 2592000;
+                if (interval > 1) return Math.floor(interval) + " mos ago";
+                interval = seconds / 86400;
+                if (interval > 1) return Math.floor(interval) + " days ago";
+                interval = seconds / 3600;
+                if (interval > 1) return Math.floor(interval) + " hrs ago";
+                interval = seconds / 60;
+                if (interval > 1) return Math.floor(interval) + " mins ago";
+                return "Just now";
+            }
+
+            function formatDateTimeVerbose(dateString) {
+                if(!dateString) return "Unknown Time";
+                const d = new Date(dateString);
+                return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + " at " + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second:'2-digit' });
+            }
+
+            function isOnline(lastSeenStr) {
+                if (!lastSeenStr) return false;
+                const lastSeen = new Date(lastSeenStr);
+                const diffMins = (new Date() - lastSeen) / 1000 / 60;
+                return diffMins <= CONFIG.ONLINE_THRESHOLD_MINUTES;
+            }
+
+            function showToast(message, isError = false) {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = `mi-toast ${isError ? '!border-netflix-red' : '!border-emerald-500'}`;
+                toast.innerHTML = `
+                    <div class="w-8 h-8 rounded-full ${isError ? 'bg-netflix-red/20 text-netflix-red' : 'bg-emerald-500/20 text-emerald-500'} flex items-center justify-center">
+                        <i class="fas ${isError ? 'fa-exclamation-triangle' : 'fa-check'}"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm text-white">${isError ? 'Error' : 'System Update'}</p>
+                        <p class="text-xs text-netflix-lightGray">${message}</p>
+                    </div>
+                `;
+                container.appendChild(toast);
                 
-                // Is user online? (Within last 5 mins)
-                let isOnline = false;
-                if(t.last_seen) {
-                    const diff = (now - new Date(t.last_seen)) / 1000 / 60;
-                    if(diff < 5) {
-                        isOnline = true;
-                        activeStreaming++;
+                // Trigger animation
+                setTimeout(() => toast.classList.add('show'), 10);
+                
+                // Remove after 4 seconds
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 400);
+                }, 4000);
+            }
+
+            function addLog(title, desc, type = 'info') {
+                const logEl = document.createElement('div');
+                const colorClass = type === 'error' ? 'border-l-netflix-red text-netflix-red' : (type === 'success' ? 'border-l-emerald-500 text-emerald-500' : 'border-l-blue-500 text-blue-500');
+                const iconClass = type === 'error' ? 'fa-times-circle' : (type === 'success' ? 'fa-check-circle' : 'fa-info-circle');
+                
+                logEl.className = `p-3 bg-netflix-lightBlack rounded-xl border border-netflix-darkGray border-l-2 ${colorClass} flex gap-3 text-xs anim-slide-up`;
+                logEl.innerHTML = `
+                    <i class="fas ${iconClass} mt-0.5"></i>
+                    <div>
+                        <p class="font-bold text-white">${title}</p>
+                        <p class="text-netflix-lightGray text-[10px]">${desc}</p>
+                    </div>
+                `;
+                DOM.engineLogs.prepend(logEl);
+                if (DOM.engineLogs.children.length > 20) {
+                    DOM.engineLogs.lastChild.remove();
+                }
+            }
+
+            // --- Charting Engine ---
+            function initChart() {
+                const ctx = document.getElementById('mainTrafficChart').getContext('2d');
+                
+                // Gradient for line
+                let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                gradient.addColorStop(0, 'rgba(229, 9, 20, 0.5)');   
+                gradient.addColorStop(1, 'rgba(229, 9, 20, 0)');
+
+                trafficChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['-60m', '-50m', '-40m', '-30m', '-20m', '-10m', 'Now'],
+                        datasets: [{
+                            label: 'Active Streams',
+                            data: [0, 0, 0, 0, 0, 0, 0],
+                            borderColor: '#E50914',
+                            borderWidth: 3,
+                            backgroundColor: gradient,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#B81D24',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, backgroundColor: 'rgba(20,20,20,0.9)', titleColor: '#fff', bodyColor: '#E50914', borderColor: '#333', borderWidth: 1 } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#808080', font: { family: 'Outfit', size: 10 }, precision: 0 } },
+                            x: { grid: { display: false }, ticks: { color: '#808080', font: { family: 'Outfit', size: 10 } } }
+                        },
+                        interaction: { mode: 'nearest', axis: 'x', intersect: false }
+                    }
+                });
+            }
+
+            function updateChartLive(currentActive) {
+                if(!trafficChartInstance) return;
+                const data = trafficChartInstance.data.datasets[0].data;
+                // Shift array left, push new value
+                data.shift();
+                data.push(currentActive);
+                trafficChartInstance.update('none'); // Update without full animation for performance
+            }
+
+            // --- Data Fetching & Processing ---
+            
+            async function fetchEngineData(isManual = false) {
+                if (isManual) DOM.syncIcon.classList.add('fa-spin');
+                
+                try {
+                    const response = await fetch(CONFIG.DB_URL);
+                    if (!response.ok) throw new Error("Network routing error");
+                    
+                    const data = await response.json();
+                    globalUserData = data || {};
+                    
+                    processDataForDashboard();
+                    
+                    if (isManual) {
+                        showToast("Manual synchronization complete.");
+                        addLog("Manual Sync", "Data successfully pulled from Firebase.", "success");
+                    } else {
+                        addLog("Auto Sync", "Background data refresh successful.", "info");
+                    }
+                    
+                } catch (error) {
+                    console.error("Engine Error:", error);
+                    showToast("Failed to connect to Firebase backend.", true);
+                    addLog("Connection Failed", error.message, "error");
+                } finally {
+                    if (isManual) setTimeout(() => DOM.syncIcon.classList.remove('fa-spin'), 500);
+                }
+            }
+
+            function processDataForDashboard() {
+                DOM.tableBody.innerHTML = '';
+                DOM.tableLoader.classList.add('hidden');
+                
+                const userIds = Object.keys(globalUserData);
+                
+                if (userIds.length === 0) {
+                    DOM.tableEmpty.classList.remove('hidden');
+                    DOM.totalUsers.innerText = "0";
+                    return;
+                }
+                
+                DOM.tableEmpty.classList.add('hidden');
+                
+                let activeCount = 0;
+                let paidCount = 0;
+
+                // Sort users: Online first, then by last seen
+                userIds.sort((a, b) => {
+                    const trackA = globalUserData[a].tracking || {};
+                    const trackB = globalUserData[b].tracking || {};
+                    const isAOnline = isOnline(trackA.last_seen);
+                    const isBOnline = isOnline(trackB.last_seen);
+                    
+                    if (isAOnline && !isBOnline) return -1;
+                    if (!isAOnline && isBOnline) return 1;
+                    
+                    const timeA = trackA.last_seen ? new Date(trackA.last_seen).getTime() : 0;
+                    const timeB = trackB.last_seen ? new Date(trackB.last_seen).getTime() : 0;
+                    return timeB - timeA;
+                });
+
+                userIds.forEach(id => {
+                    const user = globalUserData[id];
+                    const tracking = user.tracking || {};
+                    const isPaid = user.status === 'Paid';
+                    const online = isOnline(tracking.last_seen);
+                    
+                    if (isPaid) paidCount++;
+                    if (online) activeCount++;
+
+                    renderTableRow(id, user, tracking, isPaid, online);
+                });
+
+                // Update Widgets with Animation
+                animateValue(DOM.totalUsers, parseInt(DOM.totalUsers.innerText), userIds.length, 1000);
+                animateValue(DOM.activeNow, parseInt(DOM.activeNow.innerText), activeCount, 1000);
+                animateValue(DOM.paidUsers, parseInt(DOM.paidUsers.innerText), paidCount, 1000);
+
+                // Update Chart
+                updateChartLive(activeCount);
+                
+                // Re-bind click events for new rows
+                setupClickListeners();
+                applySearchFilter(); // Re-apply filter if active
+            }
+
+            function animateValue(obj, start, end, duration) {
+                if (start === end) return;
+                let startTimestamp = null;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    obj.innerHTML = Math.floor(progress * (end - start) + start);
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    } else {
+                        obj.innerHTML = end;
+                    }
+                };
+                window.requestAnimationFrame(step);
+            }
+
+            function renderTableRow(id, user, tracking, isPaid, online) {
+                const tr = document.createElement('tr');
+                tr.className = "mi-table-row group mi-click";
+                tr.onclick = () => openUserModal(id, user);
+
+                const initial = id.charAt(0).toUpperCase();
+                const statusBadge = isPaid 
+                    ? `<span class="badge-pro"><i class="fas fa-check-circle mr-1"></i> Paid</span>` 
+                    : `<span class="badge-free"><i class="fas fa-times-circle mr-1"></i> Free</span>`;
+                
+                const channelDisplay = online && tracking.last_played 
+                    ? `<span class="text-white font-bold"><i class="fas fa-play text-netflix-red text-xs mr-2 anim-pulse-red"></i> ${tracking.last_played}</span>`
+                    : `<span class="text-netflix-lightGray"><i class="fas fa-pause-circle text-netflix-darkGray mr-2"></i> ${tracking.last_played || 'Idle'}</span>`;
+
+                tr.innerHTML = `
+                    <td class="p-5 pl-8">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-netflix-darkGray flex items-center justify-center font-black text-white group-hover:bg-netflix-red transition-colors border border-white/10">
+                                ${initial}
+                            </div>
+                            <div>
+                                <div class="font-bold text-white flex items-center gap-2 text-sm">
+                                    ${id}
+                                    ${online ? '<span class="status-dot status-online"></span>' : ''}
+                                </div>
+                                <div class="text-[10px] text-netflix-lightGray font-mono mt-0.5">${tracking.ip || '0.0.0.0'}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-5">${statusBadge}</td>
+                    <td class="p-5 text-sm">${channelDisplay}</td>
+                    <td class="p-5">
+                        <div class="text-[11px] text-netflix-lightGray max-w-[150px] truncate" title="${tracking.device || 'Unknown Hardware'}">
+                            <i class="fas fa-mobile-alt mr-1 opacity-50"></i> ${tracking.device || 'Unknown Hardware'}
+                        </div>
+                    </td>
+                    <td class="p-5">
+                        <div class="text-[11px] text-netflix-lightGray font-mono font-bold">${formatTimeAgo(tracking.last_seen)}</div>
+                    </td>
+                    <td class="p-5 pr-8 text-right">
+                        <button class="w-8 h-8 rounded-lg bg-white/5 text-netflix-lightGray group-hover:bg-netflix-red group-hover:text-white transition-all flex items-center justify-center ml-auto border border-white/5">
+                            <i class="fas fa-chevron-right text-xs"></i>
+                        </button>
+                    </td>
+                `;
+                
+                DOM.tableBody.appendChild(tr);
+            }
+
+            // --- History Deep Trace & Modal ---
+
+            function openUserModal(id, userData) {
+                const tracking = userData.tracking || {};
+                const historyObj = userData.history || {}; // THIS COMES FROM NEW m3u.js UPDATE
+                const isPaid = userData.status === 'Paid';
+                const online = isOnline(tracking.last_seen);
+
+                // Setup Header
+                DOM.modalAvatar.innerText = id.charAt(0).toUpperCase();
+                DOM.modalUsername.innerText = id;
+                DOM.modalIP.innerHTML = `<i class="fas fa-network-wired mr-1"></i> ${tracking.ip || '0.0.0.0'}`;
+                
+                DOM.modalStatus.className = isPaid ? 'badge-pro' : 'badge-free';
+                DOM.modalStatus.innerHTML = isPaid ? '<i class="fas fa-crown mr-1"></i> Premium' : '<i class="fas fa-times-circle mr-1"></i> Unpaid';
+                
+                if(online) DOM.modalLiveBadge.classList.remove('hidden');
+                else DOM.modalLiveBadge.classList.add('hidden');
+
+                // Setup Body Metrics
+                DOM.modalDevice.innerText = tracking.device || 'No device metadata intercepted by engine.';
+                DOM.modalLastActive.innerText = formatDateTimeVerbose(tracking.last_seen);
+
+                // Parsing History Node (Crucial requirement from prompt)
+                const historyKeys = Object.keys(historyObj);
+                DOM.modalTotalStreams.innerText = historyKeys.length;
+
+                DOM.modalTimeline.innerHTML = ''; // Clear old data
+
+                if (historyKeys.length === 0) {
+                    // Fallback if no history node exists yet, show current tracking as one item
+                    if(tracking.last_played) {
+                        DOM.modalTimeline.appendChild(createTimelineItem(tracking.last_played, tracking.last_seen, tracking.ip, tracking.device, true));
+                    } else {
+                        DOM.modalTimeline.innerHTML = `<div class="py-10 text-center text-netflix-lightGray"><i class="fas fa-history text-3xl mb-3 opacity-50"></i><br>No playback history logs found for this user.</div>`;
+                    }
+                } else {
+                    // Sort history by time (newest first)
+                    const historyArray = historyKeys.map(k => historyObj[k]).sort((a, b) => {
+                        return new Date(b.time) - new Date(a.time);
+                    });
+
+                    // Render max 50 recent items to prevent modal lag
+                    const recentHistory = historyArray.slice(0, 50);
+                    
+                    recentHistory.forEach((item, index) => {
+                        const isLatest = (index === 0 && online);
+                        DOM.modalTimeline.appendChild(createTimelineItem(item.channel, item.time, item.ip, item.device, isLatest));
+                    });
+
+                    if(historyArray.length > 50) {
+                        const moreDiv = document.createElement('div');
+                        moreDiv.className = "text-center text-[10px] text-netflix-lightGray mt-4 uppercase tracking-widest";
+                        moreDiv.innerText = `+ ${historyArray.length - 50} older logs archived`;
+                        DOM.modalTimeline.appendChild(moreDiv);
                     }
                 }
 
-                const statusColor = (u.status === 'Paid') ? 'text-emerald-500 bg-emerald-500/10' : 'text-red-500 bg-red-500/10';
+                // Show Modal
+                DOM.modalOverlay.classList.add('active');
+            }
 
-                const row = document.createElement('tr');
-                row.className = "user-row cursor-pointer";
-                row.onclick = () => showUserDetail(id, u);
-
-                row.innerHTML = `
-                    <td class="px-8 py-6">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center font-black text-blue-500 border border-slate-700">
-                                ${id.charAt(0).toUpperCase()}
-                            </div>
+            function createTimelineItem(channel, time, ip, device, isLiveSession = false) {
+                const div = document.createElement('div');
+                div.className = "timeline-item anim-slide-up group";
+                
+                // Color formatting
+                const dotColor = isLiveSession ? 'bg-emerald-500 border-emerald-900 shadow-[0_0_10px_#10b981]' : 'bg-netflix-red border-[#141414] shadow-[0_0_10px_rgba(229,9,20,0.8)]';
+                const titleColor = isLiveSession ? 'text-emerald-500' : 'text-white';
+                
+                div.innerHTML = `
+                    <div class="timeline-dot ${dotColor} ${isLiveSession ? 'animate-pulse' : ''}"></div>
+                    <div class="bg-white/5 border border-white/5 p-4 rounded-xl group-hover:bg-white/10 transition-colors">
+                        <div class="flex justify-between items-start mb-2">
                             <div>
-                                <div class="text-sm font-bold flex items-center gap-2">
-                                    ${id}
-                                    ${isOnline ? '<div class="status-dot online-dot"></div>' : ''}
-                                </div>
-                                <div class="text-[10px] font-mono text-slate-500">${t.ip || '0.0.0.0'}</div>
+                                <h5 class="font-black text-sm ${titleColor}">${channel || 'Unknown Stream'}</h5>
+                                <p class="text-[10px] text-netflix-lightGray font-mono mt-1">${formatDateTimeVerbose(time)}</p>
                             </div>
-                        </div>
-                    </td>
-                    <td class="px-8 py-6">
-                        <span class="text-[10px] font-black uppercase px-3 py-1 rounded-full ${statusColor}">
-                            ${u.status || 'Free'}
-                        </span>
-                    </td>
-                    <td class="px-8 py-6">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-play-circle text-blue-500 ${isOnline ? 'animate-pulse' : 'opacity-20'}"></i>
-                            <span class="text-xs font-bold ${isOnline ? 'text-white' : 'text-slate-600'}">
-                                ${isOnline ? (t.last_played || 'Browsing...') : 'Offline'}
+                            <span class="text-[9px] font-bold uppercase px-2 py-1 rounded bg-black/50 text-netflix-lightGray border border-white/5">
+                                ${isLiveSession ? 'Active Session' : 'Ended'}
                             </span>
                         </div>
-                    </td>
-                    <td class="px-8 py-6 text-right">
-                        <span class="text-[10px] font-mono text-slate-500">${t.last_seen ? formatTime(t.last_seen) : 'Never'}</span>
-                    </td>
+                        <div class="flex items-center gap-3 mt-3 pt-3 border-t border-white/5">
+                            <span class="text-[10px] text-netflix-lightGray truncate max-w-[150px]" title="${device}"><i class="fas fa-desktop mr-1"></i> ${device || 'Unknown'}</span>
+                            <span class="text-[10px] text-netflix-lightGray font-mono"><i class="fas fa-wifi mr-1"></i> ${ip || '0.0.0.0'}</span>
+                        </div>
+                    </div>
                 `;
-                tbody.appendChild(row);
-            });
-
-            // Update Statistics
-            updateCounter('stat-total', userIds.length);
-            updateCounter('stat-active', activeStreaming);
-            updateCounter('stat-paid', paidUsers);
-        }
-
-        /**
-         * COUNTER ANIMATION
-         */
-        function updateCounter(id, value) {
-            const el = document.getElementById(id);
-            const startValue = parseInt(el.innerText);
-            const duration = 1000;
-            let startTime = null;
-
-            function animate(currentTime) {
-                if (!startTime) startTime = currentTime;
-                const progress = Math.min((currentTime - startTime) / duration, 1);
-                el.innerText = Math.floor(progress * (value - startValue) + startValue);
-                if (progress < 1) requestAnimationFrame(animate);
-            }
-            requestAnimationFrame(animate);
-        }
-
-        /**
-         * MODAL FUNCTIONS
-         */
-        function showUserDetail(id, data) {
-            const t = data.tracking || {};
-            const modal = document.getElementById('historyModal');
-            
-            document.getElementById('modalAvatar').innerText = id.charAt(0).toUpperCase();
-            document.getElementById('modalName').innerText = id;
-            document.getElementById('modalIP').innerText = t.ip || '0.0.0.0';
-            document.getElementById('modalDevice').innerText = t.device || 'No device metadata recorded for this session.';
-            document.getElementById('modalLastSeen').innerText = t.last_seen ? formatTime(t.last_seen) : 'N/A';
-            
-            const statusEl = document.getElementById('modalStatus');
-            statusEl.innerText = data.status || 'Free';
-            statusEl.className = `text-[10px] font-black uppercase px-2 py-0.5 rounded ${data.status === 'Paid' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-red-500/20 text-red-500'}`;
-
-            // Render History Items
-            const historyList = document.getElementById('modalHistoryList');
-            historyList.innerHTML = '';
-
-            // Note: Since we are tracking "last_played", we show the current/last item.
-            // In a real app, you would fetch a "history" array from Firebase.
-            if(t.last_played) {
-                historyList.innerHTML += createHistoryCard(t.last_played, t.last_seen, true);
+                return div;
             }
 
-            modal.classList.add('modal-active');
-        }
+            function closeModal() {
+                DOM.modalOverlay.classList.remove('active');
+            }
 
-        function createHistoryCard(channel, time, isLive) {
-            return `
-                <div class="flex items-center justify-between p-5 bg-slate-900/50 border border-slate-800 rounded-3xl group hover:border-blue-500/30 transition-all">
-                    <div class="flex items-center gap-5">
-                        <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-all">
-                            <i class="fas fa-play text-xs"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm font-bold text-white">${channel}</p>
-                            <p class="text-[10px] text-slate-500 font-medium">${isLive ? 'Currently Active Session' : 'Past Playback'}</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[10px] font-black text-slate-400 font-mono">${new Date(time).toLocaleTimeString()}</p>
-                        <p class="text-[9px] text-blue-500/50 uppercase font-bold tracking-widest">${new Date(time).toLocaleDateString()}</p>
-                    </div>
-                </div>
-            `;
-        }
+            // --- Search & Filter ---
+            function applySearchFilter() {
+                const query = DOM.searchInput.value.toLowerCase();
+                const rows = DOM.tableBody.querySelectorAll('tr');
+                let visibleCount = 0;
 
-        function closeModal() {
-            document.getElementById('historyModal').classList.remove('modal-active');
-        }
+                rows.forEach(row => {
+                    const textContent = row.innerText.toLowerCase();
+                    if (textContent.includes(query)) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
 
-        /**
-         * UTILS
-         */
-        function formatTime(isoStr) {
-            const date = new Date(isoStr);
-            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
+                if (visibleCount === 0 && Object.keys(globalUserData).length > 0) {
+                    // Show a message if search yields no results
+                    if (!document.getElementById('search-empty-msg')) {
+                        const msg = document.createElement('tr');
+                        msg.id = 'search-empty-msg';
+                        msg.innerHTML = `<td colspan="6" class="p-10 text-center text-netflix-lightGray"><i class="fas fa-search text-2xl mb-2 opacity-50"></i><br>No matching records found for "${DOM.searchInput.value}"</td>`;
+                        DOM.tableBody.appendChild(msg);
+                    }
+                } else {
+                    const msg = document.getElementById('search-empty-msg');
+                    if (msg) msg.remove();
+                }
+            }
 
-        function addLog(title, msg, type) {
-            const container = document.getElementById('globalLogs');
-            const log = document.createElement('div');
-            const color = type === 'error' ? 'text-red-500' : 'text-blue-500';
-            log.className = "flex gap-4 p-4 bg-slate-900/50 rounded-2xl border border-slate-800 animate-up";
-            log.innerHTML = `
-                <div class="${color} mt-1"><i class="fas ${type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i></div>
-                <div>
-                    <p class="text-xs font-bold">${title}</p>
-                    <p class="text-[10px] text-slate-500">${msg}</p>
-                </div>
-            `;
-            container.prepend(log);
-            if(container.children.length > 15) container.lastChild.remove();
-        }
+            // --- Export CSV ---
+            function exportDataToCSV() {
+                if(Object.keys(globalUserData).length === 0) {
+                    showToast("No data available to export.", true);
+                    return;
+                }
+                
+                playClickSound();
+                let csvContent = "data:text/csv;charset=utf-8,";
+                csvContent += "UserID,Status,CurrentStream,Device,IP,LastSeen\n"; // Header
 
-        function filterUsers() {
-            const query = document.getElementById('userSearch').value.toLowerCase();
-            const rows = document.querySelectorAll('.user-row');
-            rows.forEach(row => {
-                row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
-            });
-        }
+                for (const [id, user] of Object.entries(globalUserData)) {
+                    const t = user.tracking || {};
+                    const status = user.status || "Free";
+                    // Clean fields to prevent CSV breaking
+                    const stream = (t.last_played || "Idle").replace(/,/g, " "); 
+                    const device = (t.device || "Unknown").replace(/,/g, " ");
+                    const ip = t.ip || "0.0.0.0";
+                    const lastSeen = t.last_seen || "Never";
+                    
+                    csvContent += `"${id}","${status}","${stream}","${device}","${ip}","${lastSeen}"\n`;
+                }
 
-        // Auto Refresh Loop
-        syncAll();
-        setInterval(syncAll, 30000);
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `MiTV_Network_Logs_${new Date().getTime()}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showToast("Data exported successfully.");
+                addLog("Data Export", "Administrator downloaded network logs (CSV).", "success");
+            }
+
+            // --- Initialization ---
+            function init() {
+                // Start Clock
+                setInterval(() => {
+                    DOM.sysTime.innerText = new Date().toLocaleTimeString('en-GB', { hour12: false });
+                }, 1000);
+
+                // Setup Events
+                DOM.searchInput.addEventListener('input', applySearchFilter);
+                setupClickListeners();
+                
+                // Initialize modules
+                initChart();
+                fetchEngineData();
+                
+                // Start Auto-Sync Loop
+                syncTimer = setInterval(() => fetchEngineData(false), CONFIG.REFRESH_RATE);
+            }
+
+            // --- Public API ---
+            return {
+                init: init,
+                syncData: fetchEngineData,
+                closeModal: closeModal,
+                exportCSV: exportDataToCSV,
+                clearLogs: function() { 
+                    DOM.engineLogs.innerHTML = ''; 
+                    addLog("Logs Cleared", "Administrator flushed terminal view.");
+                }
+            };
+            
+        })();
+
+        // Start App Engine on Load
+        document.addEventListener('DOMContentLoaded', CoreEngine.init);
 
     </script>
 </body>
