@@ -1,7 +1,7 @@
 /**
- * MITV NETWORK - OMNI STREAM ENGINE (v4.5 - TURBO RETRY)
+ * MITV NETWORK - OMNI STREAM ENGINE (v4.0 - ULTRA RETRY)
  * OWNER: MUAAZ IQBAL (MiTV Network)
- * Logic: 20x Ultra-Fast Retries, 5s Max Wait, Deep Masking, Device Tracking.
+ * Logic: 20x Aggressive Retry, Deep Masking, Device Tracking.
  */
 
 const axios = require('axios');
@@ -13,16 +13,16 @@ module.exports = async (req, res) => {
     const { user, stream, sid, cname } = req.query;
     const dbUrl = `https://ramadan-2385b-default-rtdb.firebaseio.com`;
     const host = req.headers.host;
-    const offlineVideo = `https://${host}/mipay.mp4`;
+    const offlineVideo = `https://${host}/mioff.mp4`;
 
-    // --- CASE 1: STREAM PLAYBACK WITH TURBO RETRY ---
+    // --- CASE 1: STREAM PLAYBACK WITH 20 RETRIES ---
     if (stream && sid) {
         try {
             const realLink = Buffer.from(sid, 'base64').toString('ascii');
             const userAgent = req.headers['user-agent'] || "Unknown Device";
             const channelName = cname ? decodeURIComponent(cname) : "Direct Stream";
 
-            // 1. Parallel Security & Tracking (Instant)
+            // 1. Parallel Security & Tracking (No Wait)
             const [userCheck] = await Promise.all([
                 axios.get(`${dbUrl}/master_users/${user}/status.json`),
                 axios.patch(`${dbUrl}/master_users/${user}/tracking.json`, {
@@ -35,38 +35,33 @@ module.exports = async (req, res) => {
 
             if (userCheck.data !== 'Paid') return res.status(403).send("Payment Required");
 
-            // 2. TURBO RETRY LOGIC (Fast & Focused)
+            // 2. AGGRESSIVE RETRY LOGIC (15-20 Times)
             let isAlive = false;
             let attempts = 0;
-            const maxAttempts = 15; // 15 fast attempts are enough
+            const maxAttempts = 20;
 
             while (attempts < maxAttempts && !isAlive) {
                 try {
-                    // Sirf 800ms ka waqt diya hai ek attempt ko
-                    const check = await axios.get(realLink, { 
-                        timeout: 800, 
-                        headers: { 'Range': 'bytes=0-0' } 
-                    });
-                    
+                    // HEAD request fast hoti hai aur data consume nahi karti
+                    const check = await axios.head(realLink, { timeout: 1500 });
                     if (check.status >= 200 && check.status < 400) {
                         isAlive = true;
                     }
                 } catch (err) {
                     attempts++;
-                    // Agar server block kar raha hai (403/405), to seedha chala do
-                    if (err.response && (err.response.status === 403 || err.response.status === 405 || err.response.status === 401)) {
+                    // Agar 403 ya 405 error aye to direct redirect kardo (kuch servers check block karte hain)
+                    if (err.response && (err.response.status === 403 || err.response.status === 405)) {
                         isAlive = true; 
                         break;
                     }
-                    // Bohat thora gap taake processing fast rahe
-                    await wait(50); 
+                    await wait(100); // 0.1 second ka gap
                 }
             }
 
             if (isAlive) {
                 return res.redirect(realLink);
             } else {
-                // Agar saari koshishon ke baad bhi response nahi aaya
+                // Agar 20 baar fail hua to offline video
                 return res.redirect(offlineVideo);
             }
 
@@ -92,11 +87,11 @@ module.exports = async (req, res) => {
         let finalM3U = "#EXTM3U\n";
 
         if (userData.status !== 'Paid') {
-            finalM3U += `#EXTINF:-1 tvg-logo="https://cdn-icons-png.flaticon.com/512/5972/5972778.png", EXPIRED - MiTV\n${offlineVideo}\n`;
+            finalM3U += `#EXTINF:-1, ACCOUNT EXPIRED\n${offlineVideo}\n`;
         } else {
             for (let sourceUrl of config.sources) {
                 try {
-                    const m3uResponse = await axios.get(sourceUrl, { timeout: 5000 });
+                    const m3uResponse = await axios.get(sourceUrl, { timeout: 8000 });
                     const lines = m3uResponse.data.split('\n');
 
                     for (let i = 0; i < lines.length; i++) {
@@ -117,16 +112,15 @@ module.exports = async (req, res) => {
                             }
                         }
                     }
-                } catch (e) { console.error("Source skip"); }
+                } catch (e) { console.error("Source skip: " + sourceUrl); }
             }
         }
 
         res.setHeader('Content-Type', 'application/x-mpegurl');
-        res.setHeader('Content-Disposition', `attachment; filename="mitv_${user}.m3u"`);
         return res.status(200).send(finalM3U);
 
     } catch (error) {
         return res.status(500).send("Server Error");
     }
 };
-                    
+                
