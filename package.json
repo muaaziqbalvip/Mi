@@ -1,7 +1,7 @@
 {
   "name": "mitv-masker-api",
-  "version": "4.1.0",
-  "description": "MITV NETWORK - OMNI STREAM ENGINE WITH FAST FALLBACK",
+  "version": "4.5.0",
+  "description": "MITV NETWORK - ULTRA FAST OMNI ENGINE WITH CACHING",
   "author": "MUAAZ IQBAL (MiTV Network)",
   "dependencies": {
     "axios": "^1.6.2"
