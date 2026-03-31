@@ -29,7 +29,7 @@ const PAID_STATUS_CACHE_TIME = 10000; // 10 seconds only for Paid users (near re
 const M3U_DATA_CACHE_TIME = 120000;  // 2 minutes for source playlist data
 
 // MITV Logos
-const MITV_ICON = "https://i.ibb.co/3sXw6W1/mitv-logo-small.png"; // Placeholder small logo for tvg-logo
+const MITV_ICON = "https://i.ibb.co/7Jbv5QZf/file-00000000305071fa945b58b012ac072b.png"; // Placeholder small logo for tvg-logo
 
 module.exports = async (req, res) => {
     // res.setHeader('X-Engine-Author', 'MUAAZ IQBAL - MITV');
