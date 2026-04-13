@@ -211,7 +211,7 @@ module.exports = async (req, res) => {
     const now    = Date.now();
 
     // Static fallback assets hosted on your Vercel domain
-    const offlineVideo      = `https://${host}/mioff.mp4`;
+    const offlineVideo      = `https://${host}/Dream_Screen_13Apr2026_22_35_47.mp4`;
     const paidWarningVideo  = `https://mitvnet.vercel.app/mipay.mp4`;
 
     // ═══════════════════════════════════════════════════════════════════════
