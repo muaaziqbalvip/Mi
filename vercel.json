@@ -1,8 +1,14 @@
 {
-  "rewrites": [
-    { "source": "/get/m3u/:user",     "destination": "/api/m3u?user=:user" },
-    { "source": "/play/:user/:sid",   "destination": "/api/m3u?user=:user&stream=true&sid=:sid" },
-    { "source": "/stream",            "destination": "/api/m3u" }
+  "version": 2,
+  "routes": [
+    {
+      "src": "/api/m3u",
+      "dest": "/api/m3u.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
   ],
   "headers": [
     {
@@ -10,8 +16,14 @@
       "headers": [
         { "key": "Access-Control-Allow-Origin",  "value": "*" },
         { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, User-Agent" },
-        { "key": "X-Powered-By",                 "value": "MITV OmniEngine v6.0" }
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" },
+        { "key": "X-Powered-By",                 "value": "MITV-OmniEngine/7.0" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.m3u",
+      "headers": [
+        { "key": "Content-Type", "value": "application/x-mpegurl" }
       ]
     }
   ]
