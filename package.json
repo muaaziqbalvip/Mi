@@ -1,13 +1,17 @@
 {
-  "name": "mitv-omni-engine",
-  "version": "6.0.0",
-  "description": "🔥 MITV NETWORK - Ultra Fast OmniStream Engine | Categories | AI Fallback | Full Power",
-  "author": "Muaaz Iqbal (MiTV Network)",
-  "license": "PRIVATE",
+  "name": "mitv-network",
+  "version": "7.0.0",
+  "description": "MITV Network OmniStream Engine — Muaaz Iqbal, Muslim Islam",
+  "main": "api/m3u.js",
+  "scripts": {
+    "start": "node api/m3u.js"
+  },
   "dependencies": {
-    "axios": "^1.6.2"
+    "axios": "^1.6.8"
   },
   "engines": {
-    "node": ">=18.x"
-  }
+    "node": ">=18"
+  },
+  "author": "Muaaz Iqbal <muaaziqbal@gmail.com>",
+  "license": "MIT"
 }
