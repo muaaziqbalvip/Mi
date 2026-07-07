@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>MITV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ============================================================
+       SPLASH SCREEN
+       ============================================================ -->
+  <div id="splashScreen" class="screen active">
+    <div class="splash-logo brand">MITV</div>
+    <div class="splash-tagline">Live TV &middot; Movies &middot; Series</div>
+  </div>
+
+  <!-- ============================================================
+       LOGIN / SIGNUP SCREEN
+       ============================================================ -->
+  <div id="loginScreen" class="screen">
+    <div class="login-card">
+      <div class="login-logo brand">MITV</div>
+      <div class="login-sub" id="authSubtitle">Sign in to continue watching</div>
+
+      <!-- LOGIN FORM -->
+      <div id="loginForm">
+        <div class="field">
+          <label>Email or Phone Number</label>
+          <input type="text" id="loginIdentifier" placeholder="you@example.com or 03xxxxxxxxx" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="loginPassword" placeholder="Enter password">
+        </div>
+        <button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">
+          <span id="loginBtnText">Log In</span>
+          <span class="login-loader" id="loginLoader"></span>
+        </button>
+        <div class="error-msg" id="loginError"></div>
+        <div class="auth-switch">New to MITV? <a onclick="showSignup()">Create Account</a></div>
+      </div>
+
+      <!-- SIGNUP FORM -->
+      <div id="signupForm" style="display:none;">
+        <div class="field">
+          <label>Full Name</label>
+          <input type="text" id="signupName" placeholder="Your name" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Phone Number</label>
+          <input type="tel" id="signupPhone" placeholder="03xxxxxxxxx" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="signupEmail" placeholder="you@example.com" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="signupPassword" placeholder="Create password">
+        </div>
+        <button class="btn btn-primary" id="signupBtn" onclick="handleSignup()">
+          <span id="signupBtnText">Create Account</span>
+          <span class="login-loader" id="signupLoader"></span>
+        </button>
+        <div class="error-msg" id="signupError"></div>
+        <div class="auth-switch">Already have an account? <a onclick="showLogin()">Log In</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       APP SHELL (Home / Movies / Series / Account)
+       ============================================================ -->
+  <div id="appShell">
+    <div class="topbar">
+      <div class="topbar-logo brand">MITV</div>
+      <div class="topbar-right">
+        <button class="icon-btn" onclick="openSearchGrid()">&#128269;</button>
+        <button class="icon-btn" onclick="switchPage('accountPage')">&#9881;</button>
+      </div>
+    </div>
+
+    <div class="content-area">
+
+      <!-- HOME PAGE -->
+      <div class="page active" id="homePage">
+        <div id="heroContainer"></div>
+        <div id="homeRows"></div>
+      </div>
+
+      <!-- LIVE TV PAGE -->
+      <div class="page" id="livePage">
+        <div class="grid-page">
+          <div class="grid-header"><h2>Live TV</h2></div>
+          <div class="search-box">
+            <span>&#128269;</span>
+            <input type="text" placeholder="Search channels..." oninput="renderGrid('live', this.value)">
+          </div>
+          <div class="content-grid" id="liveGrid"></div>
+        </div>
+      </div>
+
+      <!-- MOVIES PAGE -->
+      <div class="page" id="moviesPage">
+        <div class="grid-page">
+          <div class="grid-header"><h2>Movies</h2></div>
+          <div class="search-box">
+            <span>&#128269;</span>
+            <input type="text" placeholder="Search movies..." oninput="renderGrid('movies', this.value)">
+          </div>
+          <div class="content-grid" id="moviesGrid"></div>
+        </div>
+      </div>
+
+      <!-- SERIES PAGE -->
+      <div class="page" id="seriesPage">
+        <div class="grid-page">
+          <div class="grid-header"><h2>Series</h2></div>
+          <div class="search-box">
+            <span>&#128269;</span>
+            <input type="text" placeholder="Search series..." oninput="renderGrid('series', this.value)">
+          </div>
+          <div class="content-grid" id="seriesGrid"></div>
+        </div>
+      </div>
+
+      <!-- ACCOUNT / SETTINGS PAGE -->
+      <div class="page" id="accountPage">
+        <div class="account-header">
+          <div class="avatar-circle" id="avatarInitial">M</div>
+          <div>
+            <div class="account-name" id="accountName">—</div>
+            <div class="account-email" id="accountEmail">—</div>
+            <span id="accountProChip" class="free-chip">FREE</span>
+          </div>
+        </div>
+
+        <div class="section-title">Subscription</div>
+        <div class="settings-list">
+          <div class="settings-item" onclick="switchPage('buyProPage')">
+            <span class="s-icon">&#11088;</span>
+            <span class="s-label">Buy MITV Pro</span>
+            <span class="s-chevron">&#8250;</span>
+          </div>
+        </div>
+
+        <div class="section-title">App Settings</div>
+        <div class="settings-list">
+          <div class="settings-item" onclick="toggleSetting('autoplay')">
+            <span class="s-icon">&#9654;</span>
+            <span class="s-label">Autoplay next episode</span>
+            <span class="s-value" id="autoplayValue">On</span>
+          </div>
+          <div class="settings-item" onclick="cyclePlayerScaling()">
+            <span class="s-icon">&#8862;</span>
+            <span class="s-label">Default video scaling</span>
+            <span class="s-value" id="scalingValue">Fit</span>
+          </div>
+          <div class="settings-item" onclick="showAbout()">
+            <span class="s-icon">&#8505;</span>
+            <span class="s-label">About MITV</span>
+            <span class="s-value" id="appVersionValue">v2.0.0</span>
+          </div>
+        </div>
+
+        <div class="section-title">Account</div>
+        <div class="settings-list">
+          <div class="settings-item" onclick="handleLogout()">
+            <span class="s-icon" style="color:var(--red-glow);">&#128682;</span>
+            <span class="s-label" style="color:var(--red-glow);">Log Out</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BUY PRO PAGE -->
+      <div class="page" id="buyProPage">
+        <button class="detail-back" style="position:static;margin:14px;" onclick="switchPage('accountPage')">&#8592;</button>
+        <div class="pro-hero">
+          <h2>MITV Pro</h2>
+          <p>Unlock premium channels, movies &amp; series</p>
+          <div class="pro-price" id="proPrice">Rs. —</div>
+        </div>
+        <div class="pay-option" onclick="openPayModal('jazzcash')">
+          <span class="p-icon">&#128241;</span>
+          <div class="p-info">
+            <div class="p-title">Pay via JazzCash</div>
+            <div class="p-sub">Instant activation after confirmation</div>
+          </div>
+          <span class="s-chevron">&#8250;</span>
+        </div>
+        <div class="pay-option" onclick="openPayModal('easypaisa')">
+          <span class="p-icon">&#128179;</span>
+          <div class="p-info">
+            <div class="p-title">Pay via EasyPaisa</div>
+            <div class="p-sub">Instant activation after confirmation</div>
+          </div>
+          <span class="s-chevron">&#8250;</span>
+        </div>
+        <div class="pay-option" onclick="openPayModal('whatsapp')">
+          <span class="p-icon">&#128172;</span>
+          <div class="p-info">
+            <div class="p-title">Contact via WhatsApp</div>
+            <div class="p-sub">Talk to admin directly</div>
+          </div>
+          <span class="s-chevron">&#8250;</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="bottom-nav">
+      <button class="nav-item active" data-page="homePage" onclick="switchPage('homePage')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 8h-3v9h-5v-6H11v6H6v-9H3z"/></svg>
+        <span>Home</span>
+      </button>
+      <button class="nav-item" data-page="livePage" onclick="switchPage('livePage')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v12H4z" opacity=".25"/><path d="M4 6h16v12H4zm2 2v8h12V8H6z"/></svg>
+        <span>Live TV</span>
+      </button>
+      <button class="nav-item" data-page="moviesPage" onclick="switchPage('moviesPage')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16v16H4zm2 2v3h3V6zm5 0v3h3V6zm5 0v3h2V6zM6 11v3h3v-3zm5 0v3h3v-3zm5 0v3h2v-3zM6 16v3h3v-3zm5 0v3h3v-3zm5 0v3h2v-3z"/></svg>
+        <span>Movies</span>
+      </button>
+      <button class="nav-item" data-page="seriesPage" onclick="switchPage('seriesPage')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4a2 2 0 00-2 2v10a2 2 0 002 2h3l-1.5 2.5.9.5L8.5 18h7l2.1 3 .9-.5L17 16h3a2 2 0 002-2V6a2 2 0 00-2-2z"/></svg>
+        <span>Series</span>
+      </button>
+      <button class="nav-item" data-page="accountPage" onclick="switchPage('accountPage')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4.4 0-8 2.2-8 5v1h16v-1c0-2.8-3.6-5-8-5z"/></svg>
+        <span>Account</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       DETAIL SCREEN (Movie / Series info before playing)
+       ============================================================ -->
+  <div id="detailScreen" class="screen">
+    <button class="detail-back" onclick="closeDetail()">&#8592;</button>
+    <div class="detail-backdrop" id="detailBackdrop"></div>
+    <div class="detail-body">
+      <div class="detail-title" id="detailTitle">—</div>
+      <div class="detail-meta" id="detailMeta">—</div>
+      <button class="btn btn-primary" style="margin-bottom:14px;" onclick="playFromDetail()">&#9654; Play</button>
+      <div class="detail-desc" id="detailDesc"></div>
+      <div id="seasonTabsContainer" style="display:none;">
+        <div class="season-tabs" id="seasonTabs"></div>
+        <div id="episodeList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PLAYER SCREEN — the .video-hole is where native ExoPlayer shows through
+       ============================================================ -->
+  <div id="playerScreen" class="screen">
+    <div class="video-hole" id="videoHole" onclick="togglePlayerControls()">
+      <div class="buffering-spinner" id="bufferingSpinner"></div>
+
+      <div class="player-controls" id="playerControls">
+        <div class="player-top">
+          <button class="player-back" onclick="closePlayer()">&#8592;</button>
+          <div class="player-title-box">
+            <div class="player-title" id="playerTitle">—</div>
+            <div class="player-sub" id="playerSub"></div>
+          </div>
+          <div class="player-top-actions">
+            <button onclick="cyclePlayerScaling(true)">&#8862;</button>
+            <button onclick="openPlayerPanel()">&#9776;</button>
+          </div>
+        </div>
+
+        <div class="player-center">
+          <button class="center-btn" onclick="playerPrev(event)">&#9198;</button>
+          <button class="center-btn play-pause" id="playPauseBtn" onclick="togglePlayPause(event)">&#10074;&#10074;</button>
+          <button class="center-btn" onclick="playerNext(event)">&#9197;</button>
+        </div>
+
+        <div class="player-bottom">
+          <div id="liveIndicatorRow" style="display:none;">
+            <div class="live-indicator"><span class="live-dot"></span> LIVE</div>
+          </div>
+          <div class="seek-row" id="seekRow">
+            <span class="time-label" id="timeCurrent">0:00</span>
+            <input type="range" class="seek-bar" id="seekBar" min="0" max="100" value="0" oninput="onSeekInput(this.value)">
+            <span class="time-label" id="timeDuration">0:00</span>
+          </div>
+          <div class="player-bottom-actions">
+            <div class="pba-left">
+              <button onclick="cyclePlayerScaling(true)" title="Scale">&#8862;</button>
+            </div>
+            <div class="pba-right">
+              <button onclick="openPlayerPanel()" title="Channels">&#9776;</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Channel switcher / search panel -->
+      <div class="player-panel" id="playerPanel">
+        <div class="player-panel-search">
+          <span>&#128269;</span>
+          <input type="text" id="panelSearchInput" placeholder="Search..." oninput="renderPlayerPanelList(this.value)">
+        </div>
+        <div class="player-panel-list" id="playerPanelList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODALS
+       ============================================================ -->
+  <div class="modal-overlay" id="payModalOverlay" onclick="closePayModalBg(event)">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closePayModal()">&times;</button>
+      <div class="modal-title" id="payModalTitle">Payment Details</div>
+      <div id="payModalBody"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="aboutModalOverlay" onclick="closeAboutModalBg(event)">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeAboutModal()">&times;</button>
+      <div class="modal-title">About MITV</div>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">
+        MITV brings you live channels, movies and series in one beautiful app.<br><br>
+        Version: <span id="aboutVersion">2.0.0</span>
+      </p>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <div style="color:var(--text-dim);font-size:13px;">Loading content...</div>
+  </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
