@@ -11,6 +11,27 @@
 //   /app_config/payment    (jazzcash, easypaisa, whatsapp numbers + price)
 // ============================================================
 
+// ============================================================
+// FIREBASE INIT — wrapped defensively.
+//
+// This runs inside an Android WebView loading from file:///android_asset/.
+// On some devices/WebView versions, a file:// page fetching https:// CDN
+// scripts (firebase-app-compat.js etc.) can be slow, blocked, or simply not
+// finish before this script runs. If that happens, `firebase` is undefined
+// here and a plain `firebase.initializeApp(...)` call throws immediately —
+// which is a synchronous, parse-time-adjacent crash that happens BEFORE the
+// DOMContentLoaded listener below gets registered. The listener that hides
+// the splash screen never runs, nothing is logged to onConsoleMessage (the
+// error fires too early / isn't a console.log), and the result is an app
+// that sits on the splash screen forever with no visible error at all.
+//
+// Fix: never let bootstrap depend on firebase existing synchronously. We
+// poll for `window.firebase` for a few seconds; if it never shows up, we
+// still take the user to the login screen instead of hanging forever, and
+// clearly log what happened so it's diagnosable via `adb logcat` /
+// onConsoleMessage next time.
+// ============================================================
+
 const firebaseConfig = {
   apiKey: "AIzaSyBbnU8DkthpYQMHOLLyj6M0cc05qXfjMcw",
   authDomain: "ramadan-2385b.firebaseapp.com",
@@ -21,9 +42,30 @@ const firebaseConfig = {
   appId: "1:882828936310:web:7f97b921031fe130fe4b57"
 };
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
+let auth = null;
+let db = null;
+let firebaseReady = false;
+let firebaseInitError = null;
+
+function tryInitFirebase() {
+  if (firebaseReady || firebaseInitError) return true;
+  if (typeof firebase === 'undefined' || !firebase.initializeApp) {
+    return false; // SDK script hasn't finished loading yet — caller will retry.
+  }
+  try {
+    if (!firebase.apps || !firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    auth = firebase.auth();
+    db = firebase.database();
+    firebaseReady = true;
+    console.log('[MITV] Firebase initialized OK.');
+  } catch (e) {
+    firebaseInitError = e;
+    console.log('[MITV] Firebase init FAILED: ' + (e && e.message ? e.message : e));
+  }
+  return true;
+}
 
 // ---------- In-memory content caches ----------
 let liveChannels = {};
@@ -47,49 +89,69 @@ let pendingDetailCategory = '';
 // ============================================================
 // BOOTSTRAP
 // ============================================================
-const SPLASH_DURATION_MS = 2000; // fixed splash time — never changes with data load speed
+const SPLASH_DURATION_MS = 2000;   // minimum splash time when things go well
+const FIREBASE_WAIT_TIMEOUT_MS = 6000; // absolute max time we'll wait for the SDK before giving up and showing login
 
 document.addEventListener('DOMContentLoaded', function () {
   const splashStart = Date.now();
 
-  // Start listening for auth state immediately (does NOT delay the splash —
-  // it just resolves in the background while the splash plays out).
   let authResolved = false;
   let resolvedUser = null;
-  auth.onAuthStateChanged(function (user) {
-    resolvedUser = user;
-    authResolved = true;
-  });
 
-  // Splash always shows for exactly SPLASH_DURATION_MS, regardless of
-  // network/auth/data speed — content loads in the background underneath it.
-  function proceedPastSplash() {
+  // Poll for the Firebase SDK to finish loading from the CDN. Most of the
+  // time this resolves on the very first check (SDK already loaded by the
+  // time DOMContentLoaded fires), but this guards against the slow/blocked
+  // case instead of crashing.
+  const firebaseWaitStart = Date.now();
+  const firebaseWaitInterval = setInterval(function () {
+    const gotIt = tryInitFirebase();
+    const timedOut = Date.now() - firebaseWaitStart > FIREBASE_WAIT_TIMEOUT_MS;
+    if (gotIt || timedOut) {
+      clearInterval(firebaseWaitInterval);
+      if (!firebaseReady) {
+        // Either init failed, or the SDK script never arrived in time.
+        // Don't hang on splash — send the user to login; auth-dependent
+        // actions there will surface a clear error instead of a dead screen.
+        console.log('[MITV] Proceeding without Firebase (timed out or failed).');
+        finishBoot();
+        return;
+      }
+      // Firebase is ready — now actually listen for auth state.
+      auth.onAuthStateChanged(function (user) {
+        resolvedUser = user;
+        authResolved = true;
+      });
+      // Poll briefly for auth to resolve, but never hold the splash past a fixed cap.
+      const authCheckInterval = setInterval(function () {
+        if (authResolved) {
+          clearInterval(authCheckInterval);
+          finishBoot();
+        }
+      }, 50);
+      setTimeout(function () {
+        clearInterval(authCheckInterval);
+        if (!authResolved) finishBoot();
+      }, SPLASH_DURATION_MS + 3000);
+    }
+  }, 50);
+
+  function finishBoot() {
     const elapsed = Date.now() - splashStart;
     const remaining = Math.max(0, SPLASH_DURATION_MS - elapsed);
     setTimeout(function () {
-      if (resolvedUser) {
+      if (resolvedUser && firebaseReady) {
         loadUserProfile(resolvedUser).then(function () {
           showScreen('appShell', true);
           startContentListeners();
+        }).catch(function () {
+          // Profile failed to load for some reason — still don't strand the user on splash.
+          showScreen('loginScreen');
         });
       } else {
         showScreen('loginScreen');
       }
     }, remaining);
   }
-
-  // Poll briefly for auth to resolve, but never hold the splash past the fixed duration.
-  const authCheckInterval = setInterval(function () {
-    if (authResolved) {
-      clearInterval(authCheckInterval);
-      proceedPastSplash();
-    }
-  }, 50);
-  // Hard safety net: even if auth never responds, don't get stuck on splash forever.
-  setTimeout(function () {
-    clearInterval(authCheckInterval);
-    if (!authResolved) proceedPastSplash();
-  }, SPLASH_DURATION_MS + 3000);
 });
 
 function showScreen(screenId, isAppShell) {
@@ -144,6 +206,12 @@ function handleLogin() {
   const errorEl = document.getElementById('loginError');
   errorEl.textContent = '';
 
+  if (!firebaseReady) {
+    errorEl.textContent = 'Still connecting, please try again in a moment.';
+    tryInitFirebase();
+    return;
+  }
+
   if (!identifier || !password) {
     errorEl.textContent = 'Please enter your email/phone and password.';
     return;
@@ -174,6 +242,12 @@ function handleSignup() {
   const password = document.getElementById('signupPassword').value;
   const errorEl = document.getElementById('signupError');
   errorEl.textContent = '';
+
+  if (!firebaseReady) {
+    errorEl.textContent = 'Still connecting, please try again in a moment.';
+    tryInitFirebase();
+    return;
+  }
 
   if (!name || !phone || !email || !password) {
     errorEl.textContent = 'Please fill in all fields.';
